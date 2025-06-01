@@ -23,6 +23,8 @@ export function Header() {
   const [notifications] = useState(3) // Mock notification count
 
   useEffect(() => {
+    if (typeof window === "undefined") return
+
     const timer = setInterval(() => {
       setCurrentTime(new Date())
     }, 1000)
@@ -79,10 +81,14 @@ export function Header() {
         <div className="flex-1" />
 
         {/* Time & Date Display */}
-        <div className="hidden lg:flex flex-col items-end">
-          <div className="text-sm font-mono font-medium">{formatTime(currentTime)}</div>
-          <div className="text-xs text-muted-foreground">{formatDate(currentTime)}</div>
-        </div>
+        {/* <div className="hidden lg:flex flex-col items-end">
+          <div className="text-sm font-mono font-medium">
+            {typeof window !== "undefined" ? formatTime(currentTime) : "--:--:--"}
+          </div>
+          <div className="text-xs text-muted-foreground">
+            {typeof window !== "undefined" ? formatDate(currentTime) : "---"}
+          </div>
+        </div> */}
 
         {/* Action Buttons */}
         <div className="flex items-center gap-2">
@@ -211,7 +217,7 @@ export function Header() {
 //                 <Menu className="h-5 w-5" />
 //               </Button>
 //             </SheetTrigger>
-//             <SheetContent side="left" className="p-0 w-64 max-w-[80vw]">
+//             <SheetContent side="left" className="p-0 w-72">
 //               <Sidebar />
 //             </SheetContent>
 //           </Sheet>
@@ -299,3 +305,4 @@ export function Header() {
 //     </header>
 //   )
 // }
+
