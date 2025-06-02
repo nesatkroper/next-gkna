@@ -8,17 +8,17 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Package, Leaf, BarChart3, Users } from "lucide-react"
-import Link from "next/link"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 export default function HomePage() {
   const [isLoading, setIsLoading] = useState(false)
+  const isMobile = useIsMobile();
+
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-    // Simulate login
     setTimeout(() => {
       setIsLoading(false)
       window.location.href = "/dashboard"
@@ -39,7 +39,8 @@ export default function HomePage() {
 
         <div className="grid lg:grid-cols-2 gap-8 items-start">
           {/* Features Section */}
-          <motion.div
+
+          {isMobile ? "" : <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
@@ -82,7 +83,7 @@ export default function HomePage() {
                 </motion.div>
               ))}
             </div>
-          </motion.div>
+          </motion.div>}
 
           {/* Login Section */}
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 }}>
@@ -92,54 +93,20 @@ export default function HomePage() {
                 <CardDescription>Sign in to your account to continue</CardDescription>
               </CardHeader>
               <CardContent>
-                <Tabs defaultValue="login" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="login">Login</TabsTrigger>
-                    <TabsTrigger value="register">Register</TabsTrigger>
-                  </TabsList>
+                <form onSubmit={handleLogin} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input id="email" type="email" placeholder="admin@fertilizer.com" required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Password</Label>
+                    <Input id="password" type="password" placeholder="••••••••" required />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? "Signing in..." : "Sign In"}
+                  </Button>
+                </form>
 
-                  <TabsContent value="login">
-                    <form onSubmit={handleLogin} className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="email">Email</Label>
-                        <Input id="email" type="email" placeholder="admin@fertilizer.com" required />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="password">Password</Label>
-                        <Input id="password" type="password" placeholder="••••••••" required />
-                      </div>
-                      <Button type="submit" className="w-full" disabled={isLoading}>
-                        {isLoading ? "Signing in..." : "Sign In"}
-                      </Button>
-                    </form>
-                  </TabsContent>
-
-                  <TabsContent value="register">
-                    <form className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="name">Full Name</Label>
-                        <Input id="name" type="text" placeholder="John Doe" required />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="reg-email">Email</Label>
-                        <Input id="reg-email" type="email" placeholder="john@example.com" required />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="reg-password">Password</Label>
-                        <Input id="reg-password" type="password" placeholder="••••••••" required />
-                      </div>
-                      <Button type="submit" className="w-full">
-                        Create Account
-                      </Button>
-                    </form>
-                  </TabsContent>
-                </Tabs>
-
-                <div className="mt-4 text-center">
-                  <Link href="/dashboard" className="text-sm text-muted-foreground hover:underline">
-                    Continue as Demo User
-                  </Link>
-                </div>
               </CardContent>
             </Card>
           </motion.div>
