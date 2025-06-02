@@ -7,8 +7,27 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { CalendarDays, Package, TrendingUp, AlertTriangle } from "lucide-react"
+import { useEffect, useState } from "react"
 
 export default function DashboardPage() {
+  const [me, setMe] = useState();
+  useEffect(() => {
+    if (!me) {
+      fetchme()
+    }
+  }, [])
+
+  const fetchme = async () => {
+    const res = await fetch("/api/auth/me", { credentials: "include" })
+    if (res.ok) {
+      const data = await res.json()
+      console.log("Current user:", data.user)
+    } else {
+      console.log("Not logged in")
+    }
+
+  }
+
   return (
     <div className="space-y-6">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>

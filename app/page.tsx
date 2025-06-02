@@ -1,3 +1,7 @@
+
+
+
+
 "use client"
 
 import { useEffect } from "react"
@@ -10,7 +14,7 @@ export default function HomePage() {
     const checkToken = async () => {
       try {
         const res = await fetch("/api/auth/me", {
-          credentials: "include", // 👈 ensures cookie is sent
+          credentials: "include",
         })
 
         if (res.ok) {
@@ -27,5 +31,5 @@ export default function HomePage() {
     checkToken()
   }, [router])
 
-  return null // optional loading spinner
+  return null
 }

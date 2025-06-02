@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
     const data = await request.json()
 
     const customer = await prisma.$transaction(async (tx) => {
-      // Create customer
+
       const newCustomer = await tx.customer.create({
         data: {
           firstName: data.firstName,
@@ -87,7 +87,6 @@ export async function POST(request: NextRequest) {
         },
       })
 
-      // Create customer info if provided
       if (data.email || data.region || data.note || data.govId) {
         await tx.customerinfo.create({
           data: {
@@ -101,7 +100,6 @@ export async function POST(request: NextRequest) {
         })
       }
 
-      // Create address if provided
       if (data.cityId || data.stateId) {
         await tx.address.create({
           data: {

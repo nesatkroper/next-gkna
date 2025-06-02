@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { Category, Product, Customer, Sale, Cart, Employee, Department } from "@/lib/generated/prisma";
+import { Category, Product, Customer, Sale, Cart, Employee, Department, Auth } from "@/lib/generated/prisma";
 import { Position } from "postcss";
 
 // interface AppState {
@@ -73,83 +73,95 @@ import { Position } from "postcss";
 
 interface AppState {
   // Data
+  me: Auth[];
   categories: Category[];
   employees: Employee[];
   products: Product[];
   customers: Customer[];
   sales: Sale[];
   carts: Cart[];
-  departments: Department[]; // Added
-  positions: Position[]; // Added
+  departments: Department[];
+  positions: Position[];
+
 
   // Loading states
+  isLoadingMe: boolean;
   isLoadingCategories: boolean;
   isLoadingProducts: boolean;
   isLoadingCustomers: boolean;
   isLoadingSales: boolean;
   isLoadingCarts: boolean;
   isLoadingEmployees: boolean;
-  isLoadingDepartments: boolean; // Added
-  isLoadingPositions: boolean; // Added
+  isLoadingDepartments: boolean;
+  isLoadingPositions: boolean;
 
   isCreatingProduct: boolean;
-  isUpdatingProduct: boolean;
-  isDeletingProduct: boolean;
   isCreatingCategory: boolean;
   isCreatingCustomer: boolean;
   isCreatingSale: boolean;
-  isCreatingCart: boolean;
   isCreatingEmployee: boolean;
+  isCreatingCart: boolean;
+  isCreatingDepartment: boolean;
+  isCreatingPosition: boolean;
+
+  isUpdatingProduct: boolean;
   isUpdatingEmployee: boolean;
+  isUpdatingPosition: boolean;
+  isUpdatingDepartment: boolean;
+  isUpdatingCategory: boolean;
+
+  isDeletingCategory: boolean;
   isDeletingEmployee: boolean;
-  isCreatingDepartment: boolean; // Added
-  isUpdatingDepartment: boolean; // Added
-  isDeletingDepartment: boolean; // Added
-  isCreatingPosition: boolean; // Added
-  isUpdatingPosition: boolean; // Added
-  isDeletingPosition: boolean; // Added
+  isDeletingDepartment: boolean;
+  isDeletingProduct: boolean;
+  isDeletingPosition: boolean;
 
   // Error states
+  meError: string | null;
   categoriesError: string | null;
   productsError: string | null;
   customersError: string | null;
   salesError: string | null;
   cartsError: string | null;
   employeeError: string | null;
-  departmentError: string | null; // Added
-  positionError: string | null; // Added
+  departmentError: string | null;
+  positionError: string | null;
 
   // Actions
+  fetchMe: () => Promise<void>;
   fetchCategories: () => Promise<void>;
   fetchProducts: () => Promise<void>;
   fetchCustomers: () => Promise<void>;
   fetchSales: () => Promise<void>;
   fetchCarts: () => Promise<void>;
   fetchEmployees: () => Promise<void>;
-  fetchDepartments: () => Promise<void>; // Added
-  fetchPositions: () => Promise<void>; // Added
+  fetchDepartments: () => Promise<void>;
+  fetchPositions: () => Promise<void>;
 
   createProduct: (data: Partial<Product>, file?: File) => Promise<boolean>;
-  updateProduct: (id: string, data: Partial<Product>, file?: File) => Promise<boolean>;
-  deleteProduct: (id: string) => Promise<boolean>;
-
   createCategory: (data: Partial<Category>, file?: File) => Promise<boolean>;
   createCustomer: (data: Partial<Customer>) => Promise<boolean>;
   createSale: (data: Partial<Sale>) => Promise<boolean>;
   createCart: (data: Partial<Cart>) => Promise<boolean>;
   createEmployee: (data: Partial<Employee>, file?: File) => Promise<boolean>;
+  createDepartment: (data: Partial<Department>) => Promise<boolean>;
+  createPosition: (data: Partial<Position>) => Promise<boolean>;
+
+  updateProduct: (id: string, data: Partial<Product>, file?: File) => Promise<boolean>;
   updateEmployee: (id: string, data: Partial<Employee>, file?: File) => Promise<boolean>;
+  updateDepartment: (id: string, data: Partial<Department>) => Promise<boolean>;
+  updatePosition: (id: string, data: Partial<Position>) => Promise<boolean>;
+  updateCategory: (id: string, data: Partial<Category>) => Promise<boolean>;
+
+  deleteCategory: (id: string, data: Partial<Category>) => Promise<boolean>;
   deleteEmployee: (id: string) => Promise<boolean>;
-
-  createDepartment: (data: Partial<Department>) => Promise<boolean>; // Added
-  updateDepartment: (id: string, data: Partial<Department>) => Promise<boolean>; // Added
-  deleteDepartment: (id: string) => Promise<boolean>; // Added
-
-  createPosition: (data: Partial<Position>) => Promise<boolean>; // Added
-  updatePosition: (id: string, data: Partial<Position>) => Promise<boolean>; // Added
-  deletePosition: (id: string) => Promise<boolean>; // Added
+  deleteProduct: (id: string) => Promise<boolean>;
+  deleteDepartment: (id: string) => Promise<boolean>;
+  deletePosition: (id: string) => Promise<boolean>;
 
   clearErrors: () => void;
+
+
 
   // Computed
   getActiveCategories: () => Category[];
@@ -158,8 +170,8 @@ interface AppState {
   getActiveSales: () => Sale[];
   getActiveCarts: () => Cart[];
   getActiveEmployees: () => Employee[];
-  getActiveDepartments: () => Department[]; // Added
-  getActivePositions: () => Position[]; // Added
+  getActiveDepartments: () => Department[];
+  getActivePositions: () => Position[];
 }
 
 const uploadFile = async (file: File): Promise<string> => {
@@ -183,17 +195,21 @@ export const useAppStore = create<AppState>()(
   devtools(
     (set, get) => ({
       // Initial state
+      me: [],
       categories: [],
       products: [],
       customers: [],
       sales: [],
       carts: [],
       employees: [],
+      departments: [],
+      positions: [],
+
+      isLoadingMe: false,
       isLoadingEmployees: false,
       isCreatingEmployee: false,
       isUpdatingEmployee: false,
       isDeletingEmployee: false,
-      employeeError: null,
       isLoadingCategories: false,
       isLoadingProducts: false,
       isLoadingCustomers: false,
@@ -206,13 +222,19 @@ export const useAppStore = create<AppState>()(
       isCreatingCustomer: false,
       isCreatingSale: false,
       isCreatingCart: false,
+      isUpdatingCategory: false,
+      isDeletingCategory: false,
+
+      meError: null,
+      employeeError: null,
       categoriesError: null,
       productsError: null,
       customersError: null,
       salesError: null,
+      departmentError: null,
+      positionError: null,
       cartsError: null,
-      departments: [],
-      positions: [],
+
       isLoadingDepartments: false,
       isLoadingPositions: false,
       isCreatingDepartment: false,
@@ -221,8 +243,25 @@ export const useAppStore = create<AppState>()(
       isCreatingPosition: false,
       isUpdatingPosition: false,
       isDeletingPosition: false,
-      departmentError: null,
-      positionError: null,
+
+      fetchMe: async () => {
+        const { isLoadingMe } = get()
+        if (isLoadingMe) return;
+
+        set({ isLoadingMe: true, meError: null })
+
+        try {
+          const response = await fetch('/api/auth/me');
+          if (!response.ok) throw new Error("Failed to get auth.")
+
+          const data = await response.json()
+          const me = Array.isArray(data) ? data : data.me || [];
+
+          set({ me, isLoadingMe: false })
+        } catch (error: unknown) {
+          throw new Error("Failed")
+        }
+      },
 
       fetchDepartments: async () => {
         const { isLoadingDepartments } = get();
@@ -349,7 +388,6 @@ export const useAppStore = create<AppState>()(
         }
       },
 
-      // New actions for Position
       fetchPositions: async () => {
         const { isLoadingPositions } = get();
         if (isLoadingPositions) return;
@@ -377,7 +415,6 @@ export const useAppStore = create<AppState>()(
         set({ isCreatingPosition: true, positionError: null });
 
         try {
-          // Validate required fields
           if (!positionData.positionName || !positionData.departmentId) {
             throw new Error("Position name and department ID are required");
           }
@@ -475,7 +512,6 @@ export const useAppStore = create<AppState>()(
         }
       },
 
-      // Actions (existing)
       fetchCategories: async () => {
         const { isLoadingCategories } = get();
         if (isLoadingCategories) return;
@@ -495,6 +531,72 @@ export const useAppStore = create<AppState>()(
             categoriesError: error.message,
             isLoadingCategories: false,
           });
+        }
+      },
+
+      deleteCategory: async (id: string) => {
+        set({ isDeletingPosition: true, positionError: null });
+
+        try {
+          const response = await fetch(`/api/positions/${id}`, {
+            method: "DELETE",
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || "Failed to delete position");
+          }
+
+          set((state) => ({
+            positions: state.positions.filter((p) => p.positionId !== id),
+            isDeletingPosition: false,
+          }));
+
+          return true;
+        } catch (error: unknown) {
+          const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+          set({
+            positionError: errorMessage,
+            isDeletingPosition: false,
+          });
+          return false;
+        }
+      },
+
+      updateCategory: async (id, productData) => {
+        set({ isUpdatingProduct: true, productsError: null });
+
+        try {
+          const response = await fetch(`/api/products/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              ...productData,
+
+            }),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || "Failed to update product");
+          }
+
+          const updatedProduct = await response.json();
+
+          set((state) => ({
+            products: state.products.map((p) =>
+              p.productId === id ? updatedProduct : p
+            ),
+            isUpdatingProduct: false,
+          }));
+
+          return true;
+        } catch (error) {
+          set({
+            productsError: error.message,
+            isUpdatingProduct: false,
+          });
+          return false;
         }
       },
 
@@ -670,7 +772,6 @@ export const useAppStore = create<AppState>()(
         }
       },
 
-      // New actions for Customer
       fetchCustomers: async () => {
         const { isLoadingCustomers } = get();
         if (isLoadingCustomers) return;
@@ -976,8 +1077,9 @@ export const useAppStore = create<AppState>()(
           salesError: null,
           cartsError: null,
           employeeError: null,
-          departmentError: null, // Added
-          positionError: null, // Added
+          departmentError: null,
+          positionError: null,
+          meError: null
         });
       },
 
