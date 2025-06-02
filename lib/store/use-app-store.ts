@@ -2,8 +2,6 @@ import { create } from "zustand"
 import { devtools } from "zustand/middleware"
 import { Category, Product } from "../generated/prisma"
 
-
-
 interface AppState {
   // Data
   categories: Category[]
@@ -286,7 +284,6 @@ export const useAppStore = create<AppState>()(
 // import { devtools } from "zustand/middleware"
 // import { Category, Product } from "../generated/prisma"
 
-// // Types
 
 
 // interface AppState {
@@ -298,6 +295,8 @@ export const useAppStore = create<AppState>()(
 //   isLoadingCategories: boolean
 //   isLoadingProducts: boolean
 //   isCreatingProduct: boolean
+//   isUpdatingProduct: boolean
+//   isDeletingProduct: boolean
 //   isCreatingCategory: boolean
 
 //   // Error states
@@ -308,6 +307,8 @@ export const useAppStore = create<AppState>()(
 //   fetchCategories: () => Promise<void>
 //   fetchProducts: () => Promise<void>
 //   createProduct: (data: Partial<Product>, file?: File) => Promise<boolean>
+//   updateProduct: (id: string, data: Partial<Product>, file?: File) => Promise<boolean>
+//   deleteProduct: (id: string) => Promise<boolean>
 //   createCategory: (data: Partial<Category>, file?: File) => Promise<boolean>
 //   clearErrors: () => void
 
@@ -343,6 +344,8 @@ export const useAppStore = create<AppState>()(
 //       isLoadingCategories: false,
 //       isLoadingProducts: false,
 //       isCreatingProduct: false,
+//       isUpdatingProduct: false,
+//       isDeletingProduct: false,
 //       isCreatingCategory: false,
 //       categoriesError: null,
 //       productsError: null,
@@ -350,7 +353,7 @@ export const useAppStore = create<AppState>()(
 //       // Actions
 //       fetchCategories: async () => {
 //         const { isLoadingCategories } = get()
-//         if (isLoadingCategories) return // Prevent multiple calls
+//         if (isLoadingCategories) return
 
 //         set({ isLoadingCategories: true, categoriesError: null })
 
@@ -372,7 +375,7 @@ export const useAppStore = create<AppState>()(
 
 //       fetchProducts: async () => {
 //         const { isLoadingProducts } = get()
-//         if (isLoadingProducts) return // Prevent multiple calls
+//         if (isLoadingProducts) return
 
 //         set({ isLoadingProducts: true, productsError: null })
 
@@ -417,7 +420,6 @@ export const useAppStore = create<AppState>()(
 
 //           const newProduct = await response.json()
 
-//           // Add to store without refetching
 //           set((state) => ({
 //             products: [newProduct, ...state.products],
 //             isCreatingProduct: false,
@@ -428,6 +430,74 @@ export const useAppStore = create<AppState>()(
 //           set({
 //             productsError: error.message,
 //             isCreatingProduct: false,
+//           })
+//           return false
+//         }
+//       },
+
+//       updateProduct: async (id, productData, file) => {
+//         set({ isUpdatingProduct: true, productsError: null })
+
+//         try {
+//           let pictureUrl = productData.picture
+//           if (file) {
+//             pictureUrl = await uploadFile(file)
+//           }
+
+//           const response = await fetch(`/api/products/${id}`, {
+//             method: "PUT",
+//             headers: { "Content-Type": "application/json" },
+//             body: JSON.stringify({
+//               ...productData,
+//               picture: pictureUrl,
+//             }),
+//           })
+
+//           if (!response.ok) {
+//             const errorData = await response.json()
+//             throw new Error(errorData.error || "Failed to update product")
+//           }
+
+//           const updatedProduct = await response.json()
+
+//           set((state) => ({
+//             products: state.products.map((p) => (p.productId === id ? updatedProduct : p)),
+//             isUpdatingProduct: false,
+//           }))
+
+//           return true
+//         } catch (error) {
+//           set({
+//             productsError: error.message,
+//             isUpdatingProduct: false,
+//           })
+//           return false
+//         }
+//       },
+
+//       deleteProduct: async (id) => {
+//         set({ isDeletingProduct: true, productsError: null })
+
+//         try {
+//           const response = await fetch(`/api/products/${id}`, {
+//             method: "DELETE",
+//           })
+
+//           if (!response.ok) {
+//             const errorData = await response.json()
+//             throw new Error(errorData.error || "Failed to delete product")
+//           }
+
+//           set((state) => ({
+//             products: state.products.filter((p) => p.productId !== id),
+//             isDeletingProduct: false,
+//           }))
+
+//           return true
+//         } catch (error) {
+//           set({
+//             productsError: error.message,
+//             isDeletingProduct: false,
 //           })
 //           return false
 //         }
@@ -458,7 +528,6 @@ export const useAppStore = create<AppState>()(
 
 //           const newCategory = await response.json()
 
-//           // Add to store without refetching
 //           set((state) => ({
 //             categories: [newCategory, ...state.categories],
 //             isCreatingCategory: false,
@@ -492,3 +561,4 @@ export const useAppStore = create<AppState>()(
 //     },
 //   ),
 // )
+
