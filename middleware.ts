@@ -47,46 +47,46 @@ export const config = {
 
 
 
-// // middleware.ts
-// import { NextResponse } from 'next/server';
-// import type { NextRequest } from 'next/server';
-// import { verifyToken } from './lib/auth';
+// // // middleware.ts
+// // import { NextResponse } from 'next/server';
+// // import type { NextRequest } from 'next/server';
+// // import { verifyToken } from './lib/auth';
 
-// const PUBLIC_ROUTES = ['/', '/login', '/register'];
-// const AUTH_ROUTES = ['/dashboard', '/account'];
+// // const PUBLIC_ROUTES = ['/', '/login', '/register'];
+// // const AUTH_ROUTES = ['/dashboard', '/account'];
 
-// export async function middleware(request: NextRequest) {
-//   const path = request.nextUrl.pathname;
-//   const token = request.cookies.get('token')?.value;
+// // export async function middleware(request: NextRequest) {
+// //   const path = request.nextUrl.pathname;
+// //   const token = request.cookies.get('token')?.value;
 
-//   // Redirect logged-in users away from auth pages
-//   if (PUBLIC_ROUTES.includes(path) && token) {
-//     const isValid = verifyToken(token);
-//     if (isValid) {
-//       return NextResponse.redirect(new URL('/dashboard', request.url));
-//     }
-//   }
+// //   // Redirect logged-in users away from auth pages
+// //   if (PUBLIC_ROUTES.includes(path) && token) {
+// //     const isValid = verifyToken(token);
+// //     if (isValid) {
+// //       return NextResponse.redirect(new URL('/dashboard', request.url));
+// //     }
+// //   }
 
-//   // Protect auth routes
-//   if (AUTH_ROUTES.some(route => path.startsWith(route))) {
-//     if (!token) {
-//       return NextResponse.redirect(new URL('/login', request.url));
-//     }
+// //   // Protect auth routes
+// //   if (AUTH_ROUTES.some(route => path.startsWith(route))) {
+// //     if (!token) {
+// //       return NextResponse.redirect(new URL('/login', request.url));
+// //     }
 
-//     const isValid = verifyToken(token);
-//     if (!isValid) {
-//       const response = NextResponse.redirect(new URL('/login', request.url));
-//       response.cookies.delete('token');
-//       return response;
-//     }
+// //     const isValid = verifyToken(token);
+// //     if (!isValid) {
+// //       const response = NextResponse.redirect(new URL('/login', request.url));
+// //       response.cookies.delete('token');
+// //       return response;
+// //     }
 
-//     // Add security headers for authenticated routes
-//     const response = NextResponse.next();
-//     response.headers.set('X-Content-Type-Options', 'nosniff');
-//     response.headers.set('X-Frame-Options', 'DENY');
-//     response.headers.set('X-XSS-Protection', '1; mode=block');
-//     return response;
-//   }
+// //     // Add security headers for authenticated routes
+// //     const response = NextResponse.next();
+// //     response.headers.set('X-Content-Type-Options', 'nosniff');
+// //     response.headers.set('X-Frame-Options', 'DENY');
+// //     response.headers.set('X-XSS-Protection', '1; mode=block');
+// //     return response;
+// //   }
 
-//   return NextResponse.next();
-// }
+// //   return NextResponse.next();
+// // }
