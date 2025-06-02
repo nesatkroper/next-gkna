@@ -30,19 +30,19 @@ export async function GET(request: NextRequest) {
       prisma.employee.findMany({
         where,
         include: {
-          department: true,
-          position: true,
-          info: true,
-          address: {
+          Department: true,
+          Position: true,
+          Employeeinfo: true,
+          Address: {
             include: {
-              city: true,
-              state: true,
+              City: true,
+              State: true,
             },
           },
           _count: {
             select: {
-              sales: true,
-              attendances: true,
+              Sale: true,
+              Attendance: true,
             },
           },
         },
@@ -86,6 +86,8 @@ export async function POST(request: NextRequest) {
           departmentId: data.departmentId,
           salary: data.salary,
           hiredDate: data.hiredDate ? new Date(data.hiredDate) : null,
+          createdAt: new Date(),
+          updatedAt: new Date()
         },
       })
 

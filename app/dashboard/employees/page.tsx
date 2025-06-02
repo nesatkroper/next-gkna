@@ -23,94 +23,41 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DatePicker } from "@/components/ui/date-picker"
 import { Plus, Search, UserCheck, Edit, Trash2, Eye, Phone, Mail } from "lucide-react"
 import { formatCurrency } from "@/lib/utils"
+import { useAppStore } from "@/lib/store/use-app-store"
 
-interface Employee {
-  employeeId: string
-  employeeCode: string
-  firstName: string
-  lastName: string
-  gender: string
-  phone: string
-  salary: number
-  status: string
-  createdAt: string
-  dob: string | null
-  hiredDate: string | null
-  department: {
-    departmentName: string
-  }
-  position: {
-    positionName: string
-  }
-  info?: {
-    email: string
-    region: string
-  }
-  _count: {
-    sales: number
-    attendances: number
-  }
-}
 
-interface Department {
-  departmentId: string
-  departmentName: string
-}
-
-interface Position {
-  positionId: string
-  positionName: string
-  departmentId: string
-}
 
 export default function EmployeesPage() {
-  const [employees, setEmployees] = useState<Employee[]>([])
-  const [departments, setDepartments] = useState<Department[]>([])
-  const [positions, setPositions] = useState<Position[]>([])
-  const [loading, setLoading] = useState(true)
+  const {
+
+    employees,
+    departments,
+    positions,
+    fetchEmployees,
+    fetchDepartments,
+    fetchPositions,
+    isLoadingEmployees,
+    isLoadingDepartments,
+    isLoadingPositions
+
+  } = useAppStore();
+
+  useEffect(() => {
+    if (employees.length === 0 && !isLoadingEmployees)
+      fetchEmployees();
+    if (departments.length === 0 && !isLoadingDepartments)
+      fetchDepartments();
+    if (positions.length === 0 && !isLoadingPositions)
+      fetchPositions();
+  }, [])
+
+
   const [searchTerm, setSearchTerm] = useState("")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [selectedDepartment, setSelectedDepartment] = useState("")
   const [dobDate, setDobDate] = useState<Date | undefined>()
   const [hiredDate, setHiredDate] = useState<Date | undefined>()
 
-  useEffect(() => {
-    fetchEmployees()
-    fetchDepartments()
-    fetchPositions()
-  }, [])
-
-  const fetchEmployees = async () => {
-    try {
-      const response = await fetch("/api/employees")
-      const data = await response.json()
-      setEmployees(data.employees || [])
-    } catch (error) {
-      console.error("Error fetching employees:", error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const fetchDepartments = async () => {
-    try {
-      const response = await fetch("/api/departments")
-      const data = await response.json()
-      setDepartments(data || [])
-    } catch (error) {
-      console.error("Error fetching departments:", error)
-    }
-  }
-
-  const fetchPositions = async () => {
-    try {
-      const response = await fetch("/api/positions")
-      const data = await response.json()
-      setPositions(data || [])
-    } catch (error) {
-      console.error("Error fetching positions:", error)
-    }
-  }
 
   const filteredEmployees = employees.filter(
     (employee) =>
@@ -164,7 +111,7 @@ export default function EmployeesPage() {
     }
   }
 
-  if (loading) {
+  if (isLoadingEmployees) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -381,21 +328,21 @@ export default function EmployeesPage() {
                             {employee.phone}
                           </div>
                         )}
-                        {employee.info?.email && (
+                        {employee.EmployeeInfo?.email && (
                           <div className="flex items-center gap-1 text-sm">
                             <Mail className="h-3 w-3" />
-                            {employee.info.email}
+                            {employee.EmployeeInfo.email}
                           </div>
                         )}
                       </div>
                     </TableCell>
-                    <TableCell>{employee.department.departmentName}</TableCell>
-                    <TableCell>{employee.position.positionName}</TableCell>
+                    <TableCell>{employee.Department?.departmentName}</TableCell>
+                    <TableCell>{employee.Position?.positionName}</TableCell>
                     <TableCell>{formatCurrency(employee.salary)}</TableCell>
                     <TableCell>
                       <div className="space-y-1">
-                        <div className="text-sm">Sales: {employee._count.sales}</div>
-                        <div className="text-sm text-muted-foreground">Attendance: {employee._count.attendances}</div>
+                        <div className="text-sm">Sales: {employee._count.Sale}</div>
+                        <div className="text-sm text-muted-foreground">Attendance: {employee._count.Attendance}</div>
                       </div>
                     </TableCell>
                     <TableCell>

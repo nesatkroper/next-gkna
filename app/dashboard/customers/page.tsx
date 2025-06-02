@@ -22,81 +22,39 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Search, Users, Edit, Trash2, Eye, Phone, Mail } from "lucide-react"
 import { formatDate } from "@/lib/utils"
+import { Customer, Employee } from "@/lib/generated/prisma"
+import { useAppStore } from "@/lib/store/use-app-store"
 
-interface Customer {
-  customerId: string
-  firstName: string
-  lastName: string
-  gender: string
-  phone: string
-  status: string
-  createdAt: string
-  info?: {
-    email: string
-    region: string
-    note: string
-  }
-  address?: {
-    city?: { name: string }
-    state?: { name: string }
-  }
-  employee?: {
-    firstName: string
-    lastName: string
-  }
-  _count: {
-    sales: number
-  }
-}
 
-interface Employee {
-  employeeId: string
-  firstName: string
-  lastName: string
-}
 
 export default function CustomersPage() {
-  const [customers, setCustomers] = useState<Customer[]>([])
-  const [employees, setEmployees] = useState<Employee[]>([])
-  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
+  const {
+    customers,
+    employees,
+    fetchCustomers,
+    fetchEmployees,
+    isLoadingCustomers,
+    isLoadingEmployees
+  } = useAppStore();
 
   useEffect(() => {
-    fetchCustomers()
-    fetchEmployees()
+    if (customers.length === 0 && !isLoadingCustomers)
+      fetchCustomers()
+    if (employees.length === 0 && !isLoadingEmployees)
+      fetchEmployees()
   }, [])
 
-  const fetchCustomers = async () => {
-    try {
-      const response = await fetch("/api/customers")
-      const data = await response.json()
-      setCustomers(data.customers || [])
-    } catch (error) {
-      console.error("Error fetching customers:", error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const fetchEmployees = async () => {
-    try {
-      const response = await fetch("/api/employees")
-      const data = await response.json()
-      setEmployees(data.employees || [])
-    } catch (error) {
-      console.error("Error fetching employees:", error)
-    }
-  }
+  console.log(customers)
 
   const filteredCustomers = customers.filter(
     (customer) =>
       customer.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       customer.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      customer.phone?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      customer.info?.email?.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
+      customer.phone?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const handleAddCustomer = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -123,7 +81,7 @@ export default function CustomersPage() {
       if (response.ok) {
         setIsDialogOpen(false)
         fetchCustomers()
-        ;(e.target as HTMLFormElement).reset()
+          ; (e.target as HTMLFormElement).reset()
       }
     } catch (error) {
       console.error("Error adding customer:", error)
@@ -146,7 +104,7 @@ export default function CustomersPage() {
     }
   }
 
-  if (loading) {
+  if (isLoadingCustomers) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -312,23 +270,23 @@ export default function CustomersPage() {
                             {customer.phone}
                           </div>
                         )}
-                        {customer.info?.email && (
+                        {customer?.CustomerInfo?.email && (
                           <div className="flex items-center gap-1 text-sm">
                             <Mail className="h-3 w-3" />
-                            {customer.info.email}
+                            {customer?.CustomerInfo.email}
                           </div>
                         )}
                       </div>
                     </TableCell>
                     <TableCell>
-                      {customer.address?.city?.name || customer.info?.region || "-"}
-                      {customer.address?.state?.name && `, ${customer.address.state.name}`}
+                      {customer.Address?.City?.name || customer.CustomerInfo?.region || "-"}
+                      {customer.Address?.State?.name && `, ${customer.Address.State.name}`}
                     </TableCell>
                     <TableCell>
-                      {customer.employee ? `${customer.employee.firstName} ${customer.employee.lastName}` : "-"}
+                      {customer?.Employee ? `${customer?.Employee.firstName} ${customer?.Employee.lastName}` : "-"}
                     </TableCell>
                     <TableCell>
-                      <Badge variant="secondary">{customer._count.sales}</Badge>
+                      <Badge variant="secondary">{customer._count.Sale}</Badge>
                     </TableCell>
                     <TableCell>
                       <Badge variant={customer.status === "active" ? "default" : "secondary"}>{customer.status}</Badge>

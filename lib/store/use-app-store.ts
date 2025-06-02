@@ -1,14 +1,86 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { Category, Product, Customer, Sale, Cart } from "@/lib/generated/prisma";
+import { Category, Product, Customer, Sale, Cart, Employee, Department } from "@/lib/generated/prisma";
+import { Position } from "postcss";
+
+// interface AppState {
+//   // Data
+//   categories: Category[];
+//   employees: Employee[];
+//   products: Product[];
+//   customers: Customer[];
+//   sales: Sale[];
+//   carts: Cart[];
+
+//   // Loading states
+//   isLoadingCategories: boolean;
+//   isLoadingProducts: boolean;
+//   isLoadingCustomers: boolean;
+//   isLoadingSales: boolean;
+//   isLoadingCarts: boolean;
+//   isLoadingEmployees: boolean;
+
+//   isCreatingProduct: boolean;
+//   isUpdatingProduct: boolean;
+//   isDeletingProduct: boolean;
+//   isCreatingCategory: boolean;
+//   isCreatingCustomer: boolean;
+//   isCreatingSale: boolean;
+//   isCreatingCart: boolean;
+//   isCreatingEmployee: boolean;
+//   isUpdatingEmployee: boolean;
+//   isDeletingEmployee: boolean;
+
+
+//   // Error states
+//   categoriesError: string | null;
+//   productsError: string | null;
+//   customersError: string | null;
+//   salesError: string | null;
+//   cartsError: string | null;
+//   employeeError: string | null;
+
+//   // Actions
+//   fetchCategories: () => Promise<void>;
+//   fetchProducts: () => Promise<void>;
+//   fetchCustomers: () => Promise<void>;
+//   fetchSales: () => Promise<void>;
+//   fetchCarts: () => Promise<void>;
+//   fetchEmployees: () => Promise<void>;
+
+//   createProduct: (data: Partial<Product>, file?: File) => Promise<boolean>;
+//   updateProduct: (id: string, data: Partial<Product>, file?: File) => Promise<boolean>;
+//   deleteProduct: (id: string) => Promise<boolean>;
+
+//   createCategory: (data: Partial<Category>, file?: File) => Promise<boolean>;
+//   createCustomer: (data: Partial<Customer>) => Promise<boolean>;
+//   createSale: (data: Partial<Sale>) => Promise<boolean>;
+//   createCart: (data: Partial<Cart>) => Promise<boolean>;
+//   createEmployee: (data: Partial<Employee>) => Promise<boolean>;
+
+//   clearErrors: () => void;
+
+//   // Computed
+//   getActiveCategories: () => Category[];
+//   getActiveProducts: () => Product[];
+//   getActiveCustomers: () => Customer[];
+//   getActiveSales: () => Sale[];
+//   getActiveCarts: () => Cart[];
+//   getActiveEmployees: () => Employee[];
+// }
+
+// Upload utility (unchanged from original)
 
 interface AppState {
   // Data
   categories: Category[];
+  employees: Employee[];
   products: Product[];
   customers: Customer[];
   sales: Sale[];
   carts: Cart[];
+  departments: Department[]; // Added
+  positions: Position[]; // Added
 
   // Loading states
   isLoadingCategories: boolean;
@@ -16,6 +88,10 @@ interface AppState {
   isLoadingCustomers: boolean;
   isLoadingSales: boolean;
   isLoadingCarts: boolean;
+  isLoadingEmployees: boolean;
+  isLoadingDepartments: boolean; // Added
+  isLoadingPositions: boolean; // Added
+
   isCreatingProduct: boolean;
   isUpdatingProduct: boolean;
   isDeletingProduct: boolean;
@@ -23,6 +99,15 @@ interface AppState {
   isCreatingCustomer: boolean;
   isCreatingSale: boolean;
   isCreatingCart: boolean;
+  isCreatingEmployee: boolean;
+  isUpdatingEmployee: boolean;
+  isDeletingEmployee: boolean;
+  isCreatingDepartment: boolean; // Added
+  isUpdatingDepartment: boolean; // Added
+  isDeletingDepartment: boolean; // Added
+  isCreatingPosition: boolean; // Added
+  isUpdatingPosition: boolean; // Added
+  isDeletingPosition: boolean; // Added
 
   // Error states
   categoriesError: string | null;
@@ -30,6 +115,9 @@ interface AppState {
   customersError: string | null;
   salesError: string | null;
   cartsError: string | null;
+  employeeError: string | null;
+  departmentError: string | null; // Added
+  positionError: string | null; // Added
 
   // Actions
   fetchCategories: () => Promise<void>;
@@ -37,13 +125,30 @@ interface AppState {
   fetchCustomers: () => Promise<void>;
   fetchSales: () => Promise<void>;
   fetchCarts: () => Promise<void>;
+  fetchEmployees: () => Promise<void>;
+  fetchDepartments: () => Promise<void>; // Added
+  fetchPositions: () => Promise<void>; // Added
+
   createProduct: (data: Partial<Product>, file?: File) => Promise<boolean>;
   updateProduct: (id: string, data: Partial<Product>, file?: File) => Promise<boolean>;
   deleteProduct: (id: string) => Promise<boolean>;
+
   createCategory: (data: Partial<Category>, file?: File) => Promise<boolean>;
   createCustomer: (data: Partial<Customer>) => Promise<boolean>;
   createSale: (data: Partial<Sale>) => Promise<boolean>;
   createCart: (data: Partial<Cart>) => Promise<boolean>;
+  createEmployee: (data: Partial<Employee>, file?: File) => Promise<boolean>;
+  updateEmployee: (id: string, data: Partial<Employee>, file?: File) => Promise<boolean>;
+  deleteEmployee: (id: string) => Promise<boolean>;
+
+  createDepartment: (data: Partial<Department>) => Promise<boolean>; // Added
+  updateDepartment: (id: string, data: Partial<Department>) => Promise<boolean>; // Added
+  deleteDepartment: (id: string) => Promise<boolean>; // Added
+
+  createPosition: (data: Partial<Position>) => Promise<boolean>; // Added
+  updatePosition: (id: string, data: Partial<Position>) => Promise<boolean>; // Added
+  deletePosition: (id: string) => Promise<boolean>; // Added
+
   clearErrors: () => void;
 
   // Computed
@@ -52,9 +157,11 @@ interface AppState {
   getActiveCustomers: () => Customer[];
   getActiveSales: () => Sale[];
   getActiveCarts: () => Cart[];
+  getActiveEmployees: () => Employee[];
+  getActiveDepartments: () => Department[]; // Added
+  getActivePositions: () => Position[]; // Added
 }
 
-// Upload utility (unchanged from original)
 const uploadFile = async (file: File): Promise<string> => {
   const formData = new FormData();
   formData.append("file", file);
@@ -81,6 +188,12 @@ export const useAppStore = create<AppState>()(
       customers: [],
       sales: [],
       carts: [],
+      employees: [],
+      isLoadingEmployees: false,
+      isCreatingEmployee: false,
+      isUpdatingEmployee: false,
+      isDeletingEmployee: false,
+      employeeError: null,
       isLoadingCategories: false,
       isLoadingProducts: false,
       isLoadingCustomers: false,
@@ -98,6 +211,269 @@ export const useAppStore = create<AppState>()(
       customersError: null,
       salesError: null,
       cartsError: null,
+      departments: [],
+      positions: [],
+      isLoadingDepartments: false,
+      isLoadingPositions: false,
+      isCreatingDepartment: false,
+      isUpdatingDepartment: false,
+      isDeletingDepartment: false,
+      isCreatingPosition: false,
+      isUpdatingPosition: false,
+      isDeletingPosition: false,
+      departmentError: null,
+      positionError: null,
+
+      fetchDepartments: async () => {
+        const { isLoadingDepartments } = get();
+        if (isLoadingDepartments) return;
+
+        set({ isLoadingDepartments: true, departmentError: null });
+
+        try {
+          const response = await fetch("/api/departments");
+          if (!response.ok) throw new Error("Failed to fetch departments");
+
+          const data = await response.json();
+          const departments = Array.isArray(data) ? data : data.departments || [];
+
+          set({ departments, isLoadingDepartments: false });
+        } catch (error: unknown) {
+          const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+          set({
+            departmentError: errorMessage,
+            isLoadingDepartments: false,
+          });
+        }
+      },
+
+      createDepartment: async (departmentData: Partial<Department>) => {
+        set({ isCreatingDepartment: true, departmentError: null });
+
+        try {
+          // Validate required fields
+          if (!departmentData.departmentName) {
+            throw new Error("Department name is required");
+          }
+
+          const response = await fetch("/api/departments", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(departmentData),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || "Failed to create department");
+          }
+
+          const newDepartment = await response.json();
+
+          set((state) => ({
+            departments: [newDepartment, ...state.departments],
+            isCreatingDepartment: false,
+          }));
+
+          return true;
+        } catch (error: unknown) {
+          const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+          set({
+            departmentError: errorMessage,
+            isCreatingDepartment: false,
+          });
+          return false;
+        }
+      },
+
+      updateDepartment: async (id: string, departmentData: Partial<Department>) => {
+        set({ isUpdatingDepartment: true, departmentError: null });
+
+        try {
+          const response = await fetch(`/api/departments/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(departmentData),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || "Failed to update department");
+          }
+
+          const updatedDepartment = await response.json();
+
+          set((state) => ({
+            departments: state.departments.map((d) =>
+              d.departmentId === id ? updatedDepartment : d
+            ),
+            isUpdatingDepartment: false,
+          }));
+
+          return true;
+        } catch (error: unknown) {
+          const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+          set({
+            departmentError: errorMessage,
+            isUpdatingDepartment: false,
+          });
+          return false;
+        }
+      },
+
+      deleteDepartment: async (id: string) => {
+        set({ isDeletingDepartment: true, departmentError: null });
+
+        try {
+          const response = await fetch(`/api/departments/${id}`, {
+            method: "DELETE",
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || "Failed to delete department");
+          }
+
+          set((state) => ({
+            departments: state.departments.filter((d) => d.departmentId !== id),
+            isDeletingDepartment: false,
+          }));
+
+          return true;
+        } catch (error: unknown) {
+          const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+          set({
+            departmentError: errorMessage,
+            isDeletingDepartment: false,
+          });
+          return false;
+        }
+      },
+
+      // New actions for Position
+      fetchPositions: async () => {
+        const { isLoadingPositions } = get();
+        if (isLoadingPositions) return;
+
+        set({ isLoadingPositions: true, positionError: null });
+
+        try {
+          const response = await fetch("/api/positions");
+          if (!response.ok) throw new Error("Failed to fetch positions");
+
+          const data = await response.json();
+          const positions = Array.isArray(data) ? data : data.positions || [];
+
+          set({ positions, isLoadingPositions: false });
+        } catch (error: unknown) {
+          const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+          set({
+            positionError: errorMessage,
+            isLoadingPositions: false,
+          });
+        }
+      },
+
+      createPosition: async (positionData: Partial<Position>) => {
+        set({ isCreatingPosition: true, positionError: null });
+
+        try {
+          // Validate required fields
+          if (!positionData.positionName || !positionData.departmentId) {
+            throw new Error("Position name and department ID are required");
+          }
+
+          const response = await fetch("/api/positions", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(positionData),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || "Failed to create position");
+          }
+
+          const newPosition = await response.json();
+
+          set((state) => ({
+            positions: [newPosition, ...state.positions],
+            isCreatingPosition: false,
+          }));
+
+          return true;
+        } catch (error: unknown) {
+          const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+          set({
+            positionError: errorMessage,
+            isCreatingPosition: false,
+          });
+          return false;
+        }
+      },
+
+      updatePosition: async (id: string, positionData: Partial<Position>) => {
+        set({ isUpdatingPosition: true, positionError: null });
+
+        try {
+          const response = await fetch(`/api/positions/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(positionData),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || "Failed to update position");
+          }
+
+          const updatedPosition = await response.json();
+
+          set((state) => ({
+            positions: state.positions.map((p) =>
+              p.positionId === id ? updatedPosition : p
+            ),
+            isUpdatingPosition: false,
+          }));
+
+          return true;
+        } catch (error: unknown) {
+          const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+          set({
+            positionError: errorMessage,
+            isUpdatingPosition: false,
+          });
+          return false;
+        }
+      },
+
+      deletePosition: async (id: string) => {
+        set({ isDeletingPosition: true, positionError: null });
+
+        try {
+          const response = await fetch(`/api/positions/${id}`, {
+            method: "DELETE",
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || "Failed to delete position");
+          }
+
+          set((state) => ({
+            positions: state.positions.filter((p) => p.positionId !== id),
+            isDeletingPosition: false,
+          }));
+
+          return true;
+        } catch (error: unknown) {
+          const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+          set({
+            positionError: errorMessage,
+            isDeletingPosition: false,
+          });
+          return false;
+        }
+      },
 
       // Actions (existing)
       fetchCategories: async () => {
@@ -348,6 +724,140 @@ export const useAppStore = create<AppState>()(
           return false;
         }
       },
+      createEmployee: async (employeeData: Partial<Employee>, file?: File) => {
+        set({ isCreatingEmployee: true, employeeError: null }); // Fixed typo
+
+        try {
+          let pictureUrl = "";
+          if (file) {
+            pictureUrl = await uploadFile(file);
+          }
+
+          const response = await fetch("/api/employees", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              ...employeeData,
+              picture: pictureUrl || employeeData.picture,
+            }),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || "Failed to create employee");
+          }
+
+          const newEmployee = await response.json();
+
+          set((state) => ({
+            employees: [newEmployee, ...state.employees],
+            isCreatingEmployee: false,
+          }));
+
+          return true;
+        } catch (error: unknown) {
+          const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+          set({
+            employeeError: errorMessage,
+            isCreatingEmployee: false,
+          });
+          return false;
+        }
+      },
+      updateEmployee: async (id: string, employeeData: Partial<Employee>, file?: File) => {
+        set({ isUpdatingEmployee: true, employeeError: null });
+
+        try {
+          let pictureUrl = employeeData.picture;
+          if (file) {
+            pictureUrl = await uploadFile(file);
+          }
+
+          const response = await fetch(`/api/employees/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              ...employeeData,
+              picture: pictureUrl,
+            }),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || "Failed to update employee");
+          }
+
+          const updatedEmployee = await response.json();
+
+          set((state) => ({
+            employees: state.employees.map((e) =>
+              e.employeeId === id ? updatedEmployee : e
+            ),
+            isUpdatingEmployee: false,
+          }));
+
+          return true;
+        } catch (error: unknown) {
+          const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+          set({
+            employeeError: errorMessage,
+            isUpdatingEmployee: false,
+          });
+          return false;
+        }
+      },
+
+      deleteEmployee: async (id: string) => {
+        set({ isDeletingEmployee: true, employeeError: null });
+
+        try {
+          const response = await fetch(`/api/employees/${id}`, {
+            method: "DELETE",
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || "Failed to delete employee");
+          }
+
+          set((state) => ({
+            employees: state.employees.filter((e) => e.employeeId !== id),
+            isDeletingEmployee: false,
+          }));
+
+          return true;
+        } catch (error: unknown) {
+          const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+          set({
+            employeeError: errorMessage,
+            isDeletingEmployee: false,
+          });
+          return false;
+        }
+      },
+
+      fetchEmployees: async () => {
+        const { isLoadingEmployees } = get();
+        if (isLoadingEmployees) return;
+
+        set({ isLoadingEmployees: true, employeeError: null });
+
+        try {
+          const response = await fetch("/api/employees");
+          if (!response.ok) throw new Error("Failed to fetch employees");
+
+          const data = await response.json();
+          const employees = Array.isArray(data) ? data : data.employees || [];
+
+          set({ employees, isLoadingEmployees: false }); // Fixed: Set employees, not employeeError
+        } catch (error: unknown) {
+          const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+          set({
+            employeeError: errorMessage, // Fixed: Use employeeError
+            isLoadingEmployees: false,
+          });
+        }
+      },
 
       // New actions for Sale
       fetchSales: async () => {
@@ -458,7 +968,6 @@ export const useAppStore = create<AppState>()(
           return false;
         }
       },
-
       clearErrors: () => {
         set({
           categoriesError: null,
@@ -466,10 +975,16 @@ export const useAppStore = create<AppState>()(
           customersError: null,
           salesError: null,
           cartsError: null,
+          employeeError: null,
+          departmentError: null, // Added
+          positionError: null, // Added
         });
       },
 
       // Computed values
+      getActiveEmployees: () => {
+        return get().employees.filter((emp) => emp.status === "active"); // Fixed typo
+      },
       getActiveCategories: () => {
         return get().categories.filter((cat) => cat.status === "active");
       },
@@ -489,292 +1004,16 @@ export const useAppStore = create<AppState>()(
       getActiveCarts: () => {
         return get().carts.filter((cart) => cart.status === "active");
       },
+      getActiveDepartments: () => {
+        return get().departments.filter((dept) => dept?.status === "active") ?? [];
+      },
+
+      getActivePositions: () => {
+        return get().positions.filter((pos) => pos?.status === "active") ?? [];
+      },
     }),
     {
       name: "app-store",
     }
   )
 );
-
-
-
-// import { create } from "zustand"
-// import { devtools } from "zustand/middleware"
-// import { Category, Product } from "@/lib/generated/prisma"
-
-// interface AppState {
-//   // Data
-//   categories: Category[]
-//   products: Product[]
-
-//   // Loading states
-//   isLoadingCategories: boolean
-//   isLoadingProducts: boolean
-//   isCreatingProduct: boolean
-//   isUpdatingProduct: boolean
-//   isDeletingProduct: boolean
-//   isCreatingCategory: boolean
-
-//   // Error states
-//   categoriesError: string | null
-//   productsError: string | null
-
-//   // Actions
-//   fetchCategories: () => Promise<void>
-//   fetchProducts: () => Promise<void>
-//   createProduct: (data: Partial<Product>, file?: File) => Promise<boolean>
-//   updateProduct: (id: string, data: Partial<Product>, file?: File) => Promise<boolean>
-//   deleteProduct: (id: string) => Promise<boolean>
-//   createCategory: (data: Partial<Category>, file?: File) => Promise<boolean>
-//   clearErrors: () => void
-
-//   // Computed
-//   getActiveCategories: () => Category[]
-//   getActiveProducts: () => Product[]
-// }
-
-// // Upload utility
-// const uploadFile = async (file: File): Promise<string> => {
-//   const formData = new FormData()
-//   formData.append("file", file)
-
-//   const response = await fetch("/api/upload", {
-//     method: "POST",
-//     body: formData,
-//   })
-
-//   if (!response.ok) {
-//     throw new Error("Failed to upload file")
-//   }
-
-//   const data = await response.json()
-//   return data.url
-// }
-
-// export const useAppStore = create<AppState>()(
-//   devtools(
-//     (set, get) => ({
-//       // Initial state
-//       categories: [],
-//       products: [],
-//       isLoadingCategories: false,
-//       isLoadingProducts: false,
-//       isCreatingProduct: false,
-//       isUpdatingProduct: false,
-//       isDeletingProduct: false,
-//       isCreatingCategory: false,
-//       categoriesError: null,
-//       productsError: null,
-
-//       // Actions
-//       fetchCategories: async () => {
-//         const { isLoadingCategories } = get()
-//         if (isLoadingCategories) return
-
-//         set({ isLoadingCategories: true, categoriesError: null })
-
-//         try {
-//           const response = await fetch("/api/categories")
-//           if (!response.ok) throw new Error("Failed to fetch categories")
-
-//           const data = await response.json()
-//           const categories = Array.isArray(data) ? data : data.categories || []
-
-//           set({ categories, isLoadingCategories: false })
-//         } catch (error) {
-//           set({
-//             categoriesError: error.message,
-//             isLoadingCategories: false,
-//           })
-//         }
-//       },
-
-//       fetchProducts: async () => {
-//         const { isLoadingProducts } = get()
-//         if (isLoadingProducts) return
-
-//         set({ isLoadingProducts: true, productsError: null })
-
-//         try {
-//           const response = await fetch("/api/products")
-//           if (!response.ok) throw new Error("Failed to fetch products")
-
-//           const data = await response.json()
-//           const products = Array.isArray(data) ? data : data.products || []
-
-//           set({ products, isLoadingProducts: false })
-//         } catch (error) {
-//           set({
-//             productsError: error.message,
-//             isLoadingProducts: false,
-//           })
-//         }
-//       },
-
-//       createProduct: async (productData, file) => {
-//         set({ isCreatingProduct: true, productsError: null })
-
-//         try {
-//           let pictureUrl = ""
-//           if (file) {
-//             pictureUrl = await uploadFile(file)
-//           }
-
-//           const response = await fetch("/api/products", {
-//             method: "POST",
-//             headers: { "Content-Type": "application/json" },
-//             body: JSON.stringify({
-//               ...productData,
-//               picture: pictureUrl || productData.picture,
-//             }),
-//           })
-
-//           if (!response.ok) {
-//             const errorData = await response.json()
-//             throw new Error(errorData.error || "Failed to create product")
-//           }
-
-//           const newProduct = await response.json()
-
-//           set((state) => ({
-//             products: [newProduct, ...state.products],
-//             isCreatingProduct: false,
-//           }))
-
-//           return true
-//         } catch (error) {
-//           set({
-//             productsError: error.message,
-//             isCreatingProduct: false,
-//           })
-//           return false
-//         }
-//       },
-
-//       updateProduct: async (id, productData, file) => {
-//         set({ isUpdatingProduct: true, productsError: null })
-
-//         try {
-//           let pictureUrl = productData.picture
-//           if (file) {
-//             pictureUrl = await uploadFile(file)
-//           }
-
-//           const response = await fetch(`/api/products/${id}`, {
-//             method: "PUT",
-//             headers: { "Content-Type": "application/json" },
-//             body: JSON.stringify({
-//               ...productData,
-//               picture: pictureUrl,
-//             }),
-//           })
-
-//           if (!response.ok) {
-//             const errorData = await response.json()
-//             throw new Error(errorData.error || "Failed to update product")
-//           }
-
-//           const updatedProduct = await response.json()
-
-//           set((state) => ({
-//             products: state.products.map((p) => (p.productId === id ? updatedProduct : p)),
-//             isUpdatingProduct: false,
-//           }))
-
-//           return true
-//         } catch (error) {
-//           set({
-//             productsError: error.message,
-//             isUpdatingProduct: false,
-//           })
-//           return false
-//         }
-//       },
-
-//       deleteProduct: async (id) => {
-//         set({ isDeletingProduct: true, productsError: null })
-
-//         try {
-//           const response = await fetch(`/api/products/${id}`, {
-//             method: "DELETE",
-//           })
-
-//           if (!response.ok) {
-//             const errorData = await response.json()
-//             throw new Error(errorData.error || "Failed to delete product")
-//           }
-
-//           set((state) => ({
-//             products: state.products.filter((p) => p.productId !== id),
-//             isDeletingProduct: false,
-//           }))
-
-//           return true
-//         } catch (error) {
-//           set({
-//             productsError: error.message,
-//             isDeletingProduct: false,
-//           })
-//           return false
-//         }
-//       },
-
-//       createCategory: async (categoryData, file) => {
-//         set({ isCreatingCategory: true, categoriesError: null })
-
-//         try {
-//           let pictureUrl = ""
-//           if (file) {
-//             pictureUrl = await uploadFile(file)
-//           }
-
-//           const response = await fetch("/api/categories", {
-//             method: "POST",
-//             headers: { "Content-Type": "application/json" },
-//             body: JSON.stringify({
-//               ...categoryData,
-//               picture: pictureUrl || categoryData.picture,
-//             }),
-//           })
-
-//           if (!response.ok) {
-//             const errorData = await response.json()
-//             throw new Error(errorData.error || "Failed to create category")
-//           }
-
-//           const newCategory = await response.json()
-
-//           set((state) => ({
-//             categories: [newCategory, ...state.categories],
-//             isCreatingCategory: false,
-//           }))
-
-//           return true
-//         } catch (error) {
-//           set({
-//             categoriesError: error.message,
-//             isCreatingCategory: false,
-//           })
-//           return false
-//         }
-//       },
-
-//       clearErrors: () => {
-//         set({ categoriesError: null, productsError: null })
-//       },
-
-//       // Computed values
-//       getActiveCategories: () => {
-//         return get().categories.filter((cat) => cat.status === "active")
-//       },
-
-//       getActiveProducts: () => {
-//         return get().products.filter((prod) => prod.status === "active")
-//       },
-//     }),
-//     {
-//       name: "app-store",
-//     },
-//   ),
-// )
-

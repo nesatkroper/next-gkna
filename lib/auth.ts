@@ -1,57 +1,36 @@
+// auth.ts
+import { SignJWT, jwtVerify } from "jose"
 import bcrypt from "bcryptjs"
-import jwt from "jsonwebtoken"
-import crypto from "crypto"
 
-const JWT_SECRET = process.env.JWT_SECRET || "your-super-secret-jwt-key"
-const JWT_EXPIRES_IN = "8h"
+import { prisma } from "./prisma"
 
-export async function hashPassword(password: string): Promise<string> {
-  const saltRounds = 12 // High salt rounds for security
-  return bcrypt.hash(password, saltRounds)
+const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key"
+
+// Create a key Uint8Array
+function getSecretKey() {
+  return new TextEncoder().encode(JWT_SECRET)
+}
+
+export async function generateToken(authId: string): Promise<string> {
+  return await new SignJWT({ authId })
+    .setProtectedHeader({ alg: "HS256" })
+    .setExpirationTime("7d")
+    .sign(getSecretKey())
+}
+
+export async function verifyToken(token: string): Promise<{ authId: string } | null> {
+  try {
+    const { payload } = await jwtVerify(token, getSecretKey())
+    return payload as { authId: string }
+  } catch (err) {
+    console.error("JWT verify error:", err)
+    return null
+  }
 }
 
 export async function verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
   return bcrypt.compare(password, hashedPassword)
 }
-
-export function generateToken(authId: string): string {
-  const payload = {
-    authId,
-    iat: Math.floor(Date.now() / 1000),
-    jti: crypto.randomUUID(), // Unique token ID
-  }
-
-  return jwt.sign(payload, JWT_SECRET, {
-    expiresIn: JWT_EXPIRES_IN,
-    issuer: "fertilizer-ms",
-    audience: "fertilizer-ms-users",
-  })
-}
-
-export function verifyToken(token: string): { authId: string; jti: string } | null {
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET, {
-      issuer: "fertilizer-ms",
-      audience: "fertilizer-ms-users",
-    }) as any
-
-    return {
-      authId: decoded.authId,
-      jti: decoded.jti,
-    }
-  } catch (error) {
-    return null
-  }
-}
-
-export function generateSecureRandomString(length = 32): string {
-  return crypto.randomBytes(length).toString("hex")
-}
-
-export function generateMFASecret(): string {
-  return crypto.randomBytes(20).toString("base32")
-}
-
 
 
 // import bcrypt from "bcryptjs"
@@ -100,3 +79,4 @@ export function generateMFASecret(): string {
 
 //   return auth
 // }
+

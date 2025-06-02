@@ -28,14 +28,14 @@ export async function GET(request: NextRequest) {
       prisma.customer.findMany({
         where,
         include: {
-          address: {
+          Address: {
             include: {
-              city: true,
-              state: true,
+              City: true,
+              State: true,
             },
           },
-          info: true,
-          employee: {
+          Customerinfo: true,
+          Employee: {
             select: {
               firstName: true,
               lastName: true,
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
           },
           _count: {
             select: {
-              sales: true,
+              Sale: true,
             },
           },
         },
@@ -82,6 +82,8 @@ export async function POST(request: NextRequest) {
           gender: data.gender || "male",
           phone: data.phone,
           employeeId: data.employeeId,
+          createdAt: new Date(),
+          updatedAt: new Date()
         },
       })
 
@@ -108,6 +110,8 @@ export async function POST(request: NextRequest) {
             stateId: data.stateId,
             latitude: data.latitude,
             longitude: data.longitude,
+            createdAt: new Date(),
+            updatedAt: new Date()
           },
         })
       }
