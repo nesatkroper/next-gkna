@@ -56,12 +56,11 @@ export async function POST(request: NextRequest) {
   try {
     const data = await request.json()
 
-    // Validate required fields
     if (!data.productName || !data.categoryId) {
       return NextResponse.json({ error: "Product name and category are required" }, { status: 400 })
     }
 
-    // Auto-generate product code if not provided
+
     const productCode = data.productCode || generateProductCode()
 
     const product = await prisma.product.create({
@@ -76,14 +75,14 @@ export async function POST(request: NextRequest) {
         costPrice: data.costPrice || 0,
         discountRate: data.discountRate || 0,
         desc: data.desc || null,
-        updatedAt: new Date(), // Fix the missing updatedAt field
+        updatedAt: new Date(), 
       },
       include: {
         Category: true,
       },
     })
 
-    // Create initial stock record
+
     await prisma.stock.create({
       data: {
         productId: product.productId,
