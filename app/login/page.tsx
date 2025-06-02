@@ -51,7 +51,7 @@ export default function LoginPage() {
       return false
     }
 
-    if (formData.password.length < 8) {
+    if (formData.password.length < 6) {
       setError("Password must be at least 8 characters long")
       return false
     }
@@ -77,13 +77,13 @@ export default function LoginPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-Requested-With": "XMLHttpRequest", // CSRF protection
+          "X-Requested-With": "XMLHttpRequest", 
         },
         credentials: "include",
         body: JSON.stringify({
           email: formData.email.toLowerCase().trim(),
           password: formData.password,
-          timestamp: Date.now(), // Replay attack protection
+          timestamp: Date.now(), 
         }),
       })
 
@@ -100,21 +100,18 @@ export default function LoginPage() {
               setAttempts(0)
             },
             15 * 60 * 1000,
-          ) // 15 minutes lockout
+          )
         }
 
         setError(data.error || "Login failed")
         return
       }
-
-      // Reset attempts on successful login
       setAttempts(0)
+      console.log("Login response:", data);
 
       if (data.requiresMFA) {
-        // Redirect to MFA verification page
         router.push(`/auth/mfa?token=${data.tempToken}`)
       } else {
-        // Successful login
         router.push("/dashboard")
       }
     } catch (error) {

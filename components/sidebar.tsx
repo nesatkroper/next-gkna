@@ -21,10 +21,11 @@ import {
 import { useEffect, useState } from "react"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { useAppStore } from "@/lib/store/use-app-store"
-
-
+import { useIsMobile } from "@/hooks/use-mobile"
 
 export function Sidebar() {
+  const isMobile = useIsMobile();
+  const [openSections, setOpenSections] = useState<string[]>(["Inventory", "People"])
   const {
     products,
     categories,
@@ -34,7 +35,6 @@ export function Sidebar() {
     fetchCategories,
   } = useAppStore()
   const pathname = usePathname()
-  const [openSections, setOpenSections] = useState<string[]>(["Inventory", "People"])
 
   useEffect(() => {
     if (categories.length === 0 && !isLoadingCategories) {

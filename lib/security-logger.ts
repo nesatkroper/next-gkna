@@ -28,6 +28,8 @@ export async function logSecurityEvent(event: SecurityEvent): Promise<void> {
           responseTime: 0,
           ip: event.ip,
           userAgent: event.userAgent,
+          createdAt: new Date(),
+          updatedAt: new Date()
         },
       })
     }
