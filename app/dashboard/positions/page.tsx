@@ -307,7 +307,7 @@ export default function PositionsPage() {
                       <div className="text-sm text-muted-foreground">{position.positionCode || "-"}</div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline">{position.department.departmentName}</Badge>
+                      <Badge variant="outline">{position.department?.departmentName}</Badge>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">

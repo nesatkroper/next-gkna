@@ -1,5 +1,6 @@
 "use client"
 
+import type React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
@@ -17,68 +18,88 @@ import {
   ChevronDown,
   ChevronRight,
 } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { useAppStore } from "@/lib/store/use-app-store"
 
-const navigation = [
-  {
-    name: "Dashboard",
-    href: "/dashboard",
-    icon: LayoutDashboard,
-    current: false,
-  },
-  {
-    name: "Inventory",
-    icon: Package,
-    children: [
-      { name: "Products", href: "/dashboard/products", badge: "124" },
-      { name: "Categories", href: "/dashboard/categories", badge: "8" },
-      { name: "Stock Management", href: "/dashboard/inventory", badge: "12" },
-    ],
-  },
-  {
-    name: "People",
-    icon: Users,
-    children: [
-      { name: "Customers", href: "/dashboard/customers", badge: "89" },
-      { name: "Employees", href: "/dashboard/employees", badge: "24" },
-      { name: "Suppliers", href: "/dashboard/suppliers", badge: "15" },
-    ],
-  },
-  {
-    name: "Organization",
-    icon: Building2,
-    children: [
-      { name: "Departments", href: "/dashboard/departments", badge: "6" },
-      { name: "Positions", href: "/dashboard/positions", badge: "12" },
-    ],
-  },
-  {
-    name: "Operations",
-    icon: ShoppingCart,
-    children: [
-      { name: "Sales", href: "/dashboard/sales", badge: "45" },
-      { name: "Attendance", href: "/dashboard/attendance", badge: "new" },
-      { name: "Payments", href: "/dashboard/payments", badge: "8" },
-    ],
-  },
-  {
-    name: "Reports",
-    href: "/dashboard/reports",
-    icon: BarChart3,
-    current: false,
-  },
-  {
-    name: "Settings",
-    href: "/dashboard/settings",
-    icon: Settings,
-    current: false,
-  },
-]
+
 
 export function Sidebar() {
+  const {
+    products,
+    categories,
+    isLoadingProducts,
+    isLoadingCategories,
+    fetchProducts,
+    fetchCategories,
+  } = useAppStore()
   const pathname = usePathname()
   const [openSections, setOpenSections] = useState<string[]>(["Inventory", "People"])
+
+  useEffect(() => {
+    if (categories.length === 0 && !isLoadingCategories) {
+      fetchCategories()
+    }
+    if (products.length === 0 && !isLoadingProducts) {
+      fetchProducts()
+    }
+  }, [])
+
+  const navigation = [
+    {
+      name: "Dashboard",
+      href: "/dashboard",
+      icon: LayoutDashboard,
+      current: false,
+    },
+    {
+      name: "Inventory",
+      icon: Package,
+      children: [
+        { name: "Products", href: "/dashboard/products", badge: products.length },
+        { name: "Categories", href: "/dashboard/categories", badge: categories.length },
+        { name: "Stock Management", href: "/dashboard/inventory", badge: "12" },
+      ],
+    },
+    {
+      name: "People",
+      icon: Users,
+      children: [
+        { name: "Customers", href: "/dashboard/customers", badge: "89" },
+        { name: "Employees", href: "/dashboard/employees", badge: "24" },
+        { name: "Suppliers", href: "/dashboard/suppliers", badge: "15" },
+      ],
+    },
+    {
+      name: "Organization",
+      icon: Building2,
+      children: [
+        { name: "Departments", href: "/dashboard/departments", badge: "6" },
+        { name: "Positions", href: "/dashboard/positions", badge: "12" },
+      ],
+    },
+    {
+      name: "Operations",
+      icon: ShoppingCart,
+      children: [
+        { name: "Sales", href: "/dashboard/sales", badge: "45" },
+        { name: "Attendance", href: "/dashboard/attendance", badge: "new" },
+        { name: "Payments", href: "/dashboard/payments", badge: "8" },
+      ],
+    },
+    {
+      name: "Reports",
+      href: "/dashboard/reports",
+      icon: BarChart3,
+      current: false,
+    },
+    {
+      name: "Settings",
+      href: "/dashboard/settings",
+      icon: Settings,
+      current: false,
+    },
+  ]
 
   const toggleSection = (sectionName: string) => {
     setOpenSections((prev) =>

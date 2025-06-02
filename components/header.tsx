@@ -67,28 +67,7 @@ export function Header() {
           </Sheet>
         </div>
 
-        {/* Company Info */}
-        <div className="hidden md:flex items-center gap-2">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-            <span className="text-primary-foreground font-bold text-sm">FS</span>
-          </div>
-          <div>
-            <h1 className="font-semibold text-sm">Fertilizer System</h1>
-            <p className="text-xs text-muted-foreground">Management Portal</p>
-          </div>
-        </div>
-
         <div className="flex-1" />
-
-        {/* Time & Date Display */}
-        {/* <div className="hidden lg:flex flex-col items-end">
-          <div className="text-sm font-mono font-medium">
-            {typeof window !== "undefined" ? formatTime(currentTime) : "--:--:--"}
-          </div>
-          <div className="text-xs text-muted-foreground">
-            {typeof window !== "undefined" ? formatDate(currentTime) : "---"}
-          </div>
-        </div> */}
 
         {/* Action Buttons */}
         <div className="flex items-center gap-2">

@@ -7,16 +7,16 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     const department = await prisma.department.findUnique({
       where: { departmentId: params.id },
       include: {
-        employees: {
+        Employee: {
           include: {
-            position: true,
+            Position: true,
           },
         },
-        positions: true,
+        Position: true,
         _count: {
           select: {
-            employees: true,
-            positions: true,
+            Employee: true,
+            Position: true,
           },
         },
       },
@@ -47,8 +47,8 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       include: {
         _count: {
           select: {
-            employees: true,
-            positions: true,
+            Employee: true,
+            Position: true,
           },
         },
       },

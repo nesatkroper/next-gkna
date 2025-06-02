@@ -50,7 +50,8 @@ export default function DepartmentsPage() {
     try {
       const response = await fetch("/api/departments")
       const data = await response.json()
-      setDepartments(data || [])
+      const departments = Array.isArray(data) ? data : data?.departments || []
+      setDepartments(departments)
     } catch (error) {
       console.error("Error fetching departments:", error)
     } finally {
@@ -58,11 +59,13 @@ export default function DepartmentsPage() {
     }
   }
 
-  const filteredDepartments = departments.filter(
-    (department) =>
-      department.departmentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      department.departmentCode?.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
+  const filteredDepartments = Array.isArray(departments)
+    ? departments.filter(
+        (department) =>
+          department.departmentName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          department.departmentCode?.toLowerCase().includes(searchTerm.toLowerCase()),
+      )
+    : []
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()

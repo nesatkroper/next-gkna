@@ -35,7 +35,6 @@ export default function ProductsPage() {
     isLoadingCategories,
     isCreatingProduct,
     isUpdatingProduct,
-    isDeletingProduct,
     productsError,
     categoriesError,
     fetchProducts,

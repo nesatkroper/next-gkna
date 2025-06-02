@@ -12,8 +12,8 @@ export async function GET(request: NextRequest) {
       include: {
         _count: {
           select: {
-            employees: true,
-            positions: true,
+            Employee: true,
+            Position: true,
           },
         },
       },
@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(departments)
   } catch (error) {
-    console.error("Departments fetch error:", error)
+    console.error("Departments fetch error:", error.message)
     return NextResponse.json({ error: "Failed to fetch departments" }, { status: 500 })
   }
 }
@@ -36,12 +36,14 @@ export async function POST(request: NextRequest) {
         departmentName: data.departmentName,
         departmentCode: data.departmentCode,
         memo: data.memo,
+        createdAt: new Date(),
+        updatedAt: new Date()
       },
     })
 
     return NextResponse.json(department, { status: 201 })
   } catch (error) {
-    console.error("Department creation error:", error)
+    console.error("Department creation error:", error.message)
     return NextResponse.json({ error: "Failed to create department" }, { status: 500 })
   }
 }
