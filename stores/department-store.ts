@@ -2,16 +2,9 @@ import { create } from "zustand"
 import { devtools } from "zustand/middleware"
 import { createBaseStore } from "./base-store-factory"
 import type { BaseStore } from "@/types/store-types"
+import { Department } from "@/lib/generated/prisma"
 
-export interface Department {
-  departmentId: string
-  departmentName: string
-  departmentCode?: string
-  memo?: string
-  status: "active" | "inactive"
-  createdAt: Date
-  updatedAt: Date
-}
+
 
 export interface CreateDepartmentData {
   departmentName: string

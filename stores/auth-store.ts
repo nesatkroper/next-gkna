@@ -1,16 +1,8 @@
+import { Auth } from "@/lib/generated/prisma"
 import { create } from "zustand"
 import { devtools } from "zustand/middleware"
 
-export interface Auth {
-  authId: string
-  email: string
-  roleId: string
-  employeeId?: string
-  status: "active" | "inactive" | "suspended" | "pending"
-  createdAt: Date
-  updatedAt: Date
-  lastLoginAt?: Date
-}
+
 
 interface AuthState {
   me: Auth[]

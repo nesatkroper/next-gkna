@@ -2,23 +2,8 @@ import { create } from "zustand"
 import { devtools } from "zustand/middleware"
 import { createBaseStore } from "./base-store-factory"
 import type { BaseStore } from "@/types/store-types"
+import { Employee } from "@/lib/generated/prisma"
 
-export interface Employee {
-  employeeId: string
-  employeeCode?: string
-  firstName: string
-  lastName: string
-  gender: "male" | "female" | "others"
-  dob?: Date
-  phone?: string
-  positionId: string
-  departmentId: string
-  salary: number
-  hiredDate?: Date
-  status: "active" | "inactive"
-  createdAt: Date
-  updatedAt: Date
-}
 
 export interface CreateEmployeeData {
   employeeCode?: string

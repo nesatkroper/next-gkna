@@ -2,31 +2,8 @@ import { create } from "zustand"
 import { devtools } from "zustand/middleware"
 import { createBaseStore } from "./base-store-factory"
 import type { BaseStore } from "@/types/store-types"
+import { Sale, Saledetail } from "@/lib/generated/prisma"
 
-export interface Sale {
-  saleId: string
-  employeeId: string
-  customerId: string
-  saleDate: Date
-  amount: number
-  status: "active" | "inactive" | "pending"
-  createdAt: Date
-  updatedAt: Date
-  memo?: string
-  invoice?: string
-}
-
-export interface SaleDetail {
-  saledetailId: string
-  saleId: string
-  productId: string
-  quantity: number
-  amount: number
-  status: "active" | "inactive"
-  createdAt: Date
-  updatedAt: Date
-  memo?: string
-}
 
 export interface CreateSaleData {
   employeeId: string
@@ -44,7 +21,7 @@ export interface CreateSaleData {
 }
 
 export type SaleStore = BaseStore<Sale, CreateSaleData> & {
-  saleDetails: SaleDetail[]
+  saleDetails: Saledetail[]
   fetchSaleDetails: (saleId: string) => Promise<void>
   isLoadingSaleDetails: boolean
   saleDetailsError: string | null

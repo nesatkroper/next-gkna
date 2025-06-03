@@ -2,17 +2,8 @@ import { create } from "zustand"
 import { devtools } from "zustand/middleware"
 import { createBaseStore } from "./base-store-factory"
 import type { BaseStore } from "@/types/store-types"
+import { Notification } from "@/lib/generated/prisma"
 
-export interface Notification {
-  notificationId: string
-  authId?: string
-  userId?: string
-  title: string
-  content: string
-  status: "active" | "inactive"
-  createdAt: Date
-  updatedAt: Date
-}
 
 export interface CreateNotificationData {
   authId?: string

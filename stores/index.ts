@@ -16,5 +16,4 @@ export { useCartStore, type CartStore, type Cart } from "./cart-store"
 export { useRoleStore, type RoleStore, type Role } from "./role-store"
 export { useNotificationStore, type NotificationStore, type Notification } from "./notification-store"
 
-// Re-export types
 export type { BaseStore, BaseEntity } from "@/types/store-types"

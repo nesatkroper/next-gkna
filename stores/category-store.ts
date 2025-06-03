@@ -2,17 +2,9 @@ import { create } from "zustand"
 import { devtools } from "zustand/middleware"
 import { createBaseStore } from "./base-store-factory"
 import type { BaseStore } from "@/types/store-types"
+import { Category } from "@/lib/generated/prisma"
 
-export interface Category {
-  categoryId: string
-  picture?: string
-  categoryName: string
-  categoryCode?: string
-  memo?: string
-  status: "active" | "inactive"
-  createdAt: Date
-  updatedAt: Date
-}
+
 
 export interface CreateCategoryData {
   categoryName: string

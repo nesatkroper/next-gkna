@@ -2,17 +2,7 @@ import { create } from "zustand"
 import { devtools } from "zustand/middleware"
 import { createBaseStore } from "./base-store-factory"
 import type { BaseStore } from "@/types/store-types"
-
-export interface Cart {
-  cartId: string
-  authId?: string
-  userId?: string
-  productId: string
-  quantity: number
-  status: "active" | "inactive"
-  createdAt: Date
-  updatedAt: Date
-}
+import { Cart } from "@/lib/generated/prisma"
 
 export interface CartNote {
   cartnoteId: string
@@ -55,7 +45,7 @@ export const useCartStore = create<CartStore>()(
         idField: "cartId",
       })(set, get),
 
-      // Additional state
+
       cartNotes: [],
       isLoadingCartNotes: false,
       cartNotesError: null,

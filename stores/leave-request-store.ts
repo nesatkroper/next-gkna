@@ -2,22 +2,7 @@ import { create } from "zustand"
 import { devtools } from "zustand/middleware"
 import { createBaseStore } from "./base-store-factory"
 import type { BaseStore } from "@/types/store-types"
-
-export type LeaveType = "annual" | "sick" | "maternity" | "paternity" | "unpaid" | "other"
-
-export interface LeaveRequest {
-  leaveId: string
-  employeeId: string
-  leaveType: LeaveType
-  startDate: Date
-  endDate: Date
-  reason?: string
-  status: "pending" | "approved" | "rejected" | "cancelled"
-  approvedById?: string
-  approvedAt?: Date
-  createdAt: Date
-  updatedAt: Date
-}
+import { LeaveRequest, LeaveType } from "@/lib/generated/prisma"
 
 export interface CreateLeaveRequestData {
   employeeId: string

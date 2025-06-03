@@ -2,30 +2,8 @@ import { create } from "zustand"
 import { devtools } from "zustand/middleware"
 import { createBaseStore } from "./base-store-factory"
 import type { BaseStore } from "@/types/store-types"
+import { Stock, Stockentry } from "@/lib/generated/prisma"
 
-export interface Stock {
-  stockId: string
-  productId: string
-  memo?: string
-  status: "active" | "inactive"
-  createdAt: Date
-  updatedAt: Date
-  quantity: number
-}
-
-export interface StockEntry {
-  entryId: string
-  quantity: number
-  memo?: string
-  status: "active" | "inactive"
-  entryPrice: number
-  entryDate?: Date
-  createdAt: Date
-  updatedAt: Date
-  productId: string
-  supplierId: string
-  invoice?: string
-}
 
 export interface CreateStockData {
   productId: string
@@ -44,7 +22,7 @@ export interface CreateStockEntryData {
 }
 
 export type StockStore = BaseStore<Stock, CreateStockData> & {
-  stockEntries: StockEntry[]
+  stockEntries: Stockentry[]
   isLoadingStockEntries: boolean
   isCreatingStockEntry: boolean
   stockEntriesError: string | null

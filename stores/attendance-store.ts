@@ -2,19 +2,8 @@ import { create } from "zustand"
 import { devtools } from "zustand/middleware"
 import { createBaseStore } from "./base-store-factory"
 import type { BaseStore } from "@/types/store-types"
+import { Attendance } from "@/lib/generated/prisma"
 
-export interface Attendance {
-  attendanceId: string
-  employeeId: string
-  datetime: Date
-  note?: string
-  status: "active" | "inactive"
-  checkIn: Date
-  checkOut?: Date
-  createdAt: Date
-  eventId: string
-  method?: string
-}
 
 export interface CreateAttendanceData {
   employeeId: string

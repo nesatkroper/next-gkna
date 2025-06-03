@@ -2,15 +2,7 @@ import { create } from "zustand"
 import { devtools } from "zustand/middleware"
 import { createBaseStore } from "./base-store-factory"
 import type { BaseStore } from "@/types/store-types"
-
-export interface Role {
-  roleId: string
-  name: string
-  description?: string
-  status: "active" | "inactive"
-  isSystemRole: boolean
-  createdAt: Date
-}
+import { Role } from "@/lib/generated/prisma"
 
 export interface CreateRoleData {
   name: string
