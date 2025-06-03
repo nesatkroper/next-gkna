@@ -1,3 +1,4 @@
+
 "use client"
 
 import type React from "react"
@@ -21,38 +22,36 @@ import { ViewToggle } from "@/components/ui/view-toggle"
 import { DataTable } from "@/components/ui/data-table"
 import { DataCards } from "@/components/ui/data-cards"
 import { Plus, Search, FolderOpen, Loader2, RefreshCw } from "lucide-react"
-import { useAppStore } from "@/lib/store/use-app-store"
+import { useCategoryStore } from "@/stores/category-store"
 import { useToast } from "@/components/ui/use-toast"
 
 export default function CategoriesPage() {
   const {
-    categories,
-    isLoadingCategories,
-    isCreatingCategory,
-    isUpdatingCategory,
-    isDeletingCategory,
-    categoriesError,
-    fetchCategories,
-    createCategory,
-    updateCategory,
-    deleteCategory,
-    getActiveCategories,
-    clearErrors,
-  } = useAppStore()
+    items: categories,
+    isLoading,
+    error,
+    fetch,
+    create,
+    update,
+    delete: deleteCategory,
+  } = useCategoryStore()
+
 
   const { toast } = useToast()
+  const [isSaving, setIsSaving] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
-  const [view, setView] = useState<"table" | "card">("table")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [view, setView] = useState<"table" | "card">("table")
   const [editingCategory, setEditingCategory] = useState<any>(null)
 
-  useEffect(() => {
-    if (categories.length === 0 && !isLoadingCategories) {
-      fetchCategories()
-    }
-  }, [])
 
-  const activeCategories = getActiveCategories()
+
+  useEffect(() => {
+    fetch()
+  }, [fetch])
+
+  const activeCategories = categories.filter((cat) => cat.status === "active")
+
   const filteredCategories = activeCategories.filter(
     (category) =>
       category.categoryName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -121,9 +120,12 @@ export default function CategoriesPage() {
       desc: formData.get("desc") as string,
     }
 
+    setIsSaving(true)
     const success = editingCategory
-      ? await updateCategory(editingCategory.categoryId, categoryData)
-      : await createCategory(categoryData)
+      ? await update(editingCategory.categoryId, categoryData)
+      : await create(categoryData)
+    setIsSaving(false)
+
 
     if (success) {
       toast({
@@ -166,8 +168,7 @@ export default function CategoriesPage() {
   }
 
   const handleRetry = () => {
-    clearErrors()
-    fetchCategories()
+    fetch()
   }
 
   return (
@@ -183,8 +184,8 @@ export default function CategoriesPage() {
         </div>
 
         <div className="flex gap-2">
-          <Button variant="outline" onClick={handleRetry} disabled={isLoadingCategories}>
-            <RefreshCw className={`mr-2 h-4 w-4 ${isLoadingCategories ? "animate-spin" : ""}`} />
+          <Button variant="outline" onClick={handleRetry} disabled={isLoading}>
+            <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
             Refresh
           </Button>
 
@@ -220,16 +221,6 @@ export default function CategoriesPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="categoryCode">Category Code (Auto-generated)</Label>
-                  <Input
-                    id="categoryCode"
-                    name="categoryCode"
-                    placeholder="Leave empty to auto-generate"
-                    defaultValue={editingCategory?.categoryCode || ""}
-                  />
-                </div>
-
-                <div className="space-y-2">
                   <Label htmlFor="desc">Description</Label>
                   <Textarea id="desc" name="desc" rows={3} defaultValue={editingCategory?.desc || ""} />
                 </div>
@@ -238,8 +229,8 @@ export default function CategoriesPage() {
                   <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                     Cancel
                   </Button>
-                  <Button type="submit" disabled={isCreatingCategory || isUpdatingCategory}>
-                    {isCreatingCategory || isUpdatingCategory ? (
+                  <Button type="submit" disabled={isSaving}>
+                    {isSaving ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         {editingCategory ? "Updating..." : "Creating..."}
@@ -250,6 +241,7 @@ export default function CategoriesPage() {
                       "Create Category"
                     )}
                   </Button>
+
                 </div>
               </form>
             </DialogContent>
@@ -258,13 +250,13 @@ export default function CategoriesPage() {
       </motion.div>
 
       {/* Error Display */}
-      {categoriesError && (
+      {error && (
         <Card className="border-destructive">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-destructive font-medium">Error loading data</p>
-                <p className="text-sm text-muted-foreground">{categoriesError}</p>
+                <p className="text-sm text-muted-foreground">{error}</p>
               </div>
               <Button variant="outline" onClick={handleRetry}>
                 Try Again
@@ -281,7 +273,7 @@ export default function CategoriesPage() {
               <CardTitle className="flex items-center gap-2">
                 <FolderOpen className="h-5 w-5" />
                 Categories
-                {isLoadingCategories && <Loader2 className="h-4 w-4 animate-spin" />}
+                {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
               </CardTitle>
               <CardDescription>{filteredCategories.length} categories available</CardDescription>
             </div>
@@ -305,7 +297,7 @@ export default function CategoriesPage() {
             <DataCards
               data={filteredCategories}
               fields={cardFields}
-              loading={isLoadingCategories}
+              loading={isLoading}
               onEdit={handleEdit}
               onDelete={handleDelete}
               idField="categoryId"
@@ -316,7 +308,7 @@ export default function CategoriesPage() {
             <DataTable
               data={filteredCategories}
               columns={tableColumns}
-              loading={isLoadingCategories}
+              loading={isLoading}
               onEdit={handleEdit}
               onDelete={handleDelete}
               idField="categoryId"

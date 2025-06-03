@@ -3,8 +3,10 @@ import { prisma } from "@/lib/prisma"
 
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
+    const { id } = await params
     const product = await prisma.product.findUnique({
-      where: { productId: params.id },
+
+      where: { productId: id },
       include: {
         Category: true,
         Stock: true,
@@ -25,9 +27,10 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const data = await request.json()
+    const { id } = await params
 
     const product = await prisma.product.update({
-      where: { productId: params.id },
+      where: { productId: id },
       data: {
         productName: data.productName,
         productCode: data.productCode,
@@ -56,9 +59,9 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    // Soft delete - update status to inactive
+    const { id } = await params
     const product = await prisma.product.update({
-      where: { productId: params.id },
+      where: { productId: id },
       data: {
         status: "inactive",
         updatedAt: new Date(),

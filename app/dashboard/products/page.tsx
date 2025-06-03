@@ -24,30 +24,32 @@ import { ViewToggle } from "@/components/ui/view-toggle"
 import { DataTable } from "@/components/ui/data-table"
 import { DataCards } from "@/components/ui/data-cards"
 import { Plus, Search, Package, Loader2, RefreshCw } from "lucide-react"
-import { useAppStore } from "@/lib/store/use-app-store"
 import { useToast } from "@/components/ui/use-toast"
+import { unit } from "@/constant"
+import { useCategoryStore, useProductStore } from "@/stores"
 
 export default function ProductsPage() {
+
+
   const {
-    products,
-    categories,
-    isLoadingProducts,
-    isLoadingCategories,
-    isCreatingProduct,
-    isUpdatingProduct,
-    productsError,
-    categoriesError,
-    fetchProducts,
-    fetchCategories,
-    createProduct,
-    updateProduct,
-    deleteProduct,
-    getActiveCategories,
-    getActiveProducts,
-    clearErrors,
-  } = useAppStore()
+    items: products,
+    isLoading: prodLoading,
+    error: prodError,
+    fetch: prodFetch,
+    create: prodCreate,
+    update: prodUpdate,
+    delete: prodDelete
+  } = useProductStore()
+
+  const {
+    items: categories,
+    isLoading: cateLoading,
+    error: cateError,
+    fetch: cateFetch,
+  } = useCategoryStore()
 
   const { toast } = useToast()
+  const [isSaving, setIsSaving] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
   const [view, setView] = useState<"table" | "card">("table")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -56,16 +58,15 @@ export default function ProductsPage() {
 
   // Load data only once on mount
   useEffect(() => {
-    if (categories.length === 0 && !isLoadingCategories) {
-      fetchCategories()
-    }
-    if (products.length === 0 && !isLoadingProducts) {
-      fetchProducts()
-    }
-  }, [])
+    prodFetch()
+  }, [prodFetch])
 
-  const activeCategories = getActiveCategories()
-  const activeProducts = getActiveProducts()
+  useEffect(() => {
+    cateFetch()
+  }, [cateFetch])
+
+  const activeCategories = categories.filter((cate) => cate.status === "active")
+  const activeProducts = products.filter((prod) => prod.status === 'active')
 
   const filteredProducts = activeProducts.filter(
     (product) =>
@@ -169,9 +170,13 @@ export default function ProductsPage() {
       desc: formData.get("desc") as string,
     }
 
+    setIsSaving(true)
     const success = editingProduct
-      ? await updateProduct(editingProduct.productId, productData, selectedFile)
-      : await createProduct(productData, selectedFile)
+      ? await prodUpdate(editingProduct.productId, productData, selectedFile)
+      : await prodCreate(productData, selectedFile)
+    setIsSaving(false)
+
+
 
     if (success) {
       toast({
@@ -200,7 +205,7 @@ export default function ProductsPage() {
   const handleDelete = async (productId: string) => {
     if (!confirm("Are you sure you want to delete this product?")) return
 
-    const success = await deleteProduct(productId)
+    const success = await prodDelete(productId)
     if (success) {
       toast({
         title: "Success",
@@ -216,9 +221,7 @@ export default function ProductsPage() {
   }
 
   const handleRetry = () => {
-    clearErrors()
-    fetchProducts()
-    fetchCategories()
+    prodFetch()
   }
 
   return (
@@ -234,8 +237,8 @@ export default function ProductsPage() {
         </div>
 
         <div className="flex gap-2">
-          <Button variant="outline" onClick={handleRetry} disabled={isLoadingProducts || isLoadingCategories}>
-            <RefreshCw className={`mr-2 h-4 w-4 ${isLoadingProducts || isLoadingCategories ? "animate-spin" : ""}`} />
+          <Button variant="outline" onClick={handleRetry} disabled={prodLoading || cateLoading}>
+            <RefreshCw className={`mr-2 h-4 w-4 ${prodLoading || cateLoading ? "animate-spin" : ""}`} />
             Refresh
           </Button>
 
@@ -274,69 +277,61 @@ export default function ProductsPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="productCode">Product Code (Auto-generated)</Label>
-                    <Input
-                      id="productCode"
-                      name="productCode"
-                      placeholder="Leave empty to auto-generate"
-                      defaultValue={editingProduct?.productCode || ""}
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Product Image</Label>
-                  <FileUpload
-                    onFileSelect={setSelectedFile}
-                    accept="image/*"
-                    maxSize={5}
-                    preview={true}
-                    value={selectedFile}
-                    placeholder="Upload product image"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="categoryId">Category *</Label>
-                  <Select name="categoryId" required defaultValue={editingProduct?.categoryId || ""}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {activeCategories.length > 0 ? (
-                        activeCategories.map((category) => (
-                          <SelectItem key={category.categoryId} value={category.categoryId}>
-                            {category.categoryName}
+                    <Label htmlFor="categoryId">Category *</Label>
+                    <Select name="categoryId" required defaultValue={editingProduct?.categoryId || ""}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {activeCategories.length > 0 ? (
+                          activeCategories.map((category) => (
+                            <SelectItem key={category.categoryId} value={category.categoryId}>
+                              {category.categoryName}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="no-categories" disabled>
+                            No categories available
                           </SelectItem>
-                        ))
-                      ) : (
-                        <SelectItem value="no-categories" disabled>
-                          No categories available
-                        </SelectItem>
-                      )}
-                    </SelectContent>
-                  </Select>
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="unit">Unit</Label>
-                    <Input
-                      id="unit"
-                      name="unit"
-                      placeholder="kg, lbs, etc."
-                      defaultValue={editingProduct?.unit || ""}
-                    />
-                  </div>
                   <div className="space-y-2">
                     <Label htmlFor="capacity">Capacity</Label>
                     <Input
                       id="capacity"
                       name="capacity"
                       placeholder="50kg, 25lbs, etc."
+                      type="number"
                       defaultValue={editingProduct?.capacity || ""}
                     />
                   </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="unit">Unit</Label>
+                    <Select name="unit" required defaultValue={editingProduct?.unit || ""}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select unit" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {activeCategories.length > 0 ? (
+                          unit.map((u) => (
+                            <SelectItem key={u.value} value={u.value}>
+                              {u.label}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="no-categories" disabled>
+                            No categories available
+                          </SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
                 </div>
 
                 <div className="grid grid-cols-3 gap-4">
@@ -375,17 +370,34 @@ export default function ProductsPage() {
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="desc">Description</Label>
-                  <Textarea id="desc" name="desc" rows={3} defaultValue={editingProduct?.desc || ""} />
+                <div className="grid grid-cols-2 gap-4">
+
+                  <div className="space-y-2">
+                    <Label>Product Image</Label>
+                    <FileUpload
+                      onFileSelect={(file) => {
+                        console.log("File selected in FileUpload:", file)
+                        setSelectedFile(file)
+                      }}
+                      accept="image/*"
+                      maxSize={5}
+                      preview={true}
+                      value={selectedFile}
+                      placeholder="Upload product image"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="desc">Description</Label>
+                    <Textarea id="desc" name="desc" rows={9} defaultValue={editingProduct?.desc || ""} />
+                  </div>
                 </div>
 
                 <div className="flex justify-end gap-2">
                   <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                     Cancel
                   </Button>
-                  <Button type="submit" disabled={isCreatingProduct || isUpdatingProduct}>
-                    {isCreatingProduct || isUpdatingProduct ? (
+                  <Button type="submit" disabled={isSaving}>
+                    {isSaving ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         {editingProduct ? "Updating..." : "Creating..."}
@@ -396,7 +408,9 @@ export default function ProductsPage() {
                       "Create Product"
                     )}
                   </Button>
+
                 </div>
+
               </form>
             </DialogContent>
           </Dialog>
@@ -404,13 +418,13 @@ export default function ProductsPage() {
       </motion.div>
 
       {/* Error Display */}
-      {(productsError || categoriesError) && (
+      {(prodError || cateError) && (
         <Card className="border-destructive">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-destructive font-medium">Error loading data</p>
-                <p className="text-sm text-muted-foreground">{productsError || categoriesError}</p>
+                <p className="text-sm text-muted-foreground">{prodError || cateError}</p>
               </div>
               <Button variant="outline" onClick={handleRetry}>
                 Try Again
@@ -427,7 +441,7 @@ export default function ProductsPage() {
               <CardTitle className="flex items-center gap-2">
                 <Package className="h-5 w-5" />
                 Product Inventory
-                {isLoadingProducts && <Loader2 className="h-4 w-4 animate-spin" />}
+                {prodLoading && <Loader2 className="h-4 w-4 animate-spin" />}
               </CardTitle>
               <CardDescription>{filteredProducts.length} products in your catalog</CardDescription>
             </div>
@@ -451,7 +465,7 @@ export default function ProductsPage() {
             <DataCards
               data={filteredProducts}
               fields={cardFields}
-              loading={isLoadingProducts}
+              loading={prodLoading}
               onEdit={handleEdit}
               onDelete={handleDelete}
               idField="productId"
@@ -463,7 +477,7 @@ export default function ProductsPage() {
             <DataTable
               data={filteredProducts}
               columns={tableColumns}
-              loading={isLoadingProducts}
+              loading={prodLoading}
               onEdit={handleEdit}
               onDelete={handleDelete}
               idField="productId"

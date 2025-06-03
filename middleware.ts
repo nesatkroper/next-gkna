@@ -25,26 +25,26 @@ const publicRoutes = [
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Apply security headers to all responses
+
   const response = NextResponse.next()
   setSecurityHeaders(response)
 
-  // Skip middleware for public routes
+
+
+
+
   if (publicRoutes.some(route => pathname.startsWith(route))) {
     return response
   }
 
-  // Check if the current path is protected
-  const requiredRoles = Object.entries(protectedRoutes).find(([route]) => 
+  const requiredRoles = Object.entries(protectedRoutes).find(([route]) =>
     pathname.startsWith(route)
   )?.[1]
 
-  // If route isn't protected, continue
   if (!requiredRoles) {
     return response
   }
 
-  // Get auth token from cookies
   const token = request.cookies.get("auth-token")?.value
 
   if (!token) {
@@ -53,28 +53,28 @@ export async function middleware(request: NextRequest) {
   }
 
   try {
-    // Verify token
     const decoded = await verifyToken(token)
     if (!decoded) {
       console.log("Invalid token, redirecting to login")
       return redirectToLogin(request)
     }
 
-    // Check user status
     if (decoded.status !== "active") {
       console.log("Account not active, redirecting to suspended page")
       return NextResponse.redirect(new URL("/account-suspended", request.url))
     }
 
-    // Check user role
     if (!requiredRoles.includes(decoded.role)) {
       console.log("Insufficient permissions, redirecting to unauthorized")
       return NextResponse.redirect(new URL("/unauthorized", request.url))
     }
 
-    // Add user info to headers for backend use
     response.headers.set("X-User-ID", decoded.authId)
     response.headers.set("X-User-Role", decoded.role)
+    response.headers.set(
+      "Content-Security-Policy",
+      "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self';"
+    )
 
     return response
   } catch (error) {
@@ -83,7 +83,6 @@ export async function middleware(request: NextRequest) {
   }
 }
 
-// Helper function to set security headers
 function setSecurityHeaders(response: NextResponse) {
   response.headers.set("X-Content-Type-Options", "nosniff")
   response.headers.set("X-Frame-Options", "DENY")
@@ -91,7 +90,7 @@ function setSecurityHeaders(response: NextResponse) {
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin")
   response.headers.set(
     "Content-Security-Policy",
-    "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self';"
+    "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self';"
   )
   response.headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
 }

@@ -1,5 +1,18 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  async headers() {
+    return [
+      {
+        source: "/(.*)",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value: "default-src 'self'; img-src 'self' data: blob: https:;",
+          },
+        ],
+      },
+    ]
+  },
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -13,8 +26,9 @@ const nextConfig = {
     JWT_SECRET: process.env.JWT_SECRET,
   },
   experimental: {
-    serverComponentsExternalPackages: ['jsonwebtoken'], // Optional, helps with edge JWT usage
+    serverComponentsExternalPackages: ['jsonwebtoken'],
   },
+
 }
 
 export default nextConfig

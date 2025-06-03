@@ -29,7 +29,6 @@ export const useAttendanceStore = create<AttendanceStore>()(
         idField: "attendanceId",
       })(set, get),
 
-      // Custom method for check-in
       checkIn: async (employeeId: string, eventId: string, note?: string) => {
         set({ isCreating: true, error: null })
 

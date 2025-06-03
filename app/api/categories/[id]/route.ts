@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import prisma from "@/lib/prisma"
+import { prisma } from "@/lib/prisma"
 import { softDelete } from "@/lib/soft-delete"
 
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
@@ -7,14 +7,14 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     const category = await prisma.category.findUnique({
       where: { categoryId: params.id },
       include: {
-        products: {
+        Product: {
           include: {
-            stocks: true,
+            Stock: true,
           },
         },
         _count: {
           select: {
-            products: true,
+            Product: true,
           },
         },
       },
@@ -34,9 +34,19 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const data = await request.json()
+    const { id } = await params
+
+    const existing = await prisma.category.findUnique({
+      where: { categoryId: id },
+    })
+
+    if (!existing) {
+      return NextResponse.json({ error: "Category not found" }, { status: 404 })
+    }
+
 
     const category = await prisma.category.update({
-      where: { categoryId: params.id },
+      where: { categoryId: id },
       data: {
         categoryName: data.categoryName,
         categoryCode: data.categoryCode,
@@ -46,7 +56,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       include: {
         _count: {
           select: {
-            products: true,
+            Product: true,
           },
         },
       },
@@ -61,9 +71,10 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    // Check if category has products
+    const { id } = await params
+
     const productsCount = await prisma.product.count({
-      where: { categoryId: params.id, status: "active" },
+      where: { categoryId: id, status: "active" },
     })
 
     if (productsCount > 0) {
@@ -74,7 +85,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     }
 
     const category = await prisma.category.update({
-      where: { categoryId: params.id },
+      where: { categoryId: id },
       data: softDelete.delete,
     })
 
