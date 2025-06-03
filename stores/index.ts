@@ -1,0 +1,20 @@
+// Export all stores from a single entry point
+export { useProductStore, type ProductStore, type Product } from "./product-store"
+export { useCategoryStore, type CategoryStore, type Category } from "./category-store"
+export { useEmployeeStore, type EmployeeStore, type Employee } from "./employee-store"
+export { useDepartmentStore, type DepartmentStore, type Department } from "./department-store"
+export { useAuthStore, type AuthStore, type Auth } from "./auth-store"
+export { useCustomerStore, type CustomerStore, type Customer } from "./customer-store"
+export { useSaleStore, type SaleStore, type Sale, type SaleDetail } from "./sale-store"
+export { useSupplierStore, type SupplierStore, type Supplier } from "./supplier-store"
+export { useStockStore, type StockStore, type Stock, type StockEntry } from "./stock-store"
+export { useEventStore, type EventStore, type Event } from "./event-store"
+export { useAttendanceStore, type AttendanceStore, type Attendance } from "./attendance-store"
+export { useLeaveRequestStore, type LeaveRequestStore, type LeaveRequest } from "./leave-request-store"
+export { usePaymentStore, type PaymentStore, type Payment } from "./payment-store"
+export { useCartStore, type CartStore, type Cart } from "./cart-store"
+export { useRoleStore, type RoleStore, type Role } from "./role-store"
+export { useNotificationStore, type NotificationStore, type Notification } from "./notification-store"
+
+// Re-export types
+export type { BaseStore, BaseEntity } from "@/types/store-types"
