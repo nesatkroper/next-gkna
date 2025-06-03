@@ -2,12 +2,14 @@
   "name": "fertilizer",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "migrate": "npx prisma migrate dev inti"
+    "migrate": "npx prisma migrate dev --name inti",
+    "seed": "NODE_OPTIONS='--loader ts-node/esm' ts-node seed.ts"
   },
   "dependencies": {
     "@emotion/is-prop-valid": "latest",
@@ -42,7 +44,6 @@
     "@radix-ui/react-toggle-group": "1.1.1",
     "@radix-ui/react-tooltip": "1.1.6",
     "@swc/core": "^1.11.29",
-    "@types/bcrypt": "^5.0.2",
     "@types/jsonwebtoken": "^9.0.9",
     "autoprefixer": "^10.4.20",
     "bcrypt": "^6.0.0",
@@ -76,11 +77,13 @@
     "zustand": "^4.4.7"
   },
   "devDependencies": {
-    "@types/node": "^22",
+    "@types/bcrypt": "^5.0.2",
+    "@types/node": "^22.15.29",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "postcss": "^8",
     "tailwindcss": "^3.4.17",
-    "typescript": "^5"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
   }
 }

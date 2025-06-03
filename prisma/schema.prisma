@@ -16,10 +16,10 @@ model Address {
   longitude    Float?
   customerId   String?        @unique @db.Uuid
   employeeId   String?        @unique @db.Uuid
-  status       Status         @default(active)
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime
   eventId      String?        @unique @db.Uuid
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  status       Status         @default(active)
   City         City?          @relation(fields: [cityId], references: [cityId])
   Customer     Customer?      @relation(fields: [customerId], references: [customerId])
   Employee     Employee?      @relation(fields: [employeeId], references: [employeeId])
@@ -27,29 +27,25 @@ model Address {
   State        State?         @relation(fields: [stateId], references: [stateId])
   Imageaddress Imageaddress[]
 
-  @@index([cityId])
-  @@index([customerId])
-  @@index([employeeId])
-  @@index([eventId])
-  @@index([stateId])
+  @@index([cityId, customerId, employeeId, eventId, stateId])
 }
 
 model Attendance {
   attendanceId String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   employeeId   String    @db.Uuid
-  datetime     DateTime  @default(now())
-  note         String?
-  status       Status    @default(active)
-  checkIn      DateTime  @default(now())
-  checkOut     DateTime?
-  createdAt    DateTime  @default(now())
   eventId      String    @db.Uuid
   method       String?
+  datetime     DateTime  @default(now())
+  checkIn      DateTime  @default(now())
+  checkOut     DateTime?
+  note         String?
+  status       Status    @default(active)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
   Employee     Employee  @relation(fields: [employeeId], references: [employeeId])
   Event        Event     @relation(fields: [eventId], references: [eventId])
 
-  @@index([employeeId])
-  @@index([eventId])
+  @@index([employeeId, eventId])
 }
 
 model Auth {
@@ -58,10 +54,10 @@ model Auth {
   password     String         @db.VarChar(255)
   roleId       String         @db.Uuid
   employeeId   String?        @unique @db.Uuid
-  status       AccountStatus  @default(active)
   createdAt    DateTime       @default(now())
-  updatedAt    DateTime
+  updatedAt    DateTime       @updatedAt
   lastLoginAt  DateTime?
+  status       Status         @default(active)
   Employee     Employee?      @relation(fields: [employeeId], references: [employeeId])
   Role         Role           @relation(fields: [roleId], references: [roleId])
   AuthLog      AuthLog[]
@@ -69,41 +65,38 @@ model Auth {
   Notification Notification[]
   Token        Token[]
 
-  @@index([createdAt])
-  @@index([email])
-  @@index([status])
+  @@index([createdAt, email, status, employeeId, roleId])
 }
 
 model AuthLog {
   id           Int      @id @default(autoincrement())
   authId       String   @db.Uuid
-  method       String
-  url          String
-  status       Int
-  responseTime Float
-  ip           String
+  method       String?
+  url          String?
+  status       Int?
+  responseTime Float?
+  ip           String?
   userAgent    String?
   createdAt    DateTime @default(now())
-  updatedAt    DateTime
+  updatedAt    DateTime @updatedAt
   Auth         Auth     @relation(fields: [authId], references: [authId])
 
-  @@index([authId])
+  @@index([authId, status, ip])
 }
 
 model Cart {
   cartId    String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   authId    String?    @db.Uuid
-  userId    String?    @db.Uuid
   productId String     @db.Uuid
   quantity  Int
   status    Status     @default(active)
   createdAt DateTime   @default(now())
-  updatedAt DateTime
+  updatedAt DateTime   @updatedAt
   Auth      Auth?      @relation(fields: [authId], references: [authId])
   Product   Product    @relation(fields: [productId], references: [productId])
-  User      User?      @relation(fields: [userId], references: [userId])
   Cartnote  Cartnote[]
 
+  @@index([authId, status])
   @@unique([authId, productId])
 }
 
@@ -113,6 +106,8 @@ model Cartnote {
   note       String
   status     Status @default(active)
   Cart       Cart   @relation(fields: [cartId], references: [cartId])
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime   @updatedAt
 
   @@index([cartId])
 }
@@ -125,7 +120,7 @@ model Category {
   memo         String?
   status       Status    @default(active)
   createdAt    DateTime  @default(now())
-  updatedAt    DateTime
+  updatedAt    DateTime  @updatedAt
   Product      Product[]
 }
 
@@ -136,6 +131,7 @@ model City {
   Address Address[]
   State   State     @relation(fields: [stateId], references: [stateId])
 
+  @@index([stateId])
   @@unique([name, stateId])
 }
 
@@ -148,12 +144,11 @@ model Customer {
   status       Status        @default(active)
   employeeId   String?       @db.Uuid
   createdAt    DateTime      @default(now())
-  updatedAt    DateTime
+  updatedAt    DateTime      @updatedAt
   Address      Address?
   Employee     Employee?     @relation(fields: [employeeId], references: [employeeId])
   Customerinfo Customerinfo?
   Sale         Sale[]
-  User         User?
 
   @@index([employeeId])
 }
@@ -169,6 +164,8 @@ model Customerinfo {
   govExpire  DateTime?
   status     Status    @default(active)
   Customer   Customer  @relation(fields: [customerId], references: [customerId])
+
+  @@index([customerId])
 }
 
 model Department {
@@ -205,14 +202,12 @@ model Employee {
   Department                                       Department     @relation(fields: [departmentId], references: [departmentId])
   Position                                         Position       @relation(fields: [positionId], references: [positionId])
   Employeeinfo                                     Employeeinfo?
-  LeaveRequest_LeaveRequest_approvedByIdToEmployee LeaveRequest[] @relation("LeaveRequest_approvedByIdToEmployee")
-  LeaveRequest_LeaveRequest_employeeIdToEmployee   LeaveRequest[] @relation("LeaveRequest_employeeIdToEmployee")
+  LeaveRequest_approvedByIdToEmployee LeaveRequest[] @relation("LeaveRequest_approvedByIdToEmployee")
+  LeaveRequest_employeeIdToEmployee   LeaveRequest[] @relation("LeaveRequest_employeeIdToEmployee")
   Payment                                          Payment[]
   Sale                                             Sale[]
 
-  @@index([departmentId])
-  @@index([employeeCode])
-  @@index([positionId])
+  @@index([departmentId, employeeCode, positionId])
 }
 
 model Employeeinfo {
@@ -226,6 +221,8 @@ model Employeeinfo {
   govId      String?
   govPicture String?
   Employee   Employee  @relation(fields: [employeeId], references: [employeeId])
+
+  @@index([employeeId])
 }
 
 model Event {
@@ -236,9 +233,11 @@ model Event {
   endDate    DateTime
   status     Status       @default(active)
   createdAt  DateTime     @default(now())
-  updatedAt  DateTime
+  updatedAt  DateTime     @updatedAt
   Address    Address?
   Attendance Attendance[]
+
+  @@index([status, startDate])
 }
 
 model Imageaddress {
@@ -248,7 +247,7 @@ model Imageaddress {
   addressId String   @db.Uuid
   status    Status   @default(active)
   createdAt DateTime @default(now())
-  updatedAt DateTime
+  updatedAt DateTime @updatedAt
   Address   Address  @relation(fields: [addressId], references: [addressId])
 
   @@index([addressId])
@@ -264,7 +263,7 @@ model Khqr {
   token     String   @unique @default("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoiNDdjMGY2MzY4ZTFmNGFjYSJ9LCJpYXQiOjE3NDgxNDA0MzgsImV4cCI6MTc1NTkxNjQzOH0.CSNbF2clfRi2f8ROhyOGF8Nxyz5lqet0Nb1iWEvwaDU")
   status    Status   @default(active)
   createdAt DateTime @default(now())
-  updatedAt DateTime
+  updatedAt DateTime @updatedAt
 }
 
 model LeaveRequest {
@@ -279,39 +278,37 @@ model LeaveRequest {
   approvedAt                                   DateTime?
   createdAt                                    DateTime    @default(now())
   updatedAt                                    DateTime
-  Employee_LeaveRequest_approvedByIdToEmployee Employee?   @relation("LeaveRequest_approvedByIdToEmployee", fields: [approvedById], references: [employeeId])
-  Employee_LeaveRequest_employeeIdToEmployee   Employee    @relation("LeaveRequest_employeeIdToEmployee", fields: [employeeId], references: [employeeId])
+  Employee_approvedByIdToEmployee Employee?   @relation("LeaveRequest_approvedByIdToEmployee", fields: [approvedById], references: [employeeId])
+  Employee_employeeIdToEmployee   Employee    @relation("LeaveRequest_employeeIdToEmployee", fields: [employeeId], references: [employeeId])
 
-  @@index([employeeId])
-  @@index([status])
+  @@index([employeeId, status, startDate, endDate])
 }
 
 model Log {
   id           Int      @id @default(autoincrement())
-  method       String
-  url          String
-  status       Int
-  responseTime Float
-  ip           String
+  method       String?
+  url          String?
+  status       Int?
+  responseTime Float?
+  ip           String?
   userAgent    String?
   createdAt    DateTime @default(now())
-  updatedAt    DateTime
+  updatedAt    DateTime @updatedAt
+
+  @@index([status, ip])
 }
 
 model Notification {
   notificationId String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   authId         String?  @db.Uuid
-  userId         String?  @db.Uuid
   title          String
   content        String
   status         Status   @default(active)
   createdAt      DateTime @default(now())
-  updatedAt      DateTime
+  updatedAt      DateTime @updatedAt
   Auth           Auth?    @relation(fields: [authId], references: [authId])
-  User           User?    @relation(fields: [userId], references: [userId])
 
-  @@index([authId])
-  @@index([userId])
+  @@index([authId, status])
 }
 
 model Payment {
@@ -319,7 +316,7 @@ model Payment {
   employeeId    String   @db.Uuid
   saleId        String   @db.Uuid
   invoice       String?
-  hash          String
+  hash          String?
   fromAccountId String
   toAccountId   String
   currency      String
@@ -327,14 +324,11 @@ model Payment {
   externalRef   String
   status        Status   @default(active)
   createdAt     DateTime @default(now())
-  updatedAt     DateTime
+  updatedAt     DateTime @updatedAt
   Employee      Employee @relation(fields: [employeeId], references: [employeeId])
   Sale          Sale     @relation(fields: [saleId], references: [saleId])
 
-  @@index([employeeId])
-  @@index([fromAccountId])
-  @@index([saleId])
-  @@index([toAccountId])
+  @@index([employeeId, fromAccountId, saleId, toAccountId])
 }
 
 model Position {
@@ -345,11 +339,11 @@ model Position {
   memo         String?
   status       Status     @default(active)
   createdAt    DateTime   @default(now())
-  updatedAt    DateTime
+  updatedAt    DateTime   @updatedAt
   Employee     Employee[]
   Department   Department @relation(fields: [departmentId], references: [departmentId])
 
-  @@index([departmentId])
+  @@index([departmentId, positionCode])
 }
 
 model Product {
@@ -366,14 +360,14 @@ model Product {
   status       Status       @default(active)
   desc         String?
   createdAt    DateTime     @default(now())
-  updatedAt    DateTime
+  updatedAt    DateTime     @updatedAt
   Cart         Cart[]
   Category     Category     @relation(fields: [categoryId], references: [categoryId])
   Saledetail   Saledetail[]
   Stock        Stock?
   Stockentry   Stockentry[]
 
-  @@index([categoryId])
+  @@index([categoryId, sellPrice, costPrice, discountRate])
 }
 
 model Role {
@@ -383,6 +377,7 @@ model Role {
   status       Status   @default(active)
   isSystemRole Boolean  @default(false)
   createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
   Auth         Auth[]
 
   @@index([name])
@@ -396,7 +391,7 @@ model Sale {
   amount     Decimal      @db.Decimal(12, 2)
   status     Status       @default(active)
   createdAt  DateTime     @default(now())
-  updatedAt  DateTime
+  updatedAt  DateTime     @updatedAt
   memo       String?
   invoice    String?
   Payment    Payment[]
@@ -404,8 +399,7 @@ model Sale {
   Employee   Employee     @relation(fields: [employeeId], references: [employeeId])
   Saledetail Saledetail[]
 
-  @@index([customerId])
-  @@index([employeeId])
+  @@index([customerId, employeeId, saleDate, status])
 }
 
 model Saledetail {
@@ -421,8 +415,7 @@ model Saledetail {
   Product      Product  @relation(fields: [productId], references: [productId])
   Sale         Sale     @relation(fields: [saleId], references: [saleId])
 
-  @@index([productId])
-  @@index([saleId])
+  @@index([productId,saledetailId, saleId,quantity,amount])
 }
 
 model State {
@@ -438,12 +431,11 @@ model Stock {
   memo      String?
   status    Status   @default(active)
   createdAt DateTime @default(now())
-  updatedAt DateTime
+  updatedAt DateTime @updatedAt
   quantity  Int      @default(0)
   Product   Product  @relation(fields: [productId], references: [productId])
 
-  @@index([createdAt])
-  @@index([productId])
+  @@index([createdAt, productId, status, quantity])
 }
 
 model Stockentry {
@@ -454,15 +446,14 @@ model Stockentry {
   entryPrice Decimal   @default(0.00) @db.Decimal(12, 2)
   entryDate  DateTime?
   createdAt  DateTime  @default(now())
-  updatedAt  DateTime
+  updatedAt  DateTime  @updatedAt
   productId  String    @db.Uuid
   supplierId String    @db.Uuid
   invoice    String?
   Product    Product   @relation(fields: [productId], references: [productId])
   Supplier   Supplier  @relation(fields: [supplierId], references: [supplierId])
 
-  @@index([productId])
-  @@index([supplierId])
+  @@index([productId, supplierId, status, entryDate])
 }
 
 model Supplier {
@@ -476,6 +467,8 @@ model Supplier {
   createdAt    DateTime     @default(now())
   updatedAt    DateTime
   Stockentry   Stockentry[]
+
+  @@index([status])
 }
 
 model System {
@@ -498,40 +491,15 @@ model System {
 model Token {
   tokenId    String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   authId     String?  @db.Uuid
-  userId     String?  @db.Uuid
   token      String   @unique
   deviceInfo String   @default("")
   ipAddress  String   @default("")
   expiresAt  DateTime
   createdAt  DateTime @default(now())
   Auth       Auth?    @relation(fields: [authId], references: [authId])
-  User       User?    @relation(fields: [userId], references: [userId])
 
   @@index([expiresAt])
   @@index([token])
-}
-
-model User {
-  userId       String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  email        String         @unique @db.VarChar(255)
-  password     String         @db.VarChar(255)
-  customerId   String?        @unique @db.Uuid
-  status       AccountStatus  @default(active)
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime
-  Cart         Cart[]
-  Notification Notification[]
-  Token        Token[]
-  Customer     Customer?      @relation(fields: [customerId], references: [customerId])
-
-  @@index([email])
-}
-
-enum AccountStatus {
-  active
-  inactive
-  suspended
-  pending
 }
 
 enum CheckStatus {
@@ -562,12 +530,6 @@ enum PaymentMethod {
   leave
 }
 
-enum PaymentStatus {
-  paid
-  pending
-  cancel
-}
-
 enum Status {
   active
   inactive
@@ -575,6 +537,7 @@ enum Status {
   approved
   rejected
   cancelled
+  paid
 }
 
 enum StockType {
