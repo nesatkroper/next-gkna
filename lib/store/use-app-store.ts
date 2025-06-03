@@ -1,75 +1,357 @@
+// import { create } from "zustand";
+// import { devtools } from "zustand/middleware";
+// import { Category, Product, Customer, Sale, Cart, Employee, Department, Position, Auth, Status, AccountStatus, LeaveStatus } from "@/lib/generated/prisma";
+
+
+// type EntityStatus = Status | AccountStatus | LeaveStatus;
+
+// interface ApiConfig {
+//   path?: string; 
+//   methods?: ('create' | 'read' | 'update' | 'delete')[]; 
+// }
+
+// type EntityBase = {
+//   status: Status | AccountStatus | LeaveStatus;
+//   createdAt: Date;
+//   updatedAt: Date;
+// } & Record<string, any>;
+
+// interface EntityWithStatus {
+//   status: Status;
+//   [key: string]: any;
+// }
+
+// interface EntityState<T> {
+//   pagination: {
+//     page: number;
+//     pageSize: number;
+//     total: number;
+//   };
+// }
+
+// interface EntityState<T extends EntityWithStatus> {
+//   data: T[];
+//   isLoading: boolean;
+//   isCreating: boolean;
+//   isUpdating: boolean;
+//   isDeleting: boolean;
+//   error: string | null;
+// }
+
+
+// interface EntityActions<T extends EntityWithStatus> {
+//   fetch: () => Promise<void>;
+//   create: (data: Partial<T>, file?: File) => Promise<boolean>;
+//   update: (id: string, data: Partial<T>, file?: File) => Promise<boolean>;
+//   delete: (id: string) => Promise<boolean>;
+//   getActive: () => T[];
+// }
+
+// interface AppState {
+//   me: EntityState<Auth> & { fetch: () => Promise<void> };
+//   entities: {
+//     categories: EntityState<Category> & EntityActions<Category>;
+//     products: EntityState<Product> & EntityActions<Product>;
+//     customers: EntityState<Customer> & EntityActions<Customer>;
+//     sales: EntityState<Sale> & EntityActions<Sale>;
+//     carts: EntityState<Cart> & EntityActions<Cart>;
+//     employees: EntityState<Employee> & EntityActions<Employee>;
+//     departments: EntityState<Department> & EntityActions<Department>;
+//     positions: EntityState<Position> & EntityActions<Position>;
+//   };
+//   clearErrors: () => void;
+// }
+
+// // Utility function to upload files
+// const uploadFile = async (file: File): Promise<string> => {
+//   const formData = new FormData();
+//   formData.append("file", file);
+
+//   const response = await fetch("/api/upload", {
+//     method: "POST",
+//     body: formData,
+//   });
+
+//   if (!response.ok) {
+//     throw new Error("Failed to upload file");
+//   }
+
+//   const data = await response.json();
+//   return data.url;
+// };
+
+// // Generic function to create entity slice
+// const createEntitySlice = <T extends EntityWithStatus>(
+//   entityName: keyof AppState["entities"],
+//   set: (fn: (state: AppState) => Partial<AppState>) => void,
+//   get: () => AppState
+// ): EntityState<T> & EntityActions<T> => ({
+//   data: [],
+//   isLoading: false,
+//   isCreating: false,
+//   isUpdating: false,
+//   isDeleting: false,
+//   error: null,
+
+//   fetch: async () => {
+//     const entity = get().entities[entityName];
+//     if (entity.isLoading) return;
+
+//     set((state) => ({
+//       entities: {
+//         ...state.entities,
+//         [entityName]: { ...state.entities[entityName], isLoading: true, error: null },
+//       },
+//     }));
+
+//     try {
+//       const response = await fetch(`/api/${entityName}`);
+//       if (!response.ok) throw new Error(`Failed to fetch ${entityName}`);
+
+//       const data = await response.json();
+//       const items = Array.isArray(data) ? data : data[entityName] || [];
+
+//       set((state) => ({
+//         entities: {
+//           ...state.entities,
+//           [entityName]: { ...state.entities[entityName], data: items, isLoading: false },
+//         },
+//       }));
+//     } catch (error: unknown) {
+//       const errorMessage = error instanceof Error ? error.message : `An unknown error occurred fetching ${entityName}`;
+//       set((state) => ({
+//         entities: {
+//           ...state.entities,
+//           [entityName]: { ...state.entities[entityName], error: errorMessage, isLoading: false },
+//         },
+//       }));
+//     }
+//   },
+
+//   create: async (data: Partial<T>, file?: File) => {
+//     set((state) => ({
+//       entities: {
+//         ...state.entities,
+//         [entityName]: { ...state.entities[entityName], isCreating: true, error: null },
+//       },
+//     }));
+
+//     try {
+//       let pictureUrl = data.picture;
+//       if (file) {
+//         pictureUrl = await uploadFile(file);
+//       }
+
+//       const response = await fetch(`/api/${entityName}`, {
+//         method: "POST",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify({ ...data, picture: pictureUrl || data.picture }),
+//       });
+
+//       if (!response.ok) {
+//         const errorData = await response.json();
+//         throw new Error(errorData.error || `Failed to create ${entityName}`);
+//       }
+
+//       const newItem = await response.json();
+
+//       set((state) => ({
+//         entities: {
+//           ...state.entities,
+//           [entityName]: {
+//             ...state.entities[entityName],
+//             data: [newItem, ...state.entities[entityName].data],
+//             isCreating: false,
+//           },
+//         },
+//       }));
+
+//       return true;
+//     } catch (error: unknown) {
+//       const errorMessage = error instanceof Error ? error.message : `An unknown error occurred creating ${entityName}`;
+//       set((state) => ({
+//         entities: {
+//           ...state.entities,
+//           [entityName]: { ...state.entities[entityName], error: errorMessage, isCreating: false },
+//         },
+//       }));
+//       return false;
+//     }
+//   },
+
+//   update: async (id: string, data: Partial<T>, file?: File) => {
+//     set((state) => ({
+//       entities: {
+//         ...state.entities,
+//         [entityName]: { ...state.entities[entityName], isUpdating: true, error: null },
+//       },
+//     }));
+
+//     try {
+//       let pictureUrl = data.picture;
+//       if (file) {
+//         pictureUrl = await uploadFile(file);
+//       }
+
+//       const response = await fetch(`/api/${entityName}/${id}`, {
+//         method: "PUT",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify({ ...data, picture: pictureUrl }),
+//       });
+
+//       if (!response.ok) {
+//         const errorData = await response.json();
+//         throw new Error(errorData.error || `Failed to update ${entityName}`);
+//       }
+
+//       const updatedItem = await response.json();
+
+//       set((state) => ({
+//         entities: {
+//           ...state.entities,
+//           [entityName]: {
+//             ...state.entities[entityName],
+//             data: state.entities[entityName].data.map((item: T) =>
+//               item[`${String(entityName).slice(0, -1)}Id`] === id ? updatedItem : item
+//             ),
+//             isUpdating: false,
+//           },
+//         },
+//       }));
+
+//       return true;
+//     } catch (error: unknown) {
+//       const errorMessage = error instanceof Error ? error.message : `An unknown error occurred updating ${entityName}`;
+//       set((state) => ({
+//         entities: {
+//           ...state.entities,
+//           [entityName]: { ...state.entities[entityName], error: errorMessage, isUpdating: false },
+//         },
+//       }));
+//       return false;
+//     }
+//   },
+
+//   delete: async (id: string) => {
+//     set((state) => ({
+//       entities: {
+//         ...state.entities,
+//         [entityName]: { ...state.entities[entityName], isDeleting: true, error: null },
+//       },
+//     }));
+
+//     try {
+//       const response = await fetch(`/api/${entityName}/${id}`, {
+//         method: "DELETE",
+//       });
+
+//       if (!response.ok) {
+//         const errorData = await response.json();
+//         throw new Error(errorData.error || `Failed to delete ${entityName}`);
+//       }
+
+//       set((state) => ({
+//         entities: {
+//           ...state.entities,
+//           [entityName]: {
+//             ...state.entities[entityName],
+//             data: state.entities[entityName].data.filter(
+//               (item: T) => item[`${String(entityName).slice(0, -1)}Id`] !== id
+//             ),
+//             isDeleting: false,
+//           },
+//         },
+//       }));
+
+//       return true;
+//     } catch (error: unknown) {
+//       const errorMessage = error instanceof Error ? error.message : `An unknown error occurred deleting ${entityName}`;
+//       set((state) => ({
+//         entities: {
+//           ...state.entities,
+//           [entityName]: { ...state.entities[entityName], error: errorMessage, isDeleting: false },
+//         },
+//       }));
+//       return false;
+//     }
+//   },
+
+//   getActive: () => {
+//     const entity = get().entities[entityName];
+//     return entity.data.filter((item: T) => item.status === "active") as T[];
+//   },
+
+//   // getActive: () => {
+//   //   const entity = get().entities[entityName];
+//   //   return entity.data.filter((item: T) => item.status === "active");
+//   // },
+// });
+
+// // Zustand store
+// export const useAppStore = create<AppState>()(
+//   devtools(
+//     (set, get) => ({
+//       me: {
+//         data: [],
+//         isLoading: false,
+//         isCreating: false,
+//         isUpdating: false,
+//         isDeleting: false,
+//         error: null,
+//         fetch: async () => {
+//           const { isLoading } = get().me;
+//           if (isLoading) return;
+
+//           set({ me: { ...get().me, isLoading: true, error: null } });
+
+//           try {
+//             const response = await fetch("/api/auth/me");
+//             if (!response.ok) throw new Error("Failed to get auth");
+
+//             const data = await response.json();
+//             const me = Array.isArray(data) ? data : data.me || [];
+
+//             set({ me: { ...get().me, data: me, isLoading: false } });
+//           } catch (error: unknown) {
+//             const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+//             set({ me: { ...get().me, error: errorMessage, isLoading: false } });
+//           }
+//         },
+//       },
+//       entities: {
+//         categories: createEntitySlice<Category>("categories", set, get),
+//         products: createEntitySlice<Product>("products", set, get),
+//         customers: createEntitySlice<Customer>("customers", set, get),
+//         sales: createEntitySlice<Sale>("sales", set, get),
+//         carts: createEntitySlice<Cart>("carts", set, get),
+//         employees: createEntitySlice<Employee>("employees", set, get),
+//         departments: createEntitySlice<Department>("departments", set, get),
+//         positions: createEntitySlice<Position>("positions", set, get),
+//       },
+//       clearErrors: () => {
+//         set((state) => ({
+//           me: { ...state.me, error: null },
+//           entities: {
+//             categories: { ...state.entities.categories, error: null },
+//             products: { ...state.entities.products, error: null },
+//             customers: { ...state.entities.customers, error: null },
+//             sales: { ...state.entities.sales, error: null },
+//             carts: { ...state.entities.carts, error: null },
+//             employees: { ...state.entities.employees, error: null },
+//             departments: { ...state.entities.departments, error: null },
+//             positions: { ...state.entities.positions, error: null },
+//           },
+//         }));
+//       },
+//     }),
+//     { name: "app-store" }
+//   )
+// );
+
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { Category, Product, Customer, Sale, Cart, Employee, Department, Auth } from "@/lib/generated/prisma";
 import { Position } from "postcss";
-
-// interface AppState {
-//   // Data
-//   categories: Category[];
-//   employees: Employee[];
-//   products: Product[];
-//   customers: Customer[];
-//   sales: Sale[];
-//   carts: Cart[];
-
-//   // Loading states
-//   isLoadingCategories: boolean;
-//   isLoadingProducts: boolean;
-//   isLoadingCustomers: boolean;
-//   isLoadingSales: boolean;
-//   isLoadingCarts: boolean;
-//   isLoadingEmployees: boolean;
-
-//   isCreatingProduct: boolean;
-//   isUpdatingProduct: boolean;
-//   isDeletingProduct: boolean;
-//   isCreatingCategory: boolean;
-//   isCreatingCustomer: boolean;
-//   isCreatingSale: boolean;
-//   isCreatingCart: boolean;
-//   isCreatingEmployee: boolean;
-//   isUpdatingEmployee: boolean;
-//   isDeletingEmployee: boolean;
-
-
-//   // Error states
-//   categoriesError: string | null;
-//   productsError: string | null;
-//   customersError: string | null;
-//   salesError: string | null;
-//   cartsError: string | null;
-//   employeeError: string | null;
-
-//   // Actions
-//   fetchCategories: () => Promise<void>;
-//   fetchProducts: () => Promise<void>;
-//   fetchCustomers: () => Promise<void>;
-//   fetchSales: () => Promise<void>;
-//   fetchCarts: () => Promise<void>;
-//   fetchEmployees: () => Promise<void>;
-
-//   createProduct: (data: Partial<Product>, file?: File) => Promise<boolean>;
-//   updateProduct: (id: string, data: Partial<Product>, file?: File) => Promise<boolean>;
-//   deleteProduct: (id: string) => Promise<boolean>;
-
-//   createCategory: (data: Partial<Category>, file?: File) => Promise<boolean>;
-//   createCustomer: (data: Partial<Customer>) => Promise<boolean>;
-//   createSale: (data: Partial<Sale>) => Promise<boolean>;
-//   createCart: (data: Partial<Cart>) => Promise<boolean>;
-//   createEmployee: (data: Partial<Employee>) => Promise<boolean>;
-
-//   clearErrors: () => void;
-
-//   // Computed
-//   getActiveCategories: () => Category[];
-//   getActiveProducts: () => Product[];
-//   getActiveCustomers: () => Customer[];
-//   getActiveSales: () => Sale[];
-//   getActiveCarts: () => Cart[];
-//   getActiveEmployees: () => Employee[];
-// }
-
-// Upload utility (unchanged from original)
 
 interface AppState {
   // Data

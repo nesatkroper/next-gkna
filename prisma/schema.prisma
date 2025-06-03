@@ -274,7 +274,7 @@ model LeaveRequest {
   startDate                                    DateTime
   endDate                                      DateTime
   reason                                       String?
-  status                                       LeaveStatus @default(pending)
+  status                                       Status @default(pending)
   approvedById                                 String?     @db.Uuid
   approvedAt                                   DateTime?
   createdAt                                    DateTime    @default(now())
@@ -546,13 +546,6 @@ enum Gender {
   others
 }
 
-enum LeaveStatus {
-  pending
-  approved
-  rejected
-  cancelled
-}
-
 enum LeaveType {
   annual
   sick
@@ -578,6 +571,10 @@ enum PaymentStatus {
 enum Status {
   active
   inactive
+  pending
+  approved
+  rejected
+  cancelled
 }
 
 enum StockType {
