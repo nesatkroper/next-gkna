@@ -3,12 +3,12 @@ import { prisma } from "@/lib/prisma"
 
 export async function GET() {
   try {
-    const brands = await prisma.brand.findMany({
+    const branches = await prisma.branch.findMany({
       where: { status: "active" },
     })
-    return NextResponse.json(brands)
+    return NextResponse.json(branches)
   } catch (error: any) {
-    return NextResponse.json({ error: error.message || "Failed to fetch brands" }, { status: 500 })
+    return NextResponse.json({ error: error.message || "Failed to fetch branches" }, { status: 500 })
   }
 }
 
@@ -16,21 +16,22 @@ export async function POST(request: Request) {
   try {
     const data = await request.json()
 
-    if (!data.brandName) {
-      return NextResponse.json({ error: "Brand name is required" }, { status: 400 })
+    if (!data.branchName) {
+      return NextResponse.json({ error: "Branch name is required" }, { status: 400 })
     }
 
-    const brand = await prisma.brand.create({
+    const branch = await prisma.branch.create({
       data: {
-        brandName: data.brandName,
-        brandCode: data.brandCode || null,
+        branchName: data.branchName,
+        branchCode: data.branchCode || null,
         picture: data.picture || null,
+        tel: data.tel || null,
         memo: data.memo || null,
         status: "active",
       },
     })
 
-    return NextResponse.json(brand, { status: 201 })
+    return NextResponse.json(branch, { status: 201 })
   } catch (error: any) {
     if (error.code === "P2002") {
       return NextResponse.json(
@@ -38,6 +39,6 @@ export async function POST(request: Request) {
         { status: 400 }
       )
     }
-    return NextResponse.json({ error: error.message || "Failed to create brand" }, { status: 500 })
+    return NextResponse.json({ error: error.message || "Failed to create branch" }, { status: 500 })
   }
 }

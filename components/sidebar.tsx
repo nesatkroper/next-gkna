@@ -65,6 +65,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       children: [
         { name: "Products", href: "/dashboard/products", badge: products.length },
         { name: "Categories", href: "/dashboard/categories", badge: categories.length },
+        { name: "Brand", href: "/dashboard/brands", badge: categories.length },
         { name: "Stock Management", href: "/dashboard/inventory", badge: 12 },
       ],
     },
@@ -82,8 +83,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       name: "People",
       icon: Users,
       children: [
-        { name: "Customers", href: "/dashboard/customers", badge: customers.length },
         { name: "Employees", href: "/dashboard/employees", badge: employees.length },
+        { name: "Customers", href: "/dashboard/customers", badge: customers.length },
         { name: "Suppliers", href: "/dashboard/suppliers", badge: 15 },
 
       ],
@@ -92,6 +93,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       name: "Organization",
       icon: Building2,
       children: [
+        { name: "Branch", href: "/dashboard/branches", badge: departments.length },
         { name: "Departments", href: "/dashboard/departments", badge: departments.length },
         { name: "Positions", href: "/dashboard/positions", badge: positions.length },
         { name: "Addresses", href: "/dashboard/addresses", badge: positions.length },

@@ -20,32 +20,33 @@ import { ViewToggle } from "@/components/ui/view-toggle"
 import { DataTable } from "@/components/ui/data-table"
 import { DataCards } from "@/components/ui/data-cards"
 import { FileUpload } from "@/components/ui/file-upload"
-import { Plus, Search, Tag, Loader2, RefreshCw } from "lucide-react"
+import { Plus, Search, Building2, Loader2, RefreshCw } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
-import { useBrandStore } from "@/stores/brand-store"
+import { useBranchStore } from "@/stores/branch-store"
 import { uploadFile } from "@/lib/file-upload"
 
-interface Brand {
-  brandId: string
-  brandName: string
-  brandCode?: string | null
+interface Branch {
+  branchId: string
+  branchName: string
+  branchCode?: string | null
   picture?: string | null
+  tel?: string | null
   memo?: string | null
   status: "active" | "inactive"
   createdAt: string
   updatedAt: string
 }
 
-export default function BrandsPage() {
+export default function BranchesPage() {
   const {
-    items: brands,
-    isLoading: brandLoading,
-    error: brandError,
-    fetch: fetchBrands,
-    create: createBrand,
-    update: updateBrand,
-    delete: deleteBrand,
-  } = useBrandStore()
+    items: branches,
+    isLoading: branchLoading,
+    error: branchError,
+    fetch: fetchBranches,
+    create: createBranch,
+    update: updateBranch,
+    delete: deleteBranch,
+  } = useBranchStore()
 
   const { toast } = useToast()
   const [isSaving, setIsSaving] = useState(false)
@@ -53,35 +54,40 @@ export default function BrandsPage() {
   const [view, setView] = useState<"table" | "card">("table")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [editingBrand, setEditingBrand] = useState<Brand | null>(null)
+  const [editingBranch, setEditingBranch] = useState<Branch | null>(null)
 
   useEffect(() => {
-    fetchBrands()
-  }, [fetchBrands])
+    fetchBranches()
+  }, [fetchBranches])
 
-  const activeBrands = brands.filter((brand) => brand.status === "active")
+  const activeBranches = branches.filter((branch) => branch.status === "active")
 
-  const filteredBrands = activeBrands.filter(
-    (brand) =>
-      brand.brandName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      brand.brandCode?.toLowerCase().includes(searchTerm.toLowerCase()),
+  const filteredBranches = activeBranches.filter(
+    (branch) =>
+      branch.branchName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      branch.branchCode?.toLowerCase().includes(searchTerm.toLowerCase()),
   )
 
   const tableColumns = [
     {
-      key: "brandName",
-      label: "Brand",
+      key: "branchName",
+      label: "Branch",
       type: "image" as const,
     },
     {
-      key: "brandCode",
+      key: "branchCode",
       label: "Code",
-      render: (_value: any, row: Brand) => row.brandCode ?? "-",
+      render: (_value: any, row: Branch) => row.branchCode ?? "-",
+    },
+    {
+      key: "tel",
+      label: "Phone",
+      render: (_value: any, row: Branch) => row.tel ?? "-",
     },
     {
       key: "memo",
       label: "Memo",
-      render: (_value: any, row: Brand) => row.memo ?? "-",
+      render: (_value: any, row: Branch) => row.memo ?? "-",
     },
     {
       key: "createdAt",
@@ -101,18 +107,23 @@ export default function BrandsPage() {
       type: "image" as const,
     },
     {
-      key: "brandName",
+      key: "branchName",
       primary: true,
     },
     {
-      key: "brandCode",
+      key: "branchCode",
       secondary: true,
-      render: (_value: any, row: Brand) => row.brandCode ?? "-",
+      render: (_value: any, row: Branch) => row.branchCode ?? "-",
+    },
+    {
+      key: "tel",
+      label: "Phone",
+      render: (_value: any, row: Branch) => row.tel ?? "-",
     },
     {
       key: "memo",
       label: "Memo",
-      render: (_value: any, row: Brand) => row.memo ?? "-",
+      render: (_value: any, row: Branch) => row.memo ?? "-",
     },
     {
       key: "status",
@@ -132,7 +143,7 @@ export default function BrandsPage() {
 
     try {
       const formData = new FormData(e.currentTarget)
-      let pictureUrl = editingBrand?.picture || null
+      let pictureUrl = editingBranch?.picture || null
 
       if (selectedFile) {
         try {
@@ -148,38 +159,39 @@ export default function BrandsPage() {
         }
       }
 
-      const brandData: Partial<Brand> = {
-        brandName: formData.get("brandName") as string,
-        brandCode: formData.get("brandCode") as string || null,
+      const branchData: Partial<Branch> = {
+        branchName: formData.get("branchName") as string,
+        branchCode: formData.get("branchCode") as string || null,
+        tel: formData.get("tel") as string || null,
         memo: formData.get("memo") as string || null,
         picture: pictureUrl,
       }
 
-      if (!brandData.brandName) {
-        throw new Error("Brand name is required")
+      if (!branchData.branchName) {
+        throw new Error("Branch name is required")
       }
 
-      const success = editingBrand
-        ? await updateBrand(editingBrand.brandId, brandData)
-        : await createBrand(brandData)
+      const success = editingBranch
+        ? await updateBranch(editingBranch.branchId, branchData)
+        : await createBranch(branchData)
 
       if (success) {
         toast({
           title: "Success",
-          description: `Brand ${editingBrand ? "updated" : "created"} successfully`,
+          description: `Branch ${editingBranch ? "updated" : "created"} successfully`,
         })
         setIsDialogOpen(false)
         setSelectedFile(null)
-        setEditingBrand(null)
+        setEditingBranch(null)
           ; (e.target as HTMLFormElement).reset()
       } else {
-        throw new Error("Brand operation failed")
+        throw new Error("Branch operation failed")
       }
     } catch (error: any) {
-      console.error("Brand submit error:", error)
+      console.error("Branch submit error:", error)
       toast({
         title: "Error",
-        description: error.message || `Failed to ${editingBrand ? "update" : "create"} brand`,
+        description: error.message || `Failed to ${editingBranch ? "update" : "create"} branch`,
         variant: "destructive",
       })
     } finally {
@@ -187,36 +199,36 @@ export default function BrandsPage() {
     }
   }
 
-  const handleEdit = (brand: Brand) => {
-    setEditingBrand(brand)
+  const handleEdit = (branch: Branch) => {
+    setEditingBranch(branch)
     setSelectedFile(null)
     setIsDialogOpen(true)
   }
 
-  const handleDelete = async (brandId: string) => {
-    if (!confirm("Are you sure you want to delete this brand?")) return
+  const handleDelete = async (branchId: string) => {
+    if (!confirm("Are you sure you want to delete this branch?")) return
 
     try {
-      const success = await deleteBrand(brandId)
+      const success = await deleteBranch(branchId)
       if (success) {
         toast({
           title: "Success",
-          description: "Brand deleted successfully",
+          description: "Branch deleted successfully",
         })
       } else {
-        throw new Error("Failed to delete brand")
+        throw new Error("Failed to delete branch")
       }
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message || "Failed to delete brand",
+        description: error.message || "Failed to delete branch",
         variant: "destructive",
       })
     }
   }
 
   const handleRetry = () => {
-    fetchBrands()
+    fetchBranches()
   }
 
   return (
@@ -227,13 +239,13 @@ export default function BrandsPage() {
         className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
       >
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Brands</h1>
-          <p className="text-muted-foreground">Manage your brand catalog</p>
+          <h1 className="text-3xl font-bold tracking-tight">Branches</h1>
+          <p className="text-muted-foreground">Manage your branch network</p>
         </div>
 
         <div className="flex gap-2">
-          <Button variant="outline" onClick={handleRetry} disabled={brandLoading}>
-            <RefreshCw className={`mr-2 h-4 w-4 ${brandLoading ? "animate-spin" : ""}`} />
+          <Button variant="outline" onClick={handleRetry} disabled={branchLoading}>
+            <RefreshCw className={`mr-2 h-4 w-4 ${branchLoading ? "animate-spin" : ""}`} />
             Refresh
           </Button>
           <Dialog
@@ -242,40 +254,50 @@ export default function BrandsPage() {
               setIsDialogOpen(open)
               if (!open) {
                 setSelectedFile(null)
-                setEditingBrand(null)
+                setEditingBranch(null)
               }
             }}
           >
             <DialogTrigger asChild>
               <Button>
                 <Plus className="mr-2 h-4 w-4" />
-                Add Brand
+                Add Branch
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px]">
               <DialogHeader>
-                <DialogTitle>{editingBrand ? "Edit Brand" : "Add New Brand"}</DialogTitle>
+                <DialogTitle>{editingBranch ? "Edit Branch" : "Add New Branch"}</DialogTitle>
                 <DialogDescription>
-                  {editingBrand ? "Update brand details" : "Create a new brand in your catalog"}
+                  {editingBranch ? "Update branch details" : "Create a new branch in your network"}
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="brandName">Brand Name *</Label>
+                  <Label htmlFor="branchName">Branch Name *</Label>
                   <Input
-                    id="brandName"
-                    name="brandName"
+                    id="branchName"
+                    name="branchName"
                     required
-                    defaultValue={editingBrand?.brandName ?? ""}
+                    defaultValue={editingBranch?.branchName ?? ""}
                     disabled={isSaving}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="brandCode">Brand Code</Label>
+                  <Label htmlFor="branchCode">Branch Code</Label>
                   <Input
-                    id="brandCode"
-                    name="brandCode"
-                    defaultValue={editingBrand?.brandCode ?? ""}
+                    id="branchCode"
+                    name="branchCode"
+                    defaultValue={editingBranch?.branchCode ?? ""}
+                    disabled={isSaving}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="tel">Phone Number</Label>
+                  <Input
+                    id="tel"
+                    name="tel"
+                    type="tel"
+                    defaultValue={editingBranch?.tel ?? ""}
                     disabled={isSaving}
                   />
                 </div>
@@ -285,19 +307,19 @@ export default function BrandsPage() {
                     id="memo"
                     name="memo"
                     rows={4}
-                    defaultValue={editingBrand?.memo ?? ""}
+                    defaultValue={editingBranch?.memo ?? ""}
                     disabled={isSaving}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Brand Image</Label>
+                  <Label>Branch Image</Label>
                   <FileUpload
                     onFileSelect={(file) => setSelectedFile(file)}
                     accept="image/*"
                     maxSize={5}
                     preview={true}
                     value={selectedFile}
-                    placeholder="Upload brand image"
+                    placeholder="Upload branch image"
                     disabled={isSaving}
                   />
                 </div>
@@ -314,12 +336,12 @@ export default function BrandsPage() {
                     {isSaving ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        {editingBrand ? "Updating..." : "Creating..."}
+                        {editingBranch ? "Updating..." : "Creating..."}
                       </>
-                    ) : editingBrand ? (
-                      "Update Brand"
+                    ) : editingBranch ? (
+                      "Update Branch"
                     ) : (
-                      "Create Brand"
+                      "Create Branch"
                     )}
                   </Button>
                 </div>
@@ -329,18 +351,18 @@ export default function BrandsPage() {
         </div>
       </motion.div>
 
-      {brandError && (
+      {branchError && (
         <Card className="border-destructive">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-destructive font-medium">Error loading data</p>
-                <p className="text-sm text-muted-foreground">{brandError}</p>
+                <p className="text-sm text-muted-foreground">{branchError}</p>
               </div>
               <Button
                 variant="outline"
                 onClick={handleRetry}
-                disabled={brandLoading}
+                disabled={branchLoading}
               >
                 Try Again
               </Button>
@@ -354,11 +376,11 @@ export default function BrandsPage() {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="flex items-center gap-2">
-                <Tag className="h-5 w-5" />
-                Brand Catalog
-                {brandLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+                <Building2 className="h-5 w-5" />
+                Branch Network
+                {branchLoading && <Loader2 className="h-4 w-4 animate-spin" />}
               </CardTitle>
-              <CardDescription>{filteredBrands.length} active brands</CardDescription>
+              <CardDescription>{filteredBranches.length} active branches</CardDescription>
             </div>
             <ViewToggle view={view} onViewChange={setView} />
           </div>
@@ -368,37 +390,37 @@ export default function BrandsPage() {
             <div className="relative flex-1 max-w-sm">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search brands..."
+                placeholder="Search branches..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
-                disabled={brandLoading}
+                disabled={branchLoading}
               />
             </div>
           </div>
 
           {view === "card" ? (
             <DataCards
-              data={filteredBrands}
+              data={filteredBranches}
               fields={cardFields}
-              loading={brandLoading}
+              loading={branchLoading}
               onEdit={handleEdit}
               onDelete={handleDelete}
-              idField="brandId"
+              idField="branchId"
               imageField="picture"
-              nameField="brandName"
+              nameField="branchName"
               columns={4}
             />
           ) : (
             <DataTable
-              data={filteredBrands}
+              data={filteredBranches}
               columns={tableColumns}
-              loading={brandLoading}
+              loading={branchLoading}
               onEdit={handleEdit}
               onDelete={handleDelete}
-              idField="brandId"
+              idField="branchId"
               imageField="picture"
-              nameField="brandName"
+              nameField="branchName"
             />
           )}
         </CardContent>
