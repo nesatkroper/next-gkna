@@ -1,14 +1,12 @@
+
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import {
   Dialog,
   DialogContent,
@@ -19,46 +17,38 @@ import {
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Plus, Search, Truck, Edit, Trash2, Eye, Phone, Mail, Building } from "lucide-react"
-import { formatDate } from "@/lib/utils"
-
-interface Supplier {
-  supplierId: string
-  supplierName: string
-  companyName: string
-  phone: string
-  email: string
-  memo: string
-  status: string
-  createdAt: string
-  _count: {
-    entry: number
-  }
-}
+import { ViewToggle } from "@/components/ui/view-toggle"
+import { DataTable } from "@/components/ui/data-table"
+import { DataCards } from "@/components/ui/data-cards"
+import { Plus, Search, Truck, Loader2, RefreshCw, Phone, Mail, Building } from "lucide-react"
+import { useToast } from "@/components/ui/use-toast"
+import { useSupplierStore } from "@/stores/supplier-store"
 
 export default function SuppliersPage() {
-  const [suppliers, setSuppliers] = useState<Supplier[]>([])
-  const [loading, setLoading] = useState(true)
+  const {
+    items: suppliers,
+    isLoading,
+    error,
+    fetch,
+    create,
+    update,
+    delete: deleteSupplier,
+  } = useSupplierStore()
+
+  const { toast } = useToast()
+  const [isSaving, setIsSaving] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [view, setView] = useState<"table" | "card">("table")
+  const [editingSupplier, setEditingSupplier] = useState<any>(null)
 
   useEffect(() => {
-    fetchSuppliers()
-  }, [])
+    fetch()
+  }, [fetch])
 
-  const fetchSuppliers = async () => {
-    try {
-      const response = await fetch("/api/suppliers")
-      const data = await response.json()
-      setSuppliers(data.suppliers || [])
-    } catch (error) {
-      console.error("Error fetching suppliers:", error)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const activeSuppliers = suppliers.filter((sup) => sup.status === "active")
 
-  const filteredSuppliers = suppliers.filter(
+  const filteredSuppliers = activeSuppliers.filter(
     (supplier) =>
       supplier.supplierName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       supplier.companyName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -66,41 +56,174 @@ export default function SuppliersPage() {
       supplier.email?.toLowerCase().includes(searchTerm.toLowerCase()),
   )
 
-  const handleAddSupplier = async (e: React.FormEvent<HTMLFormElement>) => {
+  // Table columns configuration
+  const tableColumns = [
+    {
+      key: "supplierName",
+      label: "Supplier",
+    },
+    {
+      key: "contact",
+      label: "Contact",
+      render: (_value: any, row: any) => (
+        <div className="space-y-1">
+          {row.phone && (
+            <div className="flex items-center gap-1 text-sm">
+              <Phone className="h-3 w-3" />
+              {row.phone}
+            </div>
+          )}
+          {row.email && (
+            <div className="flex items-center gap-1 text-sm">
+              <Mail className="h-3 w-3" />
+              {row.email}
+            </div>
+          )}
+        </div>
+      ),
+    },
+    {
+      key: "companyName",
+      label: "Company",
+      render: (value: any) => value || "-",
+    },
+    {
+      key: "_count.entry",
+      label: "Deliveries",
+      type: "badge" as const,
+      render: (_value: any, row: any) => row._count?.entry || 0,
+    },
+    {
+      key: "status",
+      label: "Status",
+      type: "badge" as const,
+    },
+    {
+      key: "createdAt",
+      label: "Created",
+      type: "date" as const,
+    },
+  ]
+
+  // Card fields configuration
+  const cardFields = [
+    {
+      key: "supplierName",
+      primary: true,
+    },
+    {
+      key: "companyName",
+      label: "Company",
+      secondary: true,
+      render: (value: any) => value || "-",
+    },
+    {
+      key: "contact",
+      label: "Contact Info",
+      render: (_value: any, row: any) => (
+        <div className="space-y-1">
+          {row.phone && (
+            <div className="flex items-center gap-1 text-sm">
+              <Phone className="h-4 w-4" />
+              {row.phone}
+            </div>
+          )}
+          {row.email && (
+            <div className="flex items-center gap-1 text-sm">
+              <Mail className="h-4 w-4" />
+              {row.email}
+            </div>
+          )}
+        </div>
+      ),
+    },
+    {
+      key: "_count.entry",
+      label: "Deliveries",
+      type: "badge" as const,
+      render: (_value: any, row: any) => row._count?.entry || 0,
+    },
+    {
+      key: "memo",
+      label: "Notes",
+      render: (value: any) => value || "-",
+    },
+    {
+      key: "status",
+      label: "Status",
+      type: "badge" as const,
+    },
+    {
+      key: "createdAt",
+      label: "Created",
+      type: "date" as const,
+    },
+  ]
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
-
     const supplierData = {
-      supplierName: formData.get("supplierName"),
-      companyName: formData.get("companyName"),
-      phone: formData.get("phone"),
-      email: formData.get("email"),
-      memo: formData.get("memo"),
+      supplierName: formData.get("supplierName") as string,
+      companyName: formData.get("companyName") as string,
+      phone: formData.get("phone") as string,
+      email: formData.get("email") as string,
+      memo: formData.get("memo") as string,
     }
 
+    setIsSaving(true)
     try {
-      const response = await fetch("/api/suppliers", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(supplierData),
-      })
+      const success = editingSupplier
+        ? await update(editingSupplier.supplierId, supplierData)
+        : await create(supplierData)
+      setIsSaving(false)
 
-      if (response.ok) {
+      if (success) {
+        toast({
+          title: "Success",
+          description: `Supplier ${editingSupplier ? "updated" : "created"} successfully`,
+        })
         setIsDialogOpen(false)
-        fetchSuppliers()
-        ;(e.target as HTMLFormElement).reset()
+        setEditingSupplier(null)
+          ; (e.target as HTMLFormElement).reset()
+      } else {
+        throw new Error("Supplier operation failed")
       }
     } catch (error) {
-      console.error("Error adding supplier:", error)
+      setIsSaving(false)
+      toast({
+        title: "Error",
+        description: error.message || `Failed to ${editingSupplier ? "update" : "create"} supplier`,
+        variant: "destructive",
+      })
     }
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    )
+  const handleEdit = (supplier: any) => {
+    setEditingSupplier(supplier)
+    setIsDialogOpen(true)
+  }
+
+  const handleDelete = async (supplierId: string) => {
+    if (!confirm("Are you sure you want to delete this supplier?")) return
+
+    const success = await deleteSupplier(supplierId)
+    if (success) {
+      toast({
+        title: "Success",
+        description: "Supplier deleted successfully",
+      })
+    } else {
+      toast({
+        title: "Error",
+        description: "Failed to delete supplier",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleRetry = () => {
+    fetch()
   }
 
   return (
@@ -115,64 +238,137 @@ export default function SuppliersPage() {
           <p className="text-muted-foreground">Manage your supplier relationships and procurement contacts</p>
         </div>
 
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Supplier
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[600px]">
-            <DialogHeader>
-              <DialogTitle>Add New Supplier</DialogTitle>
-              <DialogDescription>Create a new supplier record</DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleAddSupplier} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="supplierName">Supplier Name</Label>
-                  <Input id="supplierName" name="supplierName" required />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="companyName">Company Name</Label>
-                  <Input id="companyName" name="companyName" />
-                </div>
-              </div>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={handleRetry} disabled={isLoading}>
+            <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
+            Refresh
+          </Button>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone</Label>
-                  <Input id="phone" name="phone" type="tel" />
+          <Dialog
+            open={isDialogOpen}
+            onOpenChange={(open) => {
+              setIsDialogOpen(open)
+              if (!open) setEditingSupplier(null)
+            }}
+          >
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Add Supplier
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[600px]">
+              <DialogHeader>
+                <DialogTitle>{editingSupplier ? "Edit Supplier" : "Add New Supplier"}</DialogTitle>
+                <DialogDescription>
+                  {editingSupplier ? "Update supplier details" : "Create a new supplier record"}
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="supplierName">Supplier Name *</Label>
+                    <Input
+                      id="supplierName"
+                      name="supplierName"
+                      required
+                      defaultValue={editingSupplier?.supplierName || ""}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="companyName">Company Name</Label>
+                    <Input
+                      id="companyName"
+                      name="companyName"
+                      defaultValue={editingSupplier?.companyName || ""}
+                    />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input id="email" name="email" type="email" />
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Phone</Label>
+                    <Input
+                      id="phone"
+                      name="phone"
+                      type="tel"
+                      defaultValue={editingSupplier?.phone || ""}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      defaultValue={editingSupplier?.email || ""}
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="memo">Notes</Label>
-                <Textarea id="memo" name="memo" rows={3} />
-              </div>
+                <div className="space-y-2">
+                  <Label htmlFor="memo">Notes</Label>
+                  <Textarea
+                    id="memo"
+                    name="memo"
+                    rows={3}
+                    defaultValue={editingSupplier?.memo || ""}
+                  />
+                </div>
 
-              <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit">Add Supplier</Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
+                <div className="flex justify-end gap-2">
+                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={isSaving}>
+                    {isSaving ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        {editingSupplier ? "Updating..." : "Creating..."}
+                      </>
+                    ) : editingSupplier ? (
+                      "Update Supplier"
+                    ) : (
+                      "Create Supplier"
+                    )}
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
       </motion.div>
+
+      {/* Error Display */}
+      {error && (
+        <Card className="border-destructive">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-destructive font-medium">Error loading data</p>
+                <p className="text-sm text-muted-foreground">{error}</p>
+              </div>
+              <Button variant="outline" onClick={handleRetry}>
+                Try Again
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Truck className="h-5 w-5" />
-            Supplier Directory
-          </CardTitle>
-          <CardDescription>{filteredSuppliers.length} suppliers in your network</CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Truck className="h-5 w-5" />
+                Supplier Directory
+                {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+              </CardTitle>
+              <CardDescription>{filteredSuppliers.length} suppliers in your network</CardDescription>
+            </div>
+            <ViewToggle view={view} onViewChange={setView} />
+          </div>
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-4 mb-6">
@@ -187,79 +383,28 @@ export default function SuppliersPage() {
             </div>
           </div>
 
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Supplier</TableHead>
-                  <TableHead>Contact</TableHead>
-                  <TableHead>Company</TableHead>
-                  <TableHead>Deliveries</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Added</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredSuppliers.map((supplier) => (
-                  <motion.tr
-                    key={supplier.supplierId}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="group"
-                  >
-                    <TableCell>
-                      <div className="font-medium">{supplier.supplierName}</div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="space-y-1">
-                        {supplier.phone && (
-                          <div className="flex items-center gap-1 text-sm">
-                            <Phone className="h-3 w-3" />
-                            {supplier.phone}
-                          </div>
-                        )}
-                        {supplier.email && (
-                          <div className="flex items-center gap-1 text-sm">
-                            <Mail className="h-3 w-3" />
-                            {supplier.email}
-                          </div>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {supplier.companyName && (
-                        <div className="flex items-center gap-1">
-                          <Building className="h-3 w-3" />
-                          {supplier.companyName}
-                        </div>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="secondary">{supplier._count.entry}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={supplier.status === "active" ? "default" : "secondary"}>{supplier.status}</Badge>
-                    </TableCell>
-                    <TableCell>{formatDate(supplier.createdAt)}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button variant="ghost" size="sm">
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </motion.tr>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+          {view === "card" ? (
+            <DataCards
+              data={filteredSuppliers}
+              fields={cardFields}
+              loading={isLoading}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              idField="supplierId"
+              nameField="supplierName"
+              columns={3}
+            />
+          ) : (
+            <DataTable
+              data={filteredSuppliers}
+              columns={tableColumns}
+              loading={isLoading}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              idField="supplierId"
+              nameField="supplierName"
+            />
+          )}
         </CardContent>
       </Card>
     </div>

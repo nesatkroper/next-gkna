@@ -14,11 +14,11 @@ export async function POST(request: NextRequest) {
         const sales = await prisma.sale.findMany({
           where: filters,
           include: {
-            customer: true,
-            employee: true,
-            saledetails: {
+            Customer: true,
+            Employee: true,
+            Saledetail: {
               include: {
-                product: true,
+                Product: true,
               },
             },
           },
@@ -28,9 +28,9 @@ export async function POST(request: NextRequest) {
         data = sales.map((sale) => ({
           Invoice: sale.invoice || "",
           Date: sale.saleDate.toLocaleDateString(),
-          Customer: `${sale.customer.firstName} ${sale.customer.lastName}`,
-          Employee: `${sale.employee.firstName} ${sale.employee.lastName}`,
-          Items: sale.saledetails.length,
+          Customer: `${sale.Customer.firstName} ${sale.Customer.lastName}`,
+          Employee: `${sale.Employee.firstName} ${sale.Employee.lastName}`,
+          Items: sale.Saledetail.length,
           Amount: sale.amount,
           Status: sale.status,
         }))
@@ -40,15 +40,7 @@ export async function POST(request: NextRequest) {
         break
 
       case "inventory":
-        const inventory = await prisma.stock.findMany({
-          include: {
-            product: {
-              include: {
-                category: true,
-              },
-            },
-          },
-        })
+        const inventory = await prisma.product.findMany()
 
         data = inventory.map((stock) => ({
           "Product Code": stock.product.productCode || "",

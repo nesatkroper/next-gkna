@@ -16,6 +16,7 @@ model Address {
   longitude    Float?
   customerId   String?        @unique @db.Uuid
   employeeId   String?        @unique @db.Uuid
+  supplierId   String?        @unique @db.Uuid
   eventId      String?        @unique @db.Uuid
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
@@ -25,6 +26,7 @@ model Address {
   Employee     Employee?      @relation(fields: [employeeId], references: [employeeId])
   Event        Event?         @relation(fields: [eventId], references: [eventId])
   State        State?         @relation(fields: [stateId], references: [stateId])
+  supplier     Supplier?      @relation(fields: [supplierId], references: [supplierId])
   Imageaddress Imageaddress[]
 
   @@index([cityId, customerId, employeeId, eventId, stateId])
@@ -449,11 +451,11 @@ model Supplier {
   companyName  String?
   phone        String?
   email        String?
-  address      String?
   status       Status       @default(active)
   createdAt    DateTime     @default(now())
   updatedAt    DateTime
-  entry   Entry[]
+  entry        Entry[]
+  address      Address[]
 
   @@index([status])
 }

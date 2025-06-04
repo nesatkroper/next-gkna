@@ -82,6 +82,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       children: [
         { name: "Departments", href: "/dashboard/departments", badge: departments.length },
         { name: "Positions", href: "/dashboard/positions", badge: positions.length },
+        { name: "Addresses", href: "/dashboard/addresses", badge: positions.length },
       ],
     },
     {
@@ -125,7 +126,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
 
-      <SidebarContent>
+      <SidebarContent className="bg-background">
         <SidebarGroup>
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>

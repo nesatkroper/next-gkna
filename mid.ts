@@ -12,14 +12,12 @@ const protectedRoutes = {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Check if the current path requires authentication
   const requiredRoles = Object.entries(protectedRoutes).find(([route]) => pathname.startsWith(route))?.[1]
 
   if (!requiredRoles) {
     return NextResponse.next()
   }
 
-  // Get auth token from cookies
   const token = request.cookies.get("auth-token")
 
   if (!token) {
