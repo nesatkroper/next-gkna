@@ -1,3 +1,6 @@
+
+
+
 import { type NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { softDeleteWhere } from "@/lib/soft-delete"
@@ -115,3 +118,77 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Failed to create employee" }, { status: 500 })
   }
 }
+
+
+// import { NextResponse } from "next/server"
+// import { prisma } from "@/lib/prisma"
+
+// export async function GET() {
+//   try {
+//     const employees = await prisma.employee.findMany({
+//       where: { status: "active" },
+//       include: {
+//         Department: { select: { departmentId: true, name: true } },
+//         Position: { select: { positionId: true, name: true } },
+//         Branch: { select: { branchId: true, branchName: true } },
+//       },
+//     })
+//     return NextResponse.json(employees)
+//   } catch (error: any) {
+//     return NextResponse.json({ error: error.message || "Failed to fetch employees" }, { status: 500 })
+//   }
+// }
+
+// export async function POST(request: Request) {
+//   try {
+//     const data = await request.json()
+
+//     if (!data.firstName || !data.lastName || !data.positionId || !data.departmentId || !data.salary) {
+//       return NextResponse.json({ error: "Required fields are missing" }, { status: 400 })
+//     }
+
+//     const position = await prisma.position.findUnique({ where: { positionId: data.positionId } })
+//     if (!position) return NextResponse.json({ error: "Position not found" }, { status: 404 })
+
+//     const department = await prisma.department.findUnique({ where: { departmentId: data.departmentId } })
+//     if (!department) return NextResponse.json({ error: "Department not found" }, { status: 404 })
+
+//     if (data.branchId) {
+//       const branch = await prisma.branch.findUnique({ where: { branchId: data.branchId } })
+//       if (!branch) return NextResponse.json({ error: "Branch not found" }, { status: 404 })
+//     }
+
+//     const employee = await prisma.employee.create({
+//       data: {
+//         employeeCode: data.employeeCode || null,
+//         firstName: data.firstName,
+//         lastName: data.lastName,
+//         gender: data.gender || "male",
+//         dob: data.dob ? new Date(data.dob) : null,
+//         phone: data.phone || null,
+//         positionId: data.positionId,
+//         branchId: data.branchId || null,
+//         departmentId: data.departmentId,
+//         salary: data.salary,
+//         hiredDate: data.hiredDate ? new Date(data.hiredDate) : null,
+//         status: "active",
+//         updatedAt: new Date(),
+//       },
+//       include: {
+//         Department: { select: { departmentId: true, name: true } },
+//         Position: { select: { positionId: true, name: true } },
+//         Branch: { select: { branchId: true, branchName: true } },
+//       },
+//     })
+
+//     return NextResponse.json(employee, { status: 201 })
+//   } catch (error: any) {
+//     if (error.code === "P2002") {
+//       return NextResponse.json(
+//         { error: `Duplicate ${error.meta?.target?.join(", ") || "field"}` },
+//         { status: 400 }
+//       )
+//     }
+//     return NextResponse.json({ error: error.message || "Failed to create employee" }, { status: 500 })
+//   }
+// }

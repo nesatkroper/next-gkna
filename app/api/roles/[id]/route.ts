@@ -3,10 +3,10 @@ import { prisma } from "@/lib/prisma"
 
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
   try {
-    const { id } = params
+    const { id } = await params
     const data = await request.json()
 
-    const existingRole = await prisma.role.findUnique({ where: where: { roleId: id } })
+    const existingRole = await prisma.role.findUnique({ where: { roleId: id } })
     if (!existingRole) {
       return NextResponse.json({ error: "Role not found" }, { status: 404 })
     }
@@ -16,7 +16,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     }
 
     const role = await prisma.role.update({
-      where: where: { roleId: id } },
+      where: { roleId: id },
       data: {
         name: data.name,
         description: data.description || null,
@@ -37,6 +37,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       { status: 500 }
     )
   }
+}
 
 
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
