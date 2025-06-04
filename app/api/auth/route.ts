@@ -8,7 +8,7 @@ export async function GET() {
       where: { status: "active" },
       include: {
         Employee: { select: { firstName: true, lastName: true } },
-        Role: { select: { roleName: true } },
+        Role: { select: { name: true } },
       },
     })
     return NextResponse.json(auths)
@@ -60,7 +60,7 @@ export async function POST(request: Request) {
       },
       include: {
         Employee: { select: { firstName: true, lastName: true } },
-        Role: { select: { roleName: true } },
+        Role: { select: { name: true } },
       },
     })
 
