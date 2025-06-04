@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 interface FileUploadProps {
   onFileSelect: (file: File | null, aspectRatio?: string) => void
   accept?: string
-  maxSize?: number // in MB
+  maxSize?: number
   preview?: boolean
   value?: File | null
   placeholder?: string

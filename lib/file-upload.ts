@@ -2,7 +2,6 @@ export async function uploadFile(file: File, options?: { aspectRatio?: "1:1" | "
   const formData = new FormData()
   formData.append("file", file)
 
-  // Add aspect ratio option if provided
   if (options?.aspectRatio) {
     formData.append("aspectRatio", options.aspectRatio)
   }
@@ -22,17 +21,13 @@ export async function uploadFile(file: File, options?: { aspectRatio?: "1:1" | "
 }
 
 export function validateFile(file: File, maxSizeMB = 10): string | null {
-  // Check file type - allow more image formats since we'll convert to webp
   const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp", "image/bmp", "image/tiff"]
-  if (!allowedTypes.includes(file.type)) {
+  if (!allowedTypes.includes(file.type)) 
     return "Please select a valid image file (JPEG, PNG, GIF, WebP, etc.)"
-  }
 
-  // Check file size - increased since we'll compress it anyway
   const maxSize = maxSizeMB * 1024 * 1024
-  if (file.size > maxSize) {
+  if (file.size > maxSize) 
     return `File size must be less than ${maxSizeMB}MB`
-  }
 
   return null
 }

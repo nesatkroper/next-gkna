@@ -86,6 +86,33 @@ model AuthLog {
   @@index([authId, status, ip])
 }
 
+model Brand {
+  brandId   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  brandName String
+  picture   String?
+  brandCode String?
+  memo      String?
+  status    Status  @default(active)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product   Product[]
+}
+
+model Branch {
+  brandId   String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  brandName String
+  brandCode String?
+  picture   String?
+  tel       String?
+  memo      String?
+  status    Status  @default(active)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Employee  Employee[]
+}
+
 model Cart {
   cartId    String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   authId    String?    @db.Uuid
@@ -191,6 +218,7 @@ model Employee {
   dob                                              DateTime?
   phone                                            String?        @unique
   positionId                                       String         @db.Uuid
+  brandId    String?    @db.Uuid 
   departmentId                                     String         @db.Uuid
   salary                                           Decimal        @db.Decimal(10, 2)
   hiredDate                                        DateTime?
@@ -204,8 +232,10 @@ model Employee {
   Department                                       Department     @relation(fields: [departmentId], references: [departmentId])
   Position                                         Position       @relation(fields: [positionId], references: [positionId])
   Employeeinfo                                     Employeeinfo?
+  Brand      Branch?    @relation(fields: [brandId], references: [brandId])
   LeaveRequest_approvedByIdToEmployee LeaveRequest[] @relation("LeaveRequest_approvedByIdToEmployee")
   LeaveRequest_employeeIdToEmployee   LeaveRequest[] @relation("LeaveRequest_employeeIdToEmployee")
+
   Payment                                          Payment[]
   Sale                                             Sale[]
 
@@ -213,7 +243,7 @@ model Employee {
 }
 
 model Employeeinfo {
-  employeeId String    @unique @db.Uuid
+  employeeId String    @unique @db.Uuid     
   picture    String?
   region     String?
   email      String?   @unique
@@ -353,6 +383,7 @@ model Product {
   productName  String
   productCode  String?
   categoryId   String       @db.Uuid
+  brandId      String?      @db.Uuid 
   picture      String?
   unit         String?
   capacity     Decimal?     @db.Decimal(10, 2)  @default(0.00)
@@ -366,6 +397,7 @@ model Product {
   updatedAt    DateTime     @updatedAt
   Cart         Cart[]
   Category     Category     @relation(fields: [categoryId], references: [categoryId])
+  Brand        Brand?        @relation(fields: [brandId], references: [brandId])
   Saledetail   Saledetail[]
   Stockentry   Entry[]
 

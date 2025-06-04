@@ -9,7 +9,6 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       where: { productId: id },
       include: {
         Category: true,
-        Stock: true,
       },
     })
 
@@ -46,7 +45,6 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       },
       include: {
         Category: true,
-        Stock: true,
       },
     })
 
