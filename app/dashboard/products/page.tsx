@@ -1,4 +1,3 @@
-
 "use client"
 
 import type React from "react"
@@ -6,6 +5,7 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
+import { Decimal } from "@/lib/generated/prisma"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import {
@@ -29,8 +29,6 @@ import { unit } from "@/constant"
 import { useCategoryStore, useProductStore } from "@/stores"
 
 export default function ProductsPage() {
-
-
   const {
     items: products,
     isLoading: prodLoading,
@@ -74,7 +72,6 @@ export default function ProductsPage() {
       product.productCode?.toLowerCase().includes(searchTerm.toLowerCase()),
   )
 
-  // Table columns configuration
   const tableColumns = [
     {
       key: "productName",
@@ -117,7 +114,6 @@ export default function ProductsPage() {
     },
   ]
 
-  // Card fields configuration
   const cardFields = [
     {
       key: "picture",
@@ -163,17 +159,17 @@ export default function ProductsPage() {
       productCode: formData.get("productCode") as string,
       categoryId: formData.get("categoryId") as string,
       unit: formData.get("unit") as string,
-      capacity: formData.get("capacity") as string,
-      sellPrice: Number.parseFloat(formData.get("sellPrice") as string),
-      costPrice: Number.parseFloat(formData.get("costPrice") as string),
+      capacity: new Decimal(formData.get("capacity") as string || "0"),
+      sellPrice: new Decimal(formData.get("sellPrice") as string || "0"),
+      costPrice: new Decimal(formData.get("costPrice") as string || "0"),
       discountRate: Number.parseInt(formData.get("discountRate") as string) || 0,
       desc: formData.get("desc") as string,
     }
 
     setIsSaving(true)
     const success = editingProduct
-      ? await prodUpdate(editingProduct.productId, productData, selectedFile)
-      : await prodCreate(productData, selectedFile)
+      ? await prodUpdate(editingProduct.productId, productData, selectedFile ?? undefined)
+      : await prodCreate(productData, selectedFile ?? undefined)
     setIsSaving(false)
 
 

@@ -353,7 +353,8 @@ model Product {
   categoryId   String       @db.Uuid
   picture      String?
   unit         String?
-  capacity     String?
+  capacity     Decimal?     @db.Decimal(10, 2)  @default(0.00)
+  quantity     Int          @default(0)
   sellPrice    Decimal      @default(0.00) @db.Decimal(10, 2)
   costPrice    Decimal      @default(0.00) @db.Decimal(10, 2)
   discountRate Int          @default(0)
@@ -364,8 +365,7 @@ model Product {
   Cart         Cart[]
   Category     Category     @relation(fields: [categoryId], references: [categoryId])
   Saledetail   Saledetail[]
-  Stock        Stock?
-  Stockentry   Stockentry[]
+  Stockentry   Entry[]
 
   @@index([categoryId, sellPrice, costPrice, discountRate])
 }
@@ -425,20 +425,7 @@ model State {
   City    City[]
 }
 
-model Stock {
-  stockId   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  productId String   @unique @db.Uuid
-  memo      String?
-  status    Status   @default(active)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  quantity  Int      @default(0)
-  Product   Product  @relation(fields: [productId], references: [productId])
-
-  @@index([createdAt, productId, status, quantity])
-}
-
-model Stockentry {
+model Entry {
   entryId    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   quantity   Int       @default(0)
   memo       String?
@@ -466,7 +453,7 @@ model Supplier {
   status       Status       @default(active)
   createdAt    DateTime     @default(now())
   updatedAt    DateTime
-  Stockentry   Stockentry[]
+  entry   Entry[]
 
   @@index([status])
 }

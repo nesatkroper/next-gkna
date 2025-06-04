@@ -28,10 +28,10 @@ export async function GET(request: NextRequest) {
       prisma.supplier.findMany({
         where,
         include: {
-          address: {
+          Address: {
             include: {
-              city: true,
-              state: true,
+              City: true,
+              State: true,
             },
           },
           _count: {
@@ -72,7 +72,8 @@ export async function POST(request: NextRequest) {
         companyName: data.companyName,
         phone: data.phone,
         email: data.email,
-        memo: data.memo,
+        createdAt: new Date(),
+        updatedAt: new Date()
       },
     })
 

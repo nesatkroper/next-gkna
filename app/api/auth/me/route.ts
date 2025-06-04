@@ -34,15 +34,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
-    return NextResponse.json({
-      user: {
-        authId: user.authId,
-        email: user.email,
-        role: user.Role?.name,
-        employee: user.Employee,
-
-      },
-    })
+    return NextResponse.json(user)
   } catch (error) {
     console.error("Error in /api/auth/me:", error)
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })

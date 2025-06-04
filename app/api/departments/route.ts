@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { softDeleteWhere } from "@/lib/soft-delete"
+import { generateDepartmentCode } from "@/lib/utils"
 
 export async function GET(request: NextRequest) {
   try {
@@ -30,11 +31,12 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const data = await request.json()
+    const departmentCode = generateDepartmentCode()
 
     const department = await prisma.department.create({
       data: {
         departmentName: data.departmentName,
-        departmentCode: data.departmentCode,
+        departmentCode,
         memo: data.memo,
         createdAt: new Date(),
         updatedAt: new Date()

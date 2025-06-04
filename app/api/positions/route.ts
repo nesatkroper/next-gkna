@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { softDeleteWhere } from "@/lib/soft-delete"
+import { generatePositionCode } from "@/lib/utils"
 
 export async function GET(request: NextRequest) {
   try {
@@ -36,12 +37,13 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const data = await request.json()
+    const positionCode = data.positionCode || generatePositionCode()
 
     const position = await prisma.position.create({
       data: {
         departmentId: data.departmentId,
         positionName: data.positionName,
-        positionCode: data.positionCode,
+        positionCode,
         memo: data.memo,
         createdAt: new Date(),
         updatedAt: new Date()

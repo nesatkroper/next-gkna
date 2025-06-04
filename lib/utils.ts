@@ -47,6 +47,14 @@ export function generateSupplierCode(): string {
   return generateCode("SUP")
 }
 
+export function generatePositionCode(): string {
+  return generateCode("POS")
+}
+
+export function generateDepartmentCode(): string {
+  return generateCode("DEP")
+}
+
 
 
 // import { type ClassValue, clsx } from "clsx"

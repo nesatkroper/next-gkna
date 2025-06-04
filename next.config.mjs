@@ -13,6 +13,13 @@ const nextConfig = {
       },
     ]
   },
+  api: {
+    bodyParser: false,
+    responseLimit: false, 
+  },
+  images: {
+    domains: ['localhost', 'huotsopheaksakana.site/'],
+  },
   eslint: {
     ignoreDuringBuilds: true,
   },

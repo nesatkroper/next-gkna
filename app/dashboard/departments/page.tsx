@@ -1,14 +1,11 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import {
   Dialog,
   DialogContent,
@@ -19,86 +16,158 @@ import {
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Plus, Search, Building, Edit, Trash2, Eye, Users } from "lucide-react"
-import { formatDate } from "@/lib/utils"
-
-interface Department {
-  departmentId: string
-  departmentName: string
-  departmentCode: string
-  memo: string | null
-  status: string
-  createdAt: string
-  _count: {
-    employees: number
-    positions: number
-  }
-}
+import { ViewToggle } from "@/components/ui/view-toggle"
+import { DataTable } from "@/components/ui/data-table"
+import { DataCards } from "@/components/ui/data-cards"
+import { Plus, Search, Building, Loader2, RefreshCw } from "lucide-react"
+import { useToast } from "@/components/ui/use-toast"
+import { useDepartmentStore } from "@/stores/department-store" // Assuming this exists
 
 export default function DepartmentsPage() {
-  const [departments, setDepartments] = useState<Department[]>([])
-  const [loading, setLoading] = useState(true)
+  const {
+    items: departments,
+    isLoading,
+    error,
+    fetch,
+    create,
+    update,
+    delete: deleteDepartment,
+  } = useDepartmentStore()
+
+  const { toast } = useToast()
+  const [isSaving, setIsSaving] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [editingDepartment, setEditingDepartment] = useState<Department | null>(null)
+  const [view, setView] = useState<"table" | "card">("table")
+  const [editingDepartment, setEditingDepartment] = useState<any>(null)
 
   useEffect(() => {
-    fetchDepartments()
-  }, [])
+    fetch()
+  }, [fetch])
 
-  const fetchDepartments = async () => {
-    try {
-      const response = await fetch("/api/departments")
-      const data = await response.json()
-      const departments = Array.isArray(data) ? data : data?.departments || []
-      setDepartments(departments)
-    } catch (error) {
-      console.error("Error fetching departments:", error)
-    } finally {
-      setLoading(false)
-    }
-  }
+  console.log(departments)
 
-  const filteredDepartments = Array.isArray(departments)
-    ? departments.filter(
-        (department) =>
-          department.departmentName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          department.departmentCode?.toLowerCase().includes(searchTerm.toLowerCase()),
-      )
-    : []
+  const activeDepartments = departments.filter((dept) => dept.status === "active")
+
+  const filteredDepartments = activeDepartments.filter(
+    (department) =>
+      department.departmentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      department.departmentCode?.toLowerCase().includes(searchTerm.toLowerCase()),
+  )
+
+  const tableColumns = [
+    {
+      key: "departmentName",
+      label: "Department Name",
+    },
+    {
+      key: "departmentCode",
+      label: "Department Code",
+    },
+    {
+      key: "_count.employees",
+      label: "Employees",
+      type: "badge" as const,
+      render: (value: any, row: any) => row._count?.Employees || 0,
+    },
+    {
+      key: "_count.positions",
+      label: "Positions",
+      type: "badge" as const,
+      render: (value: any, row: any) => row._count?.Positions || 0,
+    },
+    {
+      key: "memo",
+      label: "Description",
+    },
+    {
+      key: "status",
+      label: "Status",
+      type: "badge" as const,
+    },
+    {
+      key: "createdAt",
+      label: "Created",
+      type: "date" as const,
+    },
+  ]
+
+  // Card fields configuration
+  const cardFields = [
+    {
+      key: "departmentName",
+      primary: true,
+    },
+    {
+      key: "departmentCode",
+      secondary: true,
+    },
+    {
+      key: "_count.employees",
+      label: "Employees",
+      type: "badge" as const,
+      render: (value: any, row: any) => row._count?.employees || 0,
+    },
+    {
+      key: "_count.positions",
+      label: "Positions",
+      type: "badge" as const,
+      render: (value: any, row: any) => row._count?.positions || 0,
+    },
+    {
+      key: "memo",
+      label: "Description",
+    },
+    {
+      key: "status",
+      label: "Status",
+      type: "badge" as const,
+    },
+    {
+      key: "createdAt",
+      label: "Created",
+      type: "date" as const,
+    },
+  ]
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
-
     const departmentData = {
-      departmentName: formData.get("departmentName"),
-      departmentCode: formData.get("departmentCode"),
-      memo: formData.get("memo"),
+      departmentName: formData.get("departmentName") as string,
+      departmentCode: formData.get("departmentCode") as string,
+      memo: formData.get("memo") as string,
     }
 
+    setIsSaving(true)
     try {
-      const url = editingDepartment ? `/api/departments/${editingDepartment.departmentId}` : "/api/departments"
-      const method = editingDepartment ? "PUT" : "POST"
+      const success = editingDepartment
+        ? await update(editingDepartment.departmentId, departmentData)
+        : await create(departmentData)
+      setIsSaving(false)
 
-      const response = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(departmentData),
-      })
-
-      if (response.ok) {
+      if (success) {
+        toast({
+          title: "Success",
+          description: `Department ${editingDepartment ? "updated" : "created"} successfully`,
+        })
         setIsDialogOpen(false)
         setEditingDepartment(null)
-        fetchDepartments()
         ;(e.target as HTMLFormElement).reset()
+      } else {
+        throw new Error("Department operation failed")
       }
     } catch (error) {
-      console.error("Error saving department:", error)
+      setIsSaving(false)
+      toast({
+        title: "Error",
+        description: error || `Failed to ${editingDepartment ? "update" : "create"} department`,
+        variant: "destructive",
+      })
     }
   }
 
-  const handleEdit = (department: Department) => {
+  const handleEdit = (department: any) => {
     setEditingDepartment(department)
     setIsDialogOpen(true)
   }
@@ -106,25 +175,23 @@ export default function DepartmentsPage() {
   const handleDelete = async (departmentId: string) => {
     if (!confirm("Are you sure you want to delete this department?")) return
 
-    try {
-      const response = await fetch(`/api/departments/${departmentId}`, {
-        method: "DELETE",
+    const success = await deleteDepartment(departmentId)
+    if (success) {
+      toast({
+        title: "Success",
+        description: "Department deleted successfully",
       })
-
-      if (response.ok) {
-        fetchDepartments()
-      }
-    } catch (error) {
-      console.error("Error deleting department:", error)
+    } else {
+      toast({
+        title: "Error",
+        description: "Failed to delete department",
+        variant: "destructive",
+      })
     }
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    )
+  const handleRetry = () => {
+    fetch()
   }
 
   return (
@@ -139,70 +206,103 @@ export default function DepartmentsPage() {
           <p className="text-muted-foreground">Manage organizational departments and structure</p>
         </div>
 
-        <Dialog
-          open={isDialogOpen}
-          onOpenChange={(open) => {
-            setIsDialogOpen(open)
-            if (!open) setEditingDepartment(null)
-          }}
-        >
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Department
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[500px]">
-            <DialogHeader>
-              <DialogTitle>{editingDepartment ? "Edit Department" : "Add New Department"}</DialogTitle>
-              <DialogDescription>
-                {editingDepartment ? "Update department information" : "Create a new department"}
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="departmentName">Department Name</Label>
-                  <Input
-                    id="departmentName"
-                    name="departmentName"
-                    required
-                    defaultValue={editingDepartment?.departmentName || ""}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="departmentCode">Department Code</Label>
-                  <Input
-                    id="departmentCode"
-                    name="departmentCode"
-                    defaultValue={editingDepartment?.departmentCode || ""}
-                  />
-                </div>
-              </div>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={handleRetry} disabled={isLoading}>
+            <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
+            Refresh
+          </Button>
 
-              <div className="space-y-2">
-                <Label htmlFor="memo">Description</Label>
-                <Textarea id="memo" name="memo" rows={3} defaultValue={editingDepartment?.memo || ""} />
-              </div>
+          <Dialog
+            open={isDialogOpen}
+            onOpenChange={(open) => {
+              setIsDialogOpen(open)
+              if (!open) setEditingDepartment(null)
+            }}
+          >
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Add Department
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[500px]">
+              <DialogHeader>
+                <DialogTitle>{editingDepartment ? "Edit Department" : "Add New Department"}</DialogTitle>
+                <DialogDescription>
+                  {editingDepartment ? "Update department information" : "Create a new department"}
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleSubmit} className="space-y-4">
 
-              <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit">{editingDepartment ? "Update" : "Create"} Department</Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
+                  <div className="space-y-2">
+                    <Label htmlFor="departmentName">Department Name *</Label>
+                    <Input
+                      id="departmentName"
+                      name="departmentName"
+                      required
+                      defaultValue={editingDepartment?.departmentName || ""}
+                    />
+                  </div>
+
+
+                <div className="space-y-2">
+                  <Label htmlFor="memo">Description</Label>
+                  <Textarea id="memo" name="memo" rows={3} defaultValue={editingDepartment?.memo || ""} />
+                </div>
+
+                <div className="flex justify-end gap-2">
+                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={isSaving}>
+                    {isSaving ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        {editingDepartment ? "Updating..." : "Creating..."}
+                      </>
+                    ) : editingDepartment ? (
+                      "Update Department"
+                    ) : (
+                      "Create Department"
+                    )}
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
       </motion.div>
+
+      {/* Error Display */}
+      {error && (
+        <Card className="border-destructive">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-destructive font-medium">Error loading data</p>
+                <p className="text-sm text-muted-foreground">{error}</p>
+              </div>
+              <Button variant="outline" onClick={handleRetry}>
+                Try Again
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Building className="h-5 w-5" />
-            Organization Departments
-          </CardTitle>
-          <CardDescription>{filteredDepartments.length} departments in your organization</CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Building className="h-5 w-5" />
+                Organization Departments
+                {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+              </CardTitle>
+              <CardDescription>{filteredDepartments.length} departments in your organization</CardDescription>
+            </div>
+            <ViewToggle view={view} onViewChange={setView} />
+          </div>
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-4 mb-6">
@@ -217,72 +317,32 @@ export default function DepartmentsPage() {
             </div>
           </div>
 
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Department</TableHead>
-                  <TableHead>Code</TableHead>
-                  <TableHead>Employees</TableHead>
-                  <TableHead>Positions</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredDepartments.map((department) => (
-                  <motion.tr
-                    key={department.departmentId}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="group"
-                  >
-                    <TableCell>
-                      <div className="font-medium">{department.departmentName}</div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-sm text-muted-foreground">{department.departmentCode || "-"}</div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        <Users className="h-4 w-4" />
-                        <Badge variant="secondary">{department._count.employees}</Badge>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{department._count.positions}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="max-w-48 truncate text-sm">{department.memo || "-"}</div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={department.status === "active" ? "default" : "secondary"}>
-                        {department.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{formatDate(department.createdAt)}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button variant="ghost" size="sm">
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm" onClick={() => handleEdit(department)}>
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm" onClick={() => handleDelete(department.departmentId)}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </motion.tr>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+          {view === "card" ? (
+            <DataCards
+              data={filteredDepartments}
+              fields={cardFields}
+              loading={isLoading}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              idField="departmentId"
+              nameField="departmentName"
+              columns={3}
+            />
+          ) : (
+            <DataTable
+              data={filteredDepartments}
+              columns={tableColumns}
+              loading={isLoading}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              idField="departmentId"
+              nameField="departmentName"
+            />
+          )}
         </CardContent>
       </Card>
     </div>
   )
 }
+
+

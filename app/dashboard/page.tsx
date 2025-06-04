@@ -8,25 +8,18 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { CalendarDays, Package, TrendingUp, AlertTriangle } from "lucide-react"
 import { useEffect, useState } from "react"
+import { useAuthStore } from "@/stores"
 
 export default function DashboardPage() {
-  const [me, setMe] = useState();
+  const { me, fetchMe } = useAuthStore()
+
   useEffect(() => {
     if (!me) {
-      fetchme()
+      fetchMe()
     }
-  }, [])
+  }, [fetchMe, me])
 
-  const fetchme = async () => {
-    const res = await fetch("/api/auth/me", { credentials: "include" })
-    if (res.ok) {
-      const data = await res.json()
-      console.log("Current user:", data.user)
-    } else {
-      console.log("Not logged in")
-    }
-
-  }
+  console.log(me)
 
   return (
     <div className="space-y-6">
