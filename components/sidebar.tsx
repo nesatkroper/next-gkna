@@ -97,6 +97,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         { name: "Departments", href: "/dashboard/departments", badge: departments.length },
         { name: "Positions", href: "/dashboard/positions", badge: positions.length },
         { name: "Addresses", href: "/dashboard/addresses", badge: positions.length },
+        { name: "Event", href: "/dashboard/events", badge: 15 },
       ],
     },
     {
