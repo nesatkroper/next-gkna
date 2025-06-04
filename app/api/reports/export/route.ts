@@ -42,15 +42,15 @@ export async function POST(request: NextRequest) {
       case "inventory":
         const inventory = await prisma.product.findMany()
 
-        data = inventory.map((stock) => ({
-          "Product Code": stock.product.productCode || "",
-          "Product Name": stock.product.productName,
-          Category: stock.product.category.categoryName,
-          "Current Stock": stock.quantity,
-          Unit: stock.product.unit || "",
-          "Cost Price": stock.product.costPrice,
-          "Sell Price": stock.product.sellPrice,
-          "Stock Value": stock.quantity * stock.product.costPrice,
+        data = inventory.map((product) => ({
+          "Product Code": product.productCode || "",
+          "Product Name": product.productName,
+          "Category": product.Category.categoryName,
+          "Current Stock": product.quantity,
+          "Unit": product.unit || "",
+          "Cost Price": product.costPrice,
+          "Sell Price": product.sellPrice,
+          "Stock Value": product.quantity * product.costPrice,
         }))
 
         headers = [
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
           include: {
             info: true,
             _count: {
-              select: { sales: true },
+              select: { Sale: true },
             },
           },
         })
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
           "First Name": customer.firstName,
           "Last Name": customer.lastName,
           Phone: customer.phone || "",
-          Email: customer.info?.email || "",
+          Email: customer.CustomerInfo?.email || "",
           Gender: customer.gender,
           "Total Sales": customer._count.sales,
           "Joined Date": customer.createdAt.toLocaleDateString(),
@@ -108,10 +108,10 @@ export async function POST(request: NextRequest) {
           "Employee Code": employee.employeeCode || "",
           "First Name": employee.firstName,
           "Last Name": employee.lastName,
-          Department: employee.department.departmentName,
-          Position: employee.position.positionName,
+          Department: employee.Department.departmentName,
+          Position: employee.Position.positionName,
           Phone: employee.phone || "",
-          Email: employee.info?.email || "",
+          Email: employee.EmployeeInfo?.email || "",
           Salary: employee.salary,
           "Total Sales": employee._count.sales,
           "Hired Date": employee.hiredDate?.toLocaleDateString() || "",

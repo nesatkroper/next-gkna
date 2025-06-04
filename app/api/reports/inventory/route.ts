@@ -4,13 +4,9 @@ import { prisma } from "@/lib/prisma"
 export async function GET() {
   try {
     // Stock levels
-    const stockLevels = await prisma.stock.findMany({
+    const stockLevels = await prisma.product.findMany({
       include: {
-        product: {
-          include: {
-            category: true,
-          },
-        },
+        Category: true,
       },
       orderBy: { quantity: "asc" },
     })
@@ -22,13 +18,13 @@ export async function GET() {
     const outOfStockItems = stockLevels.filter((stock) => stock.quantity === 0)
 
     // Stock by category
-    const stockByCategory = await prisma.stock.groupBy({
-      by: ["product", "productId"],
+    const stockByCategory = await prisma.product.groupBy({
+      by: ["categoryId"],
       _sum: { quantity: true },
     })
 
     // Recent stock entries
-    const recentEntries = await prisma.stockentry.findMany({
+    const recentEntries = await prisma.entry.findMany({
       include: {
         product: true,
         supplier: true,

@@ -74,6 +74,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         { name: "Customers", href: "/dashboard/customers", badge: customers.length },
         { name: "Employees", href: "/dashboard/employees", badge: employees.length },
         { name: "Suppliers", href: "/dashboard/suppliers", badge: 15 },
+        { name: "Authentication", href: "/dashboard/auth", badge: 15 },
       ],
     },
     {

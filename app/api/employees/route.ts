@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { softDeleteWhere } from "@/lib/soft-delete"
+import { generateEmployeeCode } from "@/lib/utils"
 
 export async function GET(request: NextRequest) {
   try {
@@ -73,10 +74,10 @@ export async function POST(request: NextRequest) {
     const data = await request.json()
 
     const employee = await prisma.$transaction(async (tx) => {
-      // Create employee
+      const employeeCode = generateEmployeeCode()
       const newEmployee = await tx.employee.create({
         data: {
-          employeeCode: data.employeeCode,
+          employeeCode,
           firstName: data.firstName,
           lastName: data.lastName,
           gender: data.gender || "male",
