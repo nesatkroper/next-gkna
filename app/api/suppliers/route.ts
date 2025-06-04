@@ -28,12 +28,12 @@ export async function GET(request: NextRequest) {
       prisma.supplier.findMany({
         where,
         include: {
-          Address: {
-            include: {
-              City: true,
-              State: true,
-            },
-          },
+          // Address: {
+          //   include: {
+          //     City: true,
+          //     State: true,
+          //   },
+          // },
           _count: {
             select: {
               entry: true,
