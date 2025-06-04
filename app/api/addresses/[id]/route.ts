@@ -1,24 +1,15 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 
-export async function GET() {
+export async function PUT(request: Request, { params }: { params: { id: string } }) {
   try {
-    const addresses = await prisma.address.findMany({
-      where: { status: "active" },
-      include: {
-        City: { select: { cityId: true, name: true } },
-        State: { select: { stateId: true, name: true } },
-      },
-    })
-    return NextResponse.json(addresses)
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message || "Failed to fetch addresses" }, { status: 500 })
-  }
-}
-
-export async function POST(request: Request) {
-  try {
+    const { id } = params
     const data = await request.json()
+
+    const existingAddress = await prisma.address.findUnique({ where: { addressId: id } })
+    if (!existingAddress) {
+      return NextResponse.json({ error: "Address not found" }, { status: 404 })
+    }
 
     if (data.cityId) {
       const city = await prisma.city.findUnique({ where: { cityId: data.cityId } })
@@ -45,17 +36,18 @@ export async function POST(request: Request) {
       if (!event) return NextResponse.json({ error: "Event not found" }, { status: 404 })
     }
 
-    const address = await prisma.address.create({
+    const updatedAddress = await prisma.address.update({
+      where: { addressId: id },
       data: {
-        cityId: data.cityId || null,
-        stateId: data.stateId || null,
-        latitude: data.latitude || null,
-        longitude: data.longitude || null,
-        customerId: data.customerId || null,
-        employeeId: data.employeeId || null,
-        supplierId: data.supplierId || null,
-        eventId: data.eventId || null,
-        status: "active",
+        cityId: data.cityId !== undefined ? data.cityId : undefined,
+        stateId: data.stateId !== undefined ? data.stateId : undefined,
+        latitude: data.latitude !== undefined ? data.latitude : undefined,
+        longitude: data.longitude !== undefined ? data.longitude : undefined,
+        customerId: data.customerId !== undefined ? data.customerId : undefined,
+        employeeId: data.employeeId !== undefined ? data.employeeId : undefined,
+        supplierId: data.supplierId !== undefined ? data.supplierId : undefined,
+        eventId: data.eventId !== undefined ? data.eventId : undefined,
+        updatedAt: new Date(),
       },
       include: {
         City: { select: { cityId: true, name: true } },
@@ -63,7 +55,7 @@ export async function POST(request: Request) {
       },
     })
 
-    return NextResponse.json(address, { status: 201 })
+    return NextResponse.json(updatedAddress)
   } catch (error: any) {
     if (error.code === "P2002") {
       return NextResponse.json(
@@ -71,29 +63,21 @@ export async function POST(request: Request) {
         { status: 400 }
       )
     }
-    return NextResponse.json({ error: error.message || "Failed to create address" }, { status: 500 })
+    return NextResponse.json({ error: error.message || "Failed to update address" }, { status: 500 })
   }
 }
 
+export async function DELETE(_request: Request, { params }: { params: { id: string } }) {
+  try {
+    const { id } = params
+    const existingAddress = await prisma.address.findUnique({ where: { addressId: id } })
+    if (!existingAddress) {
+      return NextResponse.json({ error: "Address not found" }, { status: 404 })
+    }
 
-// import { NextResponse } from "next/server"
-// import { prisma } from "@/lib/prisma"
-
-// export async function GET() {
-//   try {
-//     const addresses = await prisma.address.findMany({
-//       include: {
-//         City: true,
-//         State: true,
-//         Customer: true,
-//         Employee: true,
-//         supplier: true,
-//         Event: true,
-//         // Imageaddress: { select: { id: true } },
-//       },
-//     })
-//     return NextResponse.json(addresses)
-//   } catch (error) {
-//     return NextResponse.json({ error: "Failed to fetch addresses" }, { status: 500 })
-//   }
-// }
+    await prisma.address.delete({ where: { addressId: id } })
+    return NextResponse.json({ message: "Address deleted successfully" })
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message || "Failed to delete address" }, { status: 500 })
+  }
+}

@@ -39,10 +39,10 @@ export async function GET(request: NextRequest) {
       prisma.attendance.findMany({
         where,
         include: {
-          employee: {
+          Employee: {
             include: {
-              department: true,
-              position: true,
+              Department: true,
+              Position: true,
             },
           },
         },
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
         note: data.note,
       },
       include: {
-        employee: true,
+        Employee: true,
       },
     })
 

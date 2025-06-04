@@ -14,7 +14,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
         note: data.note,
       },
       include: {
-        employee: true,
+        Employee: true,
       },
     })
 
