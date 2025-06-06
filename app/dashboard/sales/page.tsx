@@ -29,7 +29,7 @@ export default function SalesPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [saleItems, setSaleItems] = useState([{ productId: "", quantity: 1, price: 0 }])
-  const [saleDate, setSaleDate] = useState < Date || null > (new Date())
+  const [saleDate, setSaleDate] = useState<Date>(new Date())
   const inv = generateInvoiceCode();
 
   const {
