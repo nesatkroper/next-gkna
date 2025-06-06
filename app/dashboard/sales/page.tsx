@@ -20,68 +20,37 @@ import {
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Search, ShoppingCart, Eye, DollarSign, TrendingUp, Package } from "lucide-react"
-import { formatCurrency, formatDate } from "@/lib/utils"
-
-interface Sale {
-  saleId: string
-  amount: number
-  saleDate: string
-  status: string
-  invoice: string
-  customer: {
-    firstName: string
-    lastName: string
-  }
-  employee: {
-    firstName: string
-    lastName: string
-  }
-  saledetails: Array<{
-    quantity: number
-    amount: number
-    product: {
-      productName: string
-    }
-  }>
-}
-
-interface Customer {
-  customerId: string
-  firstName: string
-  lastName: string
-}
-
-interface Employee {
-  employeeId: string
-  firstName: string
-  lastName: string
-}
-
-interface Product {
-  productId: string
-  productName: string
-  sellPrice: number
-  stocks?: {
-    quantity: number
-  }
-}
+import { formatCurrency, formatDate, generateInvoiceCode } from "@/lib/utils"
+import { Sale, Customer, Employee, Product } from "@/lib/generated/prisma"
+import { useCustomerStore, useEmployeeStore } from "@/stores"
 
 export default function SalesPage() {
   const [sales, setSales] = useState<Sale[]>([])
-  const [customers, setCustomers] = useState<Customer[]>([])
-  const [employees, setEmployees] = useState<Employee[]>([])
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [saleItems, setSaleItems] = useState([{ productId: "", quantity: 1, price: 0 }])
+  const inv = generateInvoiceCode();
+
+  const {
+    items: Customer,
+    fetch: cusFetch,
+  } = useCustomerStore();
+
+  const {
+    items: Employee,
+    fetch: empFetch
+  } = useEmployeeStore();
 
   useEffect(() => {
     fetchSales()
-    fetchCustomers()
-    fetchEmployees()
+    cusFetch()
+    empFetch()
     fetchProducts()
-  }, [])
+  }, [cusFetch,empFetch])
+
+
 
   const fetchSales = async () => {
     try {
@@ -92,26 +61,6 @@ export default function SalesPage() {
       console.error("Error fetching sales:", error)
     } finally {
       setLoading(false)
-    }
-  }
-
-  const fetchCustomers = async () => {
-    try {
-      const response = await fetch("/api/customers")
-      const data = await response.json()
-      setCustomers(data.customers || [])
-    } catch (error) {
-      console.error("Error fetching customers:", error)
-    }
-  }
-
-  const fetchEmployees = async () => {
-    try {
-      const response = await fetch("/api/employees")
-      const data = await response.json()
-      setEmployees(data.employees || [])
-    } catch (error) {
-      console.error("Error fetching employees:", error)
     }
   }
 
@@ -127,8 +76,8 @@ export default function SalesPage() {
 
   const filteredSales = sales.filter(
     (sale) =>
-      sale.customer.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      sale.customer.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      sale.Customer.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      sale.Customer.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       sale.invoice?.toLowerCase().includes(searchTerm.toLowerCase()),
   )
 
@@ -177,7 +126,7 @@ export default function SalesPage() {
         setIsDialogOpen(false)
         fetchSales()
         setSaleItems([{ productId: "", quantity: 1, price: 0 }])
-        ;(e.target as HTMLFormElement).reset()
+          ; (e.target as HTMLFormElement).reset()
       }
     } catch (error) {
       console.error("Error adding sale:", error)
@@ -233,7 +182,7 @@ export default function SalesPage() {
                       <SelectValue placeholder="Select customer" />
                     </SelectTrigger>
                     <SelectContent>
-                      {customers.map((customer) => (
+                      {Customer.map((customer) => (
                         <SelectItem key={customer.customerId} value={customer.customerId}>
                           {customer.firstName} {customer.lastName}
                         </SelectItem>
@@ -242,27 +191,10 @@ export default function SalesPage() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="employeeId">Sales Person</Label>
-                  <Select name="employeeId" required>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select employee" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {employees.map((employee) => (
-                        <SelectItem key={employee.employeeId} value={employee.employeeId}>
-                          {employee.firstName} {employee.lastName}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="invoice">Invoice Number</Label>
+                  <Input id="invoice" name="invoice" value={inv} readOnly />
                 </div>
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="invoice">Invoice Number</Label>
-                <Input id="invoice" name="invoice" />
-              </div>
-
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <Label>Sale Items</Label>
@@ -441,10 +373,10 @@ export default function SalesPage() {
                       <div className="font-medium">{sale.invoice || "-"}</div>
                     </TableCell>
                     <TableCell>
-                      {sale.customer.firstName} {sale.customer.lastName}
+                      {sale.Customer.firstName} {sale.Customer.lastName}
                     </TableCell>
                     <TableCell>
-                      {sale.employee.firstName} {sale.employee.lastName}
+                      {sale.Employee.firstName} {sale.Employee.lastName}
                     </TableCell>
                     <TableCell>
                       <div className="space-y-1">

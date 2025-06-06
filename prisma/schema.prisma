@@ -103,14 +103,15 @@ model Branch {
   branchId   String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   branchName String
   branchCode String?
-  picture   String?
-  tel       String?
-  memo      String?
-  status    Status  @default(active)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  picture    String?
+  tel        String?
+  memo       String?
+  status     Status  @default(active)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
-  Employee  Employee[]
+  Sale       Sale[]
+  Employee   Employee[]
 }
 
 model Cart {
@@ -421,6 +422,7 @@ model Sale {
   saleId     String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   employeeId String       @db.Uuid
   customerId String       @db.Uuid
+  branchId   String       @db.Uuid
   saleDate   DateTime     @default(now())
   amount     Decimal      @db.Decimal(12, 2)
   status     Status       @default(active)
@@ -431,9 +433,10 @@ model Sale {
   Payment    Payment[]
   Customer   Customer     @relation(fields: [customerId], references: [customerId])
   Employee   Employee     @relation(fields: [employeeId], references: [employeeId])
+  Branch     Branch      @relation(fields: [branchId], references: [branchId])
   Saledetail Saledetail[]
 
-  @@index([customerId, employeeId, saleDate, status])
+  @@index([customerId, employeeId, saleDate, status, branchId])
 }
 
 model Saledetail {

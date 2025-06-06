@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "mig": "prisma migrate dev --name mod-branch",
+    "mig": "prisma migrate dev --name add-branchid2sale",
     "gen": "prisma generate && npm run dev",
     "db": "npm run mig && npm run gen && npm run dev",
     "seed": "NODE_OPTIONS='--loader ts-node/esm' ts-node seed.ts"
