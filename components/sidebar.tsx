@@ -33,10 +33,19 @@ import {
 } from "@/components/ui/sidebar"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { useAppStore } from "@/lib/store/use-app-store"
+import { useCountStore } from "@/stores/count-store"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
   const { products, categories, customers, employees, departments, positions, isLoadingDepartments, isLoadingPositions, isLoadingCustomers, isLoadingEmployees, isLoadingProducts, isLoadingCategories, fetchCustomers, fetchEmployees, fetchProducts, fetchCategories, fetchDepartments, fetchPositions } = useAppStore()
+
+  const {items, fetch, error, loading} = useCountStore()
+
+  React.useEffect(() => {
+    fetch()
+  }, [])
+
+  console.log(items)
 
   React.useEffect(() => {
     if (categories.length === 0 && !isLoadingCategories)

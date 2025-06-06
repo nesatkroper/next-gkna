@@ -170,7 +170,6 @@ export default function ProductsPage() {
 
       const productData = {
         productName: formData.get("productName") as string,
-        productCode: formData.get("productCode") as string || null,
         categoryId: formData.get("categoryId") as string,
         unit: formData.get("unit") as string || null,
         capacity: new Decimal(formData.get("capacity") as string || "0"),
@@ -337,11 +336,13 @@ export default function ProductsPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="productCode">Product Code</Label>
+                    <Label htmlFor="capacity">Capacity</Label>
                     <Input
-                      id="productCode"
-                      name="productCode"
-                      defaultValue={editingProduct?.productCode ?? ""}
+                      id="capacity"
+                      name="capacity"
+                      type="number"
+                      step="0.01"
+                      defaultValue={editingProduct?.capacity ?? ""}
                       disabled={isSaving}
                     />
                   </div>
@@ -365,29 +366,7 @@ export default function ProductsPage() {
                     </Select>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="capacity">Capacity</Label>
-                    <Input
-                      id="capacity"
-                      name="capacity"
-                      type="number"
-                      step="0.01"
-                      defaultValue={editingProduct?.capacity ?? ""}
-                      disabled={isSaving}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="desc">Description</Label>
-                    <Textarea
-                      id="desc"
-                      name="desc"
-                      rows={4}
-                      defaultValue={editingProduct?.desc ?? ""}
-                      disabled={isSaving}
-                    />
-                  </div>
-                </div>
+
                 <div className="grid grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="costPrice">Cost Price *</Label>
@@ -426,17 +405,30 @@ export default function ProductsPage() {
                     />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <Label>Product Image</Label>
-                  <FileUpload
-                    onFileSelect={(file) => setSelectedFile(file)}
-                    accept="image/*"
-                    maxSize={5}
-                    preview={true}
-                    value={selectedFile}
-                    placeholder="Upload product image"
-                    disabled={isSaving}
-                  />
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Product Image</Label>
+                    <FileUpload
+                      onFileSelect={(file) => setSelectedFile(file)}
+                      accept="image/*"
+                      maxSize={5}
+                      preview={true}
+                      value={selectedFile}
+                      placeholder="Upload product image"
+                      disabled={isSaving}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="desc">Description</Label>
+                    <Textarea
+                      id="desc"
+                      name="desc"
+                      rows={9}
+                      defaultValue={editingProduct?.desc ?? ""}
+                      disabled={isSaving}
+                    />
+                  </div>
                 </div>
                 <div className="flex justify-end gap-2">
                   <Button

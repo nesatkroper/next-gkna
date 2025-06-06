@@ -117,7 +117,7 @@ export function FileUpload({
 
       <div
         className={cn(
-          "relative border-2 border-dashed rounded-lg pt-4 transition-colors",
+          "relative border-2 border-dashed rounded-lg p-4 transition-colors",
           dragActive ? "border-primary bg-primary/5" : "border-muted-foreground/25",
           error ? "border-destructive" : "",
           "hover:border-primary/50 hover:bg-primary/5",

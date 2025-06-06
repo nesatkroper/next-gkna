@@ -24,17 +24,7 @@ import { Plus, Search, Tag, Loader2, RefreshCw } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 import { useBrandStore } from "@/stores/brand-store"
 import { uploadFile } from "@/lib/file-upload"
-
-interface Brand {
-  brandId: string
-  brandName: string
-  brandCode?: string | null
-  picture?: string | null
-  memo?: string | null
-  status: "active" | "inactive"
-  createdAt: string
-  updatedAt: string
-}
+import { Brand } from "@/lib/generated/prisma"
 
 export default function BrandsPage() {
   const {
@@ -150,7 +140,6 @@ export default function BrandsPage() {
 
       const brandData: Partial<Brand> = {
         brandName: formData.get("brandName") as string,
-        brandCode: formData.get("brandCode") as string || null,
         memo: formData.get("memo") as string || null,
         picture: pictureUrl,
       }
@@ -267,15 +256,6 @@ export default function BrandsPage() {
                     name="brandName"
                     required
                     defaultValue={editingBrand?.brandName ?? ""}
-                    disabled={isSaving}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="brandCode">Brand Code</Label>
-                  <Input
-                    id="brandCode"
-                    name="brandCode"
-                    defaultValue={editingBrand?.brandCode ?? ""}
                     disabled={isSaving}
                   />
                 </div>
