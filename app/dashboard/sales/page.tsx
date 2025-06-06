@@ -21,13 +21,10 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Search, ShoppingCart, Eye, DollarSign, TrendingUp, Package } from "lucide-react"
 import { formatCurrency, formatDate, generateInvoiceCode } from "@/lib/utils"
-import { Sale, Customer, Employee, Product } from "@/lib/generated/prisma"
-import { useCustomerStore, useEmployeeStore } from "@/stores"
+import { useCustomerStore, useEmployeeStore, useProductStore, useSaleStore } from "@/stores"
+import { useBranchStore } from "@/stores/branch-store"
 
 export default function SalesPage() {
-  const [sales, setSales] = useState<Sale[]>([])
-  const [products, setProducts] = useState<Product[]>([])
-  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [saleItems, setSaleItems] = useState([{ productId: "", quantity: 1, price: 0 }])
@@ -43,38 +40,31 @@ export default function SalesPage() {
     fetch: empFetch
   } = useEmployeeStore();
 
+  const {
+    items: Product,
+    fetch: proFetch
+  } = useProductStore();
+
+  const {
+    items: Sale,
+    fetch: salFetch,
+    isLoading
+  } = useSaleStore()
+
+  const {
+    items: Branch,
+    fetch: brcFetch
+  } = useBranchStore();
+
   useEffect(() => {
-    fetchSales()
+    salFetch()
     cusFetch()
     empFetch()
-    fetchProducts()
-  }, [cusFetch,empFetch])
+    proFetch()
+    brcFetch()
+  }, [cusFetch, empFetch, proFetch, salFetch, brcFetch])
 
-
-
-  const fetchSales = async () => {
-    try {
-      const response = await fetch("/api/sales")
-      const data = await response.json()
-      setSales(data.sales || [])
-    } catch (error) {
-      console.error("Error fetching sales:", error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const fetchProducts = async () => {
-    try {
-      const response = await fetch("/api/products")
-      const data = await response.json()
-      setProducts(data.products || [])
-    } catch (error) {
-      console.error("Error fetching products:", error)
-    }
-  }
-
-  const filteredSales = sales.filter(
+  const filteredSales = Sale.filter(
     (sale) =>
       sale.Customer.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       sale.Customer.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -124,7 +114,7 @@ export default function SalesPage() {
 
       if (response.ok) {
         setIsDialogOpen(false)
-        fetchSales()
+        salFetch()
         setSaleItems([{ productId: "", quantity: 1, price: 0 }])
           ; (e.target as HTMLFormElement).reset()
       }
@@ -134,14 +124,14 @@ export default function SalesPage() {
   }
 
   // Calculate stats
-  const totalSales = sales.reduce((sum, sale) => sum + sale.amount, 0)
-  const todaySales = sales.filter((sale) => {
+  const totalSales = Sale.reduce((sum, sale) => sum + sale.amount, 0)
+  const todaySales = Sale.filter((sale) => {
     const today = new Date().toDateString()
     return new Date(sale.saleDate).toDateString() === today
   })
   const todayRevenue = todaySales.reduce((sum, sale) => sum + sale.amount, 0)
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -174,7 +164,7 @@ export default function SalesPage() {
               <DialogDescription>Record a new sales transaction</DialogDescription>
             </DialogHeader>
             <form onSubmit={handleAddSale} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="customerId">Customer</Label>
                   <Select name="customerId" required>
@@ -185,6 +175,21 @@ export default function SalesPage() {
                       {Customer.map((customer) => (
                         <SelectItem key={customer.customerId} value={customer.customerId}>
                           {customer.firstName} {customer.lastName}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>                <div className="space-y-2">
+                  <Label htmlFor="branchId">Branch</Label>
+                  <Select name="branchId" required>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select customer" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Branch.map((branch) => (
+                        
+                        <SelectItem key={branch.branchId} value={branch.branchId}>
+                          {branch.branchName}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -210,7 +215,7 @@ export default function SalesPage() {
                       <Select
                         value={item.productId}
                         onValueChange={(value) => {
-                          const product = products.find((p) => p.productId === value)
+                          const product = Product.find((p) => p.productId === value)
                           updateSaleItem(index, "productId", value)
                           updateSaleItem(index, "price", product?.sellPrice || 0)
                         }}
@@ -219,7 +224,7 @@ export default function SalesPage() {
                           <SelectValue placeholder="Select product" />
                         </SelectTrigger>
                         <SelectContent>
-                          {products.map((product) => (
+                          {Product.map((product) => (
                             <SelectItem key={product.productId} value={product.productId}>
                               {product.productName} - {formatCurrency(product.sellPrice)}
                             </SelectItem>
@@ -309,7 +314,7 @@ export default function SalesPage() {
               <ShoppingCart className="h-4 w-4 text-purple-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{sales.length}</div>
+              <div className="text-2xl font-bold">{Sale.length}</div>
               <p className="text-xs text-muted-foreground">Completed sales</p>
             </CardContent>
           </Card>
@@ -323,7 +328,7 @@ export default function SalesPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {formatCurrency(sales.length > 0 ? totalSales / sales.length : 0)}
+                {formatCurrency(Sale.length > 0 ? totalSales / Sale.length : 0)}
               </div>
               <p className="text-xs text-muted-foreground">Per transaction</p>
             </CardContent>
@@ -380,13 +385,13 @@ export default function SalesPage() {
                     </TableCell>
                     <TableCell>
                       <div className="space-y-1">
-                        {sale.saledetails.slice(0, 2).map((detail, index) => (
+                        {sale.Saledetails.slice(0, 2).map((detail, index) => (
                           <div key={index} className="text-sm">
-                            {detail.quantity}x {detail.product.productName}
+                            {detail.quantity}x {detail.Product.productName}
                           </div>
                         ))}
-                        {sale.saledetails.length > 2 && (
-                          <div className="text-xs text-muted-foreground">+{sale.saledetails.length - 2} more items</div>
+                        {sale.Saledetails.length > 2 && (
+                          <div className="text-xs text-muted-foreground">+{sale.Saledetails.length - 2} more items</div>
                         )}
                       </div>
                     </TableCell>
