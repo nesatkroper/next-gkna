@@ -1,3 +1,5 @@
+
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   async headers() {
@@ -13,6 +15,7 @@ const nextConfig = {
       },
     ]
   },
+
   images: {
     domains: ['localhost', 'huotsopheaksakana.site'],
     unoptimized: false,

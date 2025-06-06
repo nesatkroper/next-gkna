@@ -227,7 +227,7 @@ export default function LoginPage() {
               <p className="text-xl text-gray-600 dark:text-gray-300">Complete Fertilizer Management System</p>
             </motion.div>
 
-            <div className="grid lg:grid-cols-2 gap-6 items-between">
+            <div className="grid lg:grid-cols-2 gap-6 items-start">
               {/* Features Section */}
               <motion.div
                 initial={{ opacity: 0, x: -20 }}

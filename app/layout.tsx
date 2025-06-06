@@ -4,9 +4,7 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
-
 import I18nProvider from '@/app/i18n/client';
-import { dir } from 'i18next';
 import { languages } from '@/app/i18n/settings';
 
 export async function generateStaticParams() {
@@ -28,12 +26,12 @@ export default function RootLayout({
   params: { lng: string }
 }>) {
   return (
-    <html lang={lng} dir={dir(lng)} suppressHydrationWarning>
+    <html lang={lng} suppressHydrationWarning>
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-        <I18nProvider>
-          {children}
-</
+          <I18nProvider>
+            {children}
+          </I18nProvider>
           <Toaster />
         </ThemeProvider>
       </body>
