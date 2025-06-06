@@ -24,18 +24,7 @@ import { Plus, Search, Building2, Loader2, RefreshCw } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 import { useBranchStore } from "@/stores/branch-store"
 import { uploadFile } from "@/lib/file-upload"
-
-interface Branch {
-  branchId: string
-  branchName: string
-  branchCode?: string | null
-  picture?: string | null
-  tel?: string | null
-  memo?: string | null
-  status: "active" | "inactive"
-  createdAt: string
-  updatedAt: string
-}
+import { Branch } from "@/lib/generated/prisma"
 
 export default function BranchesPage() {
   const {
@@ -279,15 +268,6 @@ export default function BranchesPage() {
                     name="branchName"
                     required
                     defaultValue={editingBranch?.branchName ?? ""}
-                    disabled={isSaving}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="branchCode">Branch Code</Label>
-                  <Input
-                    id="branchCode"
-                    name="branchCode"
-                    defaultValue={editingBranch?.branchCode ?? ""}
                     disabled={isSaving}
                   />
                 </div>

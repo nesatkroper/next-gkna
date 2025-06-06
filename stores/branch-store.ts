@@ -1,16 +1,7 @@
+import { Branch } from "@/lib/generated/prisma"
 import { create } from "zustand"
 
-interface Branch {
-  branchId: string
-  branchName: string
-  branchCode?: string | null
-  picture?: string | null
-  tel?: string | null
-  memo?: string | null
-  status: "active" | "inactive"
-  createdAt: string
-  updatedAt: string
-}
+
 
 interface BranchStore {
   items: Branch[]

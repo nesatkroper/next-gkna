@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { generateBranchCode } from "@/lib/utils"
 
 export async function GET() {
   try {
@@ -15,6 +16,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const data = await request.json()
+    const branchCode = generateBranchCode();
 
     if (!data.branchName) {
       return NextResponse.json({ error: "Branch name is required" }, { status: 400 })
@@ -23,7 +25,7 @@ export async function POST(request: Request) {
     const branch = await prisma.branch.create({
       data: {
         branchName: data.branchName,
-        branchCode: data.branchCode || null,
+        branchCode,
         picture: data.picture || null,
         tel: data.tel || null,
         memo: data.memo || null,

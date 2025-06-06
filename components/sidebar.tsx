@@ -32,35 +32,26 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { useAppStore } from "@/lib/store/use-app-store"
 import { useCountStore } from "@/stores/count-store"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
-  const { products, categories, customers, employees, departments, positions, isLoadingDepartments, isLoadingPositions, isLoadingCustomers, isLoadingEmployees, isLoadingProducts, isLoadingCategories, fetchCustomers, fetchEmployees, fetchProducts, fetchCategories, fetchDepartments, fetchPositions } = useAppStore()
-
-  const {items, fetch, error, loading} = useCountStore()
+  const { items, fetch  } = useCountStore()
 
   React.useEffect(() => {
     fetch()
   }, [])
 
-  console.log(items)
+  // Define the type for your result object
+  type TableCounts = {
+    [key: string]: string;
+  };
 
-  React.useEffect(() => {
-    if (categories.length === 0 && !isLoadingCategories)
-      fetchCategories()
-    if (products.length === 0 && !isLoadingProducts)
-      fetchProducts()
-    if (employees.length === 0 && !isLoadingEmployees)
-      fetchEmployees()
-    if (customers.length === 0 && !isLoadingCustomers)
-      fetchCustomers()
-    if (departments.length === 0 && !isLoadingDepartments)
-      fetchDepartments()
-    if (positions.length === 0 && !isLoadingPositions)
-      fetchPositions()
-  }, [])
+  // Then use it in your reduce function
+  const result = items.reduce<TableCounts>((acc, item) => {
+    acc[item.table_name] = item.count;
+    return acc;
+  }, {});
 
   const navigation = [
     {
@@ -72,9 +63,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       name: "Inventory",
       icon: Package,
       children: [
-        { name: "Products", href: "/dashboard/products", badge: products.length },
-        { name: "Categories", href: "/dashboard/categories", badge: categories.length },
-        { name: "Brand", href: "/dashboard/brands", badge: categories.length },
+        { name: "Products", href: "/dashboard/products", badge: result.Product },
+        { name: "Categories", href: "/dashboard/categories", badge: result.Category },
+        { name: "Brand", href: "/dashboard/brands", badge: result.Brand },
         { name: "Stock Management", href: "/dashboard/inventory", badge: 12 },
       ],
     },
@@ -82,8 +73,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       name: "Secure",
       icon: ShieldAlert,
       children: [
-        { name: "Authentication", href: "/dashboard/auth", badge: 15 },
-        { name: "Role", href: "/dashboard/roles", badge: employees.length },
+        { name: "Authentication", href: "/dashboard/auth", badge: result.Auth },
+        { name: "Role", href: "/dashboard/roles", badge: result.Role },
         // { name: "Suppliers", href: "/dashboard/suppliers", badge: 15 },
         // { name: "Authentication", href: "/dashboard/auth", badge: 15 },
       ],
@@ -92,9 +83,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       name: "People",
       icon: Users,
       children: [
-        { name: "Employees", href: "/dashboard/employees", badge: employees.length },
-        { name: "Customers", href: "/dashboard/customers", badge: customers.length },
-        { name: "Suppliers", href: "/dashboard/suppliers", badge: 15 },
+        { name: "Employees", href: "/dashboard/employees", badge: result.Employee },
+        { name: "Customers", href: "/dashboard/customers", badge: result.Customer },
+        { name: "Suppliers", href: "/dashboard/suppliers", badge: result.Supplier },
 
       ],
     },
@@ -102,20 +93,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       name: "Organization",
       icon: Building2,
       children: [
-        { name: "Branch", href: "/dashboard/branches", badge: departments.length },
-        { name: "Departments", href: "/dashboard/departments", badge: departments.length },
-        { name: "Positions", href: "/dashboard/positions", badge: positions.length },
-        { name: "Addresses", href: "/dashboard/addresses", badge: positions.length },
-        { name: "Event", href: "/dashboard/events", badge: 15 },
+        { name: "Branch", href: "/dashboard/branches", badge: result.Branch },
+        { name: "Departments", href: "/dashboard/departments", badge: result.Department },
+        { name: "Positions", href: "/dashboard/positions", badge: result.Position },
+        { name: "Addresses", href: "/dashboard/addresses", badge: result.Address },
+        { name: "Event", href: "/dashboard/events", badge: result.Event },
       ],
     },
     {
       name: "Operations",
       icon: ShoppingCart,
       children: [
-        { name: "Sales", href: "/dashboard/sales", badge: 45 },
-        { name: "Attendance", href: "/dashboard/attendance", badge: "new" },
-        { name: "Payments", href: "/dashboard/payments", badge: 8 },
+        { name: "Sales", href: "/dashboard/sales", badge: result.Sale },
+        { name: "Attendance", href: "/dashboard/attendance", badge: result.Attendance },
+        { name: "Payments", href: "/dashboard/payments", badge: result.Payment },
       ],
     },
     {

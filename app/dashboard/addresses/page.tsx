@@ -241,7 +241,7 @@ export default function AddressPage() {
       } else {
         throw new Error("Address operation failed")
       }
-    } catch (error) {
+    } catch (error: any) {
       setIsSaving(false)
       toast({
         title: "Error",
