@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { Button } from "@/components/ui/button"
+import { usePathname } from 'next/navigation';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -91,6 +92,9 @@ function DigitalClock() {
 export function EnhancedHeader() {
   const { setTheme, theme } = useTheme()
   const [notifications] = React.useState(3)
+  const pathname = usePathname()
+  const segments = pathname.split('/')
+  const lastSegment = segments[segments.length - 1]
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -105,7 +109,7 @@ export function EnhancedHeader() {
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem>
-                <BreadcrumbPage>Overview</BreadcrumbPage>
+                <BreadcrumbPage className="capitalize">{lastSegment}</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>

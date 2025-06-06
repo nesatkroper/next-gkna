@@ -34,18 +34,7 @@ export async function POST(request: Request) {
         memo: data.memo || null,
         startDate: new Date(data.startDate),
         endDate: new Date(data.endDate),
-        status: "active",
-        Address: addressData && Object.values(addressData).some((v) => v)
-          ? {
-            create: {
-              street: addressData.street || null,
-              city: addressData.city || null,
-              state: addressData.state || null,
-              zip: addressData.zip || null,
-              country: addressData.country || null,
-            },
-          }
-          : undefined,
+        status: "active"
       },
       include: { Address: true },
     })

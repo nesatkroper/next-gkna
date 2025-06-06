@@ -22,7 +22,7 @@ import { DataCards } from "@/components/ui/data-cards"
 import { Plus, Search, Calendar, Loader2, RefreshCw } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 import { useEventStore } from "@/stores"
-
+import { DatePicker } from "@/components/ui/date-picker"
 interface Event {
   eventId: string
   eventName: string
@@ -58,6 +58,9 @@ export default function EventsPage() {
   const [view, setView] = useState<"table" | "card">("table")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingEvent, setEditingEvent] = useState<Event | null>(null)
+  const [startDate, setStartDate ]= useState<Date | undefined>()
+  const [endDate, setEndDate]=useState<Date | undefined>()
+
 
   useEffect(() => {
     fetchEvents()
@@ -285,24 +288,18 @@ export default function EventsPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="startDate">Start Date *</Label>
-                    <Input
-                      id="startDate"
-                      name="startDate"
-                      type="datetime-local"
-                      required
-                      defaultValue={editingEvent ? formatDateTimeLocal(editingEvent.startDate) : ""}
-                      disabled={isSaving}
+                    <DatePicker
+                      date={startDate}
+                      onDateChange={setStartDate}
+                      placeholder="Select date"
                     />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="endDate">End Date *</Label>
-                    <Input
-                      id="endDate"
-                      name="endDate"
-                      type="datetime-local"
-                      required
-                      defaultValue={editingEvent ? formatDateTimeLocal(editingEvent.endDate) : ""}
-                      disabled={isSaving}
+                    <DatePicker
+                      date={endDate}
+                      onDateChange={setEndDate}
+                      placeholder="Select end date"
                     />
                   </div>
                 </div>
@@ -315,56 +312,6 @@ export default function EventsPage() {
                     defaultValue={editingEvent?.memo ?? ""}
                     disabled={isSaving}
                   />
-                </div>
-                <div className="space-y-2">
-                  <Label>Address</Label>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="street">Street</Label>
-                      <Input
-                        id="street"
-                        name="street"
-                        defaultValue={editingEvent?.Address?.street ?? ""}
-                        disabled={isSaving}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="city">City</Label>
-                      <Input
-                        id="city"
-                        name="city"
-                        defaultValue={editingEvent?.Address?.city ?? ""}
-                        disabled={isSaving}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="state">State</Label>
-                      <Input
-                        id="state"
-                        name="state"
-                        defaultValue={editingEvent?.Address?.state ?? ""}
-                        disabled={isSaving}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="zip">ZIP Code</Label>
-                      <Input
-                        id="zip"
-                        name="zip"
-                        defaultValue={editingEvent?.Address?.zip ?? ""}
-                        disabled={isSaving}
-                      />
-                    </div>
-                    <div className="space-y-2 col-span-2">
-                      <Label htmlFor="country">Country</Label>
-                      <Input
-                        id="country"
-                        name="country"
-                        defaultValue={editingEvent?.Address?.country ?? ""}
-                        disabled={isSaving}
-                      />
-                    </div>
-                  </div>
                 </div>
                 <div className="flex justify-end gap-2">
                   <Button
