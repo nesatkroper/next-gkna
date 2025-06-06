@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import { DatePicker } from "@/components/ui/date-picker"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import {
   Dialog,
@@ -28,6 +29,7 @@ export default function SalesPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [saleItems, setSaleItems] = useState([{ productId: "", quantity: 1, price: 0 }])
+  const [saleDate, setSaleDate] = useState < Date || null > (new Date())
   const inv = generateInvoiceCode();
 
   const {
@@ -158,13 +160,13 @@ export default function SalesPage() {
               New Sale
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
+          <DialogContent className="sm:max-w-[900px] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Create New Sale</DialogTitle>
               <DialogDescription>Record a new sales transaction</DialogDescription>
             </DialogHeader>
             <form onSubmit={handleAddSale} className="space-y-4">
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="customerId">Customer</Label>
                   <Select name="customerId" required>
@@ -179,15 +181,22 @@ export default function SalesPage() {
                       ))}
                     </SelectContent>
                   </Select>
-                </div>                <div className="space-y-2">
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="invoice">Invoice Number</Label>
+                  <Input id="invoice" name="invoice" value={inv} readOnly />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
                   <Label htmlFor="branchId">Branch</Label>
                   <Select name="branchId" required>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select customer" />
+                      <SelectValue placeholder="Leave to choose current" />
                     </SelectTrigger>
                     <SelectContent>
                       {Branch.map((branch) => (
-                        
                         <SelectItem key={branch.branchId} value={branch.branchId}>
                           {branch.branchName}
                         </SelectItem>
@@ -196,8 +205,12 @@ export default function SalesPage() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="invoice">Invoice Number</Label>
-                  <Input id="invoice" name="invoice" value={inv} readOnly />
+                  <Label>Sale Date</Label>
+                  <DatePicker
+                    date={saleDate}
+                    onDateChange={setSaleDate}
+                    placeholder="Select date of birth"
+                  />
                 </div>
               </div>
               <div className="space-y-4">
