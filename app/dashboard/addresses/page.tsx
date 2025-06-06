@@ -339,71 +339,35 @@ export default function AddressPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="cityId">City</Label>
-                    <Select name="cityId" defaultValue={editingAddress?.cityId?.toString()}>
+                    <Select name="cityId" defaultValue={editingAddress?.cityId?.toString() ?? ""}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select city" />
                       </SelectTrigger>
                       <SelectContent>
-                        {cities?.length ? (
-                          cities.map((city) => (
-                            <SelectItem key={city.cityId} value={city.cityId.toString()}>
-                              {city.name}
-                            </SelectItem>
-                          ))
-                        ) : (
-                          <SelectItem disabled value="no-cities">
-                            No cities available
-                          </SelectItem>
-                        )}
-                      </SelectContent>
-                    </Select>
-                    {/* <Select name="cityId" defaultValue={editingAddress?.cityId?.toString() || ""}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select city" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="">None</SelectItem>
+                        <SelectItem value="null">None</SelectItem>
                         {cities.map((city) => (
                           <SelectItem key={city.cityId} value={city.cityId.toString()}>
                             {city.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
-                    </Select> */}
+                    </Select>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="stateId">State</Label>
-                    <Select name="stateId" defaultValue={editingAddress?.stateId?.toString()}>
+                    <Select name="stateId" defaultValue={editingAddress?.stateId ?? ""}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select state" />
                       </SelectTrigger>
                       <SelectContent>
-                        {states?.length ? (
-                          states.map((state) => (
-                            <SelectItem key={state.stateId} value={state.stateId.toString()}>
-                              {state.name}
-                            </SelectItem>
-                          ))
-                        ) : (
-                          <SelectItem disabled value="no-states">
-                            No states available
-                          </SelectItem>
-                        )}
-                      </SelectContent>
-                    </Select>
-                    {/* <Select name="stateId" defaultValue={editingAddress?.stateId || ""}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select state" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="">None</SelectItem>
+                        <SelectItem value="null">None</SelectItem>
                         {states.map((state) => (
                           <SelectItem key={state.stateId} value={state.stateId.toString()}>
                             {state.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
-                    </Select> */}
+                    </Select>
                   </div>
                 </div>
 
@@ -432,23 +396,18 @@ export default function AddressPage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="customerId">Customer</Label>
-                  <Select name="customerId" defaultValue={editingAddress?.customerId}>
+                  <Select name="customerId" defaultValue={editingAddress?.customerId ?? ''}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select customer" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">None</SelectItem>
-                      {customers?.length ? (
-                        customers.map((customer) => (
-                          <SelectItem key={customer.customerId} value={customer.customerId}>
-                            {customer.firstName} {customer.lastName}
-                          </SelectItem>
-                        ))
-                      ) : (
-                        <SelectItem disabled value="no-customers">
-                          No customers available
+                      <SelectItem value="null">None</SelectItem>
+                      {customers.map((customer) => (
+                        <SelectItem key={customer.customerId} value={customer.customerId}>
+                          {customer.firstName} {customer.lastName}
                         </SelectItem>
-                      )}
+                      ))}
+
                     </SelectContent>
                   </Select>
                   {/* <Select name="customerId" defaultValue={editingAddress?.customerId ?? ""}>
@@ -468,12 +427,12 @@ export default function AddressPage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="employeeId">Employee</Label>
-                  <Select name="employeeId" defaultValue={editingAddress?.employeeId || ""}>
+                  <Select name="employeeId" defaultValue={editingAddress?.employeeId ?? ""}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select employee" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">None</SelectItem>
+                      <SelectItem value="null">None</SelectItem>
                       {employees.map((employee) => (
                         <SelectItem key={employee.employeeId} value={employee.employeeId}>
                           {employee.firstName} {employee.lastName}
@@ -485,12 +444,12 @@ export default function AddressPage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="supplierId">Supplier</Label>
-                  <Select name="supplierId" defaultValue={editingAddress?.supplierId || ""}>
+                  <Select name="supplierId" defaultValue={editingAddress?.supplierId ?? ""}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select supplier" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">None</SelectItem>
+                      <SelectItem value="null">None</SelectItem>
                       {suppliers.map((supplier) => (
                         <SelectItem key={supplier.supplierId} value={supplier.supplierId}>
                           {supplier.supplierName}
