@@ -22,25 +22,23 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Search, ShoppingCart, Eye, DollarSign, TrendingUp, Package } from "lucide-react"
 import { formatCurrency, formatDate, generateInvoiceCode } from "@/lib/utils"
-import { useCustomerStore, useEmployeeStore, useProductStore, useSaleStore } from "@/stores"
+import { useAuthStore, useCustomerStore, useProductStore, useSaleStore } from "@/stores"
 import { useBranchStore } from "@/stores/branch-store"
+import { toast } from "sonner"
 
 export default function SalesPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [saleItems, setSaleItems] = useState([{ productId: "", quantity: 1, price: 0 }])
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [saleItems, setSaleItems] = useState([{ productId: "", quantity: 1, price: 0, productName: "" }])
   const [saleDate, setSaleDate] = useState<Date>(new Date())
   const inv = generateInvoiceCode();
+  const { me, fetchMe } = useAuthStore()
 
   const {
     items: Customer,
     fetch: cusFetch,
   } = useCustomerStore();
-
-  const {
-    items: Employee,
-    fetch: empFetch
-  } = useEmployeeStore();
 
   const {
     items: Product,
@@ -61,10 +59,10 @@ export default function SalesPage() {
   useEffect(() => {
     salFetch()
     cusFetch()
-    empFetch()
     proFetch()
     brcFetch()
-  }, [cusFetch, empFetch, proFetch, salFetch, brcFetch])
+    fetchMe()
+  }, [cusFetch, proFetch, salFetch, brcFetch, fetchMe])
 
   const filteredSales = Sale.filter(
     (sale) =>
@@ -82,48 +80,60 @@ export default function SalesPage() {
   }
 
   const updateSaleItem = (index: number, field: string, value: any) => {
-    const updated = [...saleItems]
-    updated[index] = { ...updated[index], [field]: value }
-    setSaleItems(updated)
-  }
+    setSaleItems(prev => prev.map((item, i) =>
+      i === index ? { ...item, [field]: value } : item
+    ));
+  };
 
   const calculateTotal = () => {
     return saleItems.reduce((total, item) => total + item.quantity * item.price, 0)
   }
 
-  const handleAddSale = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    const formData = new FormData(e.currentTarget)
+  const handleAddSale = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Validate all products are selected
+    if (saleItems.some(item => !item.productId)) {
+      toast.error("Please select products for all items");
+      return;
+    }
 
     const saleData = {
-      customerId: formData.get("customerId"),
-      employeeId: formData.get("employeeId"),
+      customerId: (e.currentTarget.elements.namedItem('customerId') as HTMLInputElement).value,
+      branchId: (e.currentTarget.elements.namedItem('branchId') as HTMLInputElement).value,
+      employeeId: me?.employeeId,
       amount: calculateTotal(),
-      invoice: formData.get("invoice"),
-      items: saleItems.map((item) => ({
+      invoice: inv,
+      saleDate: saleDate.toISOString(),
+      items: saleItems.map(item => ({
         productId: item.productId,
         quantity: item.quantity,
         amount: item.quantity * item.price,
       })),
-    }
+    };
+    setIsSubmitting(true);
 
     try {
-      const response = await fetch("/api/sales", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(saleData),
-      })
+      const response = await fetch('/api/sales', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(saleData)
+      });
 
-      if (response.ok) {
-        setIsDialogOpen(false)
-        salFetch()
-        setSaleItems([{ productId: "", quantity: 1, price: 0 }])
-          ; (e.target as HTMLFormElement).reset()
-      }
+      if (!response.ok) throw new Error('Failed to create sale');
+
+      // Reset form on success
+      setSaleItems([{ productId: "", quantity: 1, price: 0 }]);
+      setIsDialogOpen(false);
+      salFetch(); // Refresh sales list
     } catch (error) {
-      console.error("Error adding sale:", error)
+      console.error('Error:', error);
+      toast.error('Failed to create sale');
     }
-  }
+    finally {
+      setIsSubmitting(false);
+    }
+  };
 
   // Calculate stats
   const totalSales = Sale.reduce((sum, sale) => sum + sale.amount, 0)
@@ -162,7 +172,7 @@ export default function SalesPage() {
           </DialogTrigger>
           <DialogContent className="sm:max-w-[900px] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Create New Sale</DialogTitle>
+              <DialogTitle>Create New Sale or Record Saled</DialogTitle>
               <DialogDescription>Record a new sales transaction</DialogDescription>
             </DialogHeader>
             <form onSubmit={handleAddSale} className="space-y-4">
@@ -190,10 +200,10 @@ export default function SalesPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="branchId">Branch</Label>
+                  <Label htmlFor="branchId">Branch ({ })</Label>
                   <Select name="branchId" required>
                     <SelectTrigger>
-                      <SelectValue placeholder="Leave to choose current" />
+                      <SelectValue placeholder="Leave to choose current branch" />
                     </SelectTrigger>
                     <SelectContent>
                       {Branch.map((branch) => (
@@ -226,21 +236,33 @@ export default function SalesPage() {
                   <div key={index} className="grid grid-cols-12 gap-2 items-end">
                     <div className="col-span-5">
                       <Select
+                        name={`products[${index}].productId`}
                         value={item.productId}
                         onValueChange={(value) => {
-                          const product = Product.find((p) => p.productId === value)
-                          updateSaleItem(index, "productId", value)
-                          updateSaleItem(index, "price", product?.sellPrice || 0)
+                          const selectedProduct = Product.find(p => p.productId === value);
+                          if (selectedProduct) {
+                            updateSaleItem(index, "productId", value);
+                            updateSaleItem(index, "price", selectedProduct.sellPrice);
+                          }
                         }}
+                        required
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select product" />
+                          <SelectValue placeholder="Select product">
+                            {item.productId
+                              ? `${Product.find(p => p.productId === item.productId)?.productName || 'Selected'}`
+                              : "Select product"}
+                          </SelectValue>
                         </SelectTrigger>
                         <SelectContent>
                           {Product.map((product) => (
-                            <SelectItem key={product.productId} value={product.productId}>
+                            <SelectItem
+                              key={product.productId}
+                              value={product.productId}
+                            >
                               {product.productName} - {formatCurrency(product.sellPrice)}
                             </SelectItem>
+
                           ))}
                         </SelectContent>
                       </Select>
@@ -274,6 +296,7 @@ export default function SalesPage() {
                       )}
                     </div>
                   </div>
+
                 ))}
 
                 <div className="flex justify-end">
@@ -285,7 +308,9 @@ export default function SalesPage() {
                 <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                   Cancel
                 </Button>
-                <Button type="submit">Create Sale</Button>
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? "Processing..." : "Create Sale"}
+                </Button>
               </div>
             </form>
           </DialogContent>
@@ -398,13 +423,21 @@ export default function SalesPage() {
                     </TableCell>
                     <TableCell>
                       <div className="space-y-1">
-                        {sale.Saledetails.slice(0, 2).map((detail, index) => (
-                          <div key={index} className="text-sm">
-                            {detail.quantity}x {detail.Product.productName}
-                          </div>
-                        ))}
-                        {sale.Saledetails.length > 2 && (
-                          <div className="text-xs text-muted-foreground">+{sale.Saledetails.length - 2} more items</div>
+                        {sale?.Saledetail?.length ? (
+                          <>
+                            {sale.Saledetail.slice(0, 2).map((detail, index) => (
+                              <div key={index} className="text-sm">
+                                {detail.quantity}x {detail.Product?.productName || 'Unknown product'}
+                              </div>
+                            ))}
+                            {sale.Saledetail.length > 2 && (
+                              <div className="text-xs text-muted-foreground">
+                                +{sale.Saledetail.length - 2} more items
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <div className="text-sm text-muted-foreground">No items</div>
                         )}
                       </div>
                     </TableCell>
