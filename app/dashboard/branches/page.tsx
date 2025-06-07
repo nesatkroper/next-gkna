@@ -25,6 +25,7 @@ import { useToast } from "@/components/ui/use-toast"
 import { useBranchStore } from "@/stores/branch-store"
 import { uploadFile } from "@/lib/file-upload"
 import { Branch } from "@/lib/generated/prisma"
+import { t } from "i18next"
 
 export default function BranchesPage() {
   const {
@@ -228,14 +229,14 @@ export default function BranchesPage() {
         className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
       >
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Branches</h1>
-          <p className="text-muted-foreground">Manage your branch network</p>
+          <h1 className="text-3xl font-bold tracking-tight">{t("Branches")}</h1>
+          <p className="text-muted-foreground">{t("Manage your branch network")}</p>
         </div>
 
         <div className="flex gap-2">
           <Button variant="outline" onClick={handleRetry} disabled={branchLoading}>
             <RefreshCw className={`mr-2 h-4 w-4 ${branchLoading ? "animate-spin" : ""}`} />
-            Refresh
+            {t("Refresh")}
           </Button>
           <Dialog
             open={isDialogOpen}
@@ -250,7 +251,7 @@ export default function BranchesPage() {
             <DialogTrigger asChild>
               <Button>
                 <Plus className="mr-2 h-4 w-4" />
-                Add Branch
+                {t("Add Branch")}
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px]">
@@ -262,7 +263,7 @@ export default function BranchesPage() {
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="branchName">Branch Name *</Label>
+                  <Label htmlFor="branchName">{t("Branch Name")} *</Label>
                   <Input
                     id="branchName"
                     name="branchName"
@@ -272,7 +273,7 @@ export default function BranchesPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="tel">Phone Number</Label>
+                  <Label htmlFor="tel">{t("Phone Numbe")}r</Label>
                   <Input
                     id="tel"
                     name="tel"
@@ -282,7 +283,7 @@ export default function BranchesPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="memo">Memo</Label>
+                  <Label htmlFor="memo">{t("Memo")}</Label>
                   <Textarea
                     id="memo"
                     name="memo"
@@ -292,7 +293,7 @@ export default function BranchesPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Branch Image</Label>
+                  <Label>{t("Branch Image")}</Label>
                   <FileUpload
                     onFileSelect={(file) => setSelectedFile(file)}
                     accept="image/*"
@@ -310,7 +311,7 @@ export default function BranchesPage() {
                     onClick={() => setIsDialogOpen(false)}
                     disabled={isSaving}
                   >
-                    Cancel
+                    {t("Cancel")}
                   </Button>
                   <Button type="submit" disabled={isSaving}>
                     {isSaving ? (
@@ -336,7 +337,7 @@ export default function BranchesPage() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-destructive font-medium">Error loading data</p>
+                <p className="text-destructive font-medium">{t("Error loading data")}</p>
                 <p className="text-sm text-muted-foreground">{branchError}</p>
               </div>
               <Button
@@ -344,7 +345,7 @@ export default function BranchesPage() {
                 onClick={handleRetry}
                 disabled={branchLoading}
               >
-                Try Again
+                {t("Try Again")}
               </Button>
             </div>
           </CardContent>
@@ -357,7 +358,7 @@ export default function BranchesPage() {
             <div>
               <CardTitle className="flex items-center gap-2">
                 <Building2 className="h-5 w-5" />
-                Branch Network
+                {t("Branch Network")}
                 {branchLoading && <Loader2 className="h-4 w-4 animate-spin" />}
               </CardTitle>
               <CardDescription>{filteredBranches.length} active branches</CardDescription>

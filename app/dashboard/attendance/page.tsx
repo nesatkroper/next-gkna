@@ -196,8 +196,9 @@ export default function AttendancePage() {
         className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
       >
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Attendance</h1>
-          <p className="text-muted-foreground">Track employee attendance and working hours</p>
+          <h1 className="text-3xl font-bold tracking-tight">{t
+            ("Attendance")}</h1>
+          <p className="text-muted-foreground">{t("Track employee attendance and working hours")}</p>
         </div>
 
         <Dialog
@@ -210,7 +211,7 @@ export default function AttendancePage() {
           <DialogTrigger asChild>
             <Button>
               <Plus className="mr-2 h-4 w-4" />
-              Mark Attendance
+              {t(" Mark Attendance")}
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[600px]">
@@ -223,7 +224,7 @@ export default function AttendancePage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="employeeId">Employee</Label>
+                  <Label htmlFor="employeeId">{t("Employee")}</Label>
                   <Select
                     name="employeeId"
                     required
@@ -263,7 +264,7 @@ export default function AttendancePage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="checkIn">Check In</Label>
+                  <Label htmlFor="checkIn">{t("Check In")}</Label>
                   <Input
                     id="checkIn"
                     name="checkIn"
@@ -274,7 +275,7 @@ export default function AttendancePage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="checkOut">Check Out</Label>
+                  <Label htmlFor="checkOut">{t("Check Out")}</Label>
                   <Input
                     id="checkOut"
                     name="checkOut"
@@ -287,22 +288,22 @@ export default function AttendancePage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="status">Status</Label>
+                <Label htmlFor="status">{t("Status")}</Label>
                 <Select name="status" required defaultValue={editingAttendance?.status || "present"}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="present">Present</SelectItem>
-                    <SelectItem value="absent">Absent</SelectItem>
-                    <SelectItem value="late">Late</SelectItem>
-                    <SelectItem value="halfday">Half Day</SelectItem>
+                    <SelectItem value="present">{t("Present")}</SelectItem>
+                    <SelectItem value="absent">{t("Absent")}</SelectItem>
+                    <SelectItem value="late">{t("Late")}</SelectItem>
+                    <SelectItem value="halfday">{t("Half Day")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="note">Notes</Label>
+                <Label htmlFor="note">{t("Notes")}</Label>
                 <Textarea id="note" name="note" rows={3} defaultValue={editingAttendance?.note || ""} />
               </div>
 
@@ -322,12 +323,12 @@ export default function AttendancePage() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Employees</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("Total Employee")}s</CardTitle>
               <Users className="h-4 w-4 text-blue-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{employees.length}</div>
-              <p className="text-xs text-muted-foreground">Active employees</p>
+              <p className="text-xs text-muted-foreground">{t("Active employees")}</p>
             </CardContent>
           </Card>
         </motion.div>
@@ -335,12 +336,12 @@ export default function AttendancePage() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Present Today</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("Present Today")}</CardTitle>
               <UserCheck className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{presentCount}</div>
-              <p className="text-xs text-muted-foreground">Employees present</p>
+              <p className="text-xs text-muted-foreground">{t("Employees presen")}t</p>
             </CardContent>
           </Card>
         </motion.div>
@@ -348,12 +349,12 @@ export default function AttendancePage() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Absent Today</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("Absent Toda")}y</CardTitle>
               <Users className="h-4 w-4 text-red-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{absentCount}</div>
-              <p className="text-xs text-muted-foreground">Employees absent</p>
+              <p className="text-xs text-muted-foreground">{t"Employees absent"}</p>
             </CardContent>
           </Card>
         </motion.div>
@@ -361,12 +362,12 @@ export default function AttendancePage() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Late Arrivals</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("Late Arrival")}s</CardTitle>
               <Clock className="h-4 w-4 text-orange-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{lateCount}</div>
-              <p className="text-xs text-muted-foreground">Late today</p>
+              <p className="text-xs text-muted-foreground">{t("Late today")}</p>
             </CardContent>
           </Card>
         </motion.div>
@@ -376,9 +377,9 @@ export default function AttendancePage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />
-            Daily Attendance
+            {t("Daily Attendance")}
           </CardTitle>
-          <CardDescription>Attendance records for {formatDate(selectedDate)}</CardDescription>
+          <CardDescription>{t("Attendance records for")} {formatDate(selectedDate)}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-4 mb-6">
@@ -403,14 +404,14 @@ export default function AttendancePage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Employee</TableHead>
-                  <TableHead>Department</TableHead>
-                  <TableHead>Check In</TableHead>
-                  <TableHead>Check Out</TableHead>
-                  <TableHead>Working Hours</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Notes</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>{t("Employee")</TableHead>
+                  <TableHead>{t("Department")}</TableHead>
+                  <TableHead>{t("Check In")}</TableHead>
+                  <TableHead>{t("Check Out")}t</TableHead>
+                  <TableHead>{t("Working Hour")}s</TableHead>
+                  <TableHead>{t("Status")}</TableHead>
+                  <TableHead>{t("Notes")}</TableHead>
+                  <TableHead className="text-right">{t("Actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
