@@ -1,120 +1,110 @@
-import { create } from "zustand"
-import { devtools } from "zustand/middleware"
-import { createBaseStore } from "./base-store-factory"
-import type { BaseStore } from "@/types/store-types"
-import { Stock, Stockentry } from "@/lib/generated/prisma"
+import { create } from "zustand";
 
-
-export interface CreateStockData {
-  productId: string
-  memo?: string
-  quantity: number
+interface StockEntry {
+  entryId: string;
+  productId: string;
+  supplierId: string;
+  quantity: number;
+  entryPrice: number;
+  entryDate?: string | null;
+  invoice?: string | null;
+  memo?: string | null;
+  status: "active" | "inactive";
+  createdAt: string;
+  updatedAt: string;
+  Product?: { productId: string; productName: string; productCode: string | null } | null;
+  Supplier?: { supplierId: string; name: string } | null;
 }
 
-export interface CreateStockEntryData {
-  quantity: number
-  memo?: string
-  entryPrice: number
-  entryDate?: Date
-  productId: string
-  supplierId: string
-  invoice?: string
+interface StockStore {
+  items: StockEntry[];
+  isLoading: boolean;
+  error: string | null;
+  fetch: (params?: { page?: number; limit?: number; search?: string; lowStock?: boolean }) => Promise<void>;
+  create: (data: Partial<StockEntry>) => Promise<boolean>;
+  update: (id: string, data: Partial<StockEntry>) => Promise<boolean>;
+  delete: (id: string) => Promise<boolean>;
 }
 
-export type StockStore = BaseStore<Stock, CreateStockData> & {
-  stockEntries: Stockentry[]
-  isLoadingStockEntries: boolean
-  isCreatingStockEntry: boolean
-  stockEntriesError: string | null
-  fetchStockEntries: (productId: string) => Promise<void>
-  createStockEntry: (data: CreateStockEntryData) => Promise<boolean>
-}
+export const useStockStore = create<StockStore>((set) => ({
+  items: [],
+  isLoading: false,
+  error: null,
+  fetch: async (params = {}) => {
+    set({ isLoading: true, error: null });
+    try {
+      const { page = 1, limit = 10, search = "", lowStock = false } = params;
+      const query = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+        ...(search && { search }),
+        ...(lowStock && { lowStock: "true" }),
+      }).toString();
 
-export const useStockStore = create<StockStore>()(
-  devtools(
-    (set, get) => ({
-      ...createBaseStore<Stock, CreateStockData>({
-        endpoint: "/api/stocks",
-        entityName: "stocks",
-        idField: "stockId",
-      })(set, get),
-
-      // Additional state for stock entries
-      stockEntries: [],
-      isLoadingStockEntries: false,
-      isCreatingStockEntry: false,
-      stockEntriesError: null,
-
-      // Custom method to fetch stock entries
-      fetchStockEntries: async (productId: string) => {
-        set({ isLoadingStockEntries: true, stockEntriesError: null })
-
-        try {
-          const response = await fetch(`/api/products/${productId}/stock-entries`)
-          if (!response.ok) throw new Error("Failed to fetch stock entries")
-
-          const data = await response.json()
-          const entries = Array.isArray(data) ? data : data.entries || []
-
-          set({ stockEntries: entries, isLoadingStockEntries: false })
-        } catch (error: unknown) {
-          const errorMessage = error instanceof Error ? error.message : "An unknown error occurred"
-          set({
-            stockEntriesError: errorMessage,
-            isLoadingStockEntries: false,
-          })
-        }
-      },
-
-      // Custom method to create stock entry
-      createStockEntry: async (entryData: CreateStockEntryData) => {
-        set({ isCreatingStockEntry: true, stockEntriesError: null })
-
-        try {
-          const response = await fetch("/api/stock-entries", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(entryData),
-          })
-
-          if (!response.ok) {
-            const errorData = await response.json()
-            throw new Error(errorData.error || "Failed to create stock entry")
-          }
-
-          const newEntry = await response.json()
-
-          set((state) => ({
-            stockEntries: [newEntry, ...state.stockEntries],
-            isCreatingStockEntry: false,
-          }))
-
-          // Update the stock quantity if this entry is for a product we already have in stock
-          const { items } = get()
-          const stockItem = items.find((item) => item.productId === entryData.productId)
-
-          if (stockItem) {
-            const updatedStock = {
-              ...stockItem,
-              quantity: stockItem.quantity + entryData.quantity,
-            }
-
-            set((state) => ({
-              items: state.items.map((item) => (item.productId === entryData.productId ? updatedStock : item)),
-            }))
-          }
-
-          return true
-        } catch (error: unknown) {
-          const errorMessage = error instanceof Error ? error.message : "An unknown error occurred"
-          set({
-            stockEntriesError: errorMessage,
-            isCreatingStockEntry: false,
-          })
-          return false
-        }
-      },
-    }),
-    { name: "stock-store" },
-  ),
-)
+      const response = await fetch(`/api/stockentries?${query}`);
+      if (!response.ok) throw new Error("Failed to fetch stock entries");
+      const data = await response.json();
+      set({
+        items: Array.isArray(data.stockEntries) ? data.stockEntries : [],
+        isLoading: false,
+      });
+    } catch (error: any) {
+      set({ error: error.message || "Failed to fetch stock entries", isLoading: false });
+    }
+  },
+  create: async (data) => {
+    try {
+      const response = await fetch("/api/stockentries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to create stock entry");
+      }
+      const newEntry = await response.json();
+      set((state) => ({ items: [...state.items, newEntry] }));
+      return true;
+    } catch (error: any) {
+      throw error;
+    }
+  },
+  update: async (id, data) => {
+    try {
+      const response = await fetch(`/api/stockentries/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update stock entry");
+      }
+      const updatedEntry = await response.json();
+      set((state) => ({
+        items: state.items.map((item) => (item.entryId === id ? updatedEntry : item)),
+      }));
+      return true;
+    } catch (error: any) {
+      throw error;
+    }
+  },
+  delete: async (id) => {
+    try {
+      const response = await fetch(`/api/stockentries/${id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to delete stock entry");
+      }
+      set((state) => ({
+        items: state.items.filter((item) => item.entryId !== id),
+      }));
+      return true;
+    } catch (error: any) {
+      throw error;
+    }
+  },
+}));

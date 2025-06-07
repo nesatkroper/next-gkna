@@ -24,25 +24,8 @@ export async function GET(request: NextRequest) {
       ...(lowStock && { quantity: { lt: 50 } }),
     }
 
-    const [stocks, total] = await Promise.all([
-      prisma.stock.findMany({
-        where,
-        include: {
-          product: {
-            include: {
-              category: true,
-            },
-          },
-        },
-        skip,
-        take: limit,
-        orderBy: { updatedAt: "desc" },
-      }),
-      prisma.stock.count({ where }),
-    ])
-
     return NextResponse.json({
-      stocks,
+
       pagination: {
         page,
         limit,
