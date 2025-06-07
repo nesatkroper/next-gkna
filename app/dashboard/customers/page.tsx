@@ -26,6 +26,7 @@ import { Plus, Search, Users, Loader2, RefreshCw, Phone, Mail } from "lucide-rea
 import { useToast } from "@/components/ui/use-toast"
 import { useCustomerStore } from "@/stores/customer-store"
 import { useEmployeeStore } from "@/stores/employee-store"
+import { t } from "i18next"
 
 export default function CustomersPage() {
   const {
@@ -271,14 +272,14 @@ export default function CustomersPage() {
         className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
       >
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Customers</h1>
-          <p className="text-muted-foreground">Manage your customer relationships and contact information</p>
+          <h1 className="text-3xl font-bold tracking-tight">{("Customers")}</h1>
+          <p className="text-muted-foreground">{t("Manage your customer relationships and contact information")}</p>
         </div>
 
         <div className="flex gap-2">
           <Button variant="outline" onClick={handleRetry} disabled={custLoading || empLoading}>
             <RefreshCw className={`mr-2 h-4 w-4 ${custLoading || empLoading ? "animate-spin" : ""}`} />
-            Refresh
+            {t("Refresh")}
           </Button>
 
           <Dialog
@@ -291,7 +292,7 @@ export default function CustomersPage() {
             <DialogTrigger asChild>
               <Button disabled={employees.length === 0}>
                 <Plus className="mr-2 h-4 w-4" />
-                Add Customer
+                {t("Add Customer")}
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[600px]">
@@ -304,7 +305,7 @@ export default function CustomersPage() {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="firstName">First Name *</Label>
+                    <Label htmlFor="firstName">{t("First Name")} *</Label>
                     <Input
                       id="firstName"
                       name="firstName"
@@ -313,7 +314,7 @@ export default function CustomersPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="lastName">Last Name *</Label>
+                    <Label htmlFor="lastName">{t("Last Name")} *</Label>
                     <Input
                       id="lastName"
                       name="lastName"
@@ -341,7 +342,7 @@ export default function CustomersPage() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Phone</Label>
+                    <Label htmlFor="phone">{t("Phone")}</Label>
                     <Input
                       id="phone"
                       name="phone"
@@ -353,7 +354,7 @@ export default function CustomersPage() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="email">{t("Email")}</Label>
                     <Input
                       id="email"
                       name="email"
@@ -362,7 +363,7 @@ export default function CustomersPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="region">Region</Label>
+                    <Label htmlFor="region">{t("Region")}</Label>
                     <Input
                       id="region"
                       name="region"
@@ -381,7 +382,7 @@ export default function CustomersPage() {
                       <SelectValue placeholder="Select employee (optional)" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">None</SelectItem>
+                      <SelectItem value="">{t("None")}</SelectItem>
                       {employees.map((employee) => (
                         <SelectItem key={employee.employeeId} value={employee.employeeId}>
                           {employee.firstName} {employee.lastName}
@@ -392,7 +393,7 @@ export default function CustomersPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="note">Notes</Label>
+                  <Label htmlFor="note">{t("Notes")}</Label>
                   <Textarea
                     id="note"
                     name="note"
@@ -403,7 +404,7 @@ export default function CustomersPage() {
 
                 <div className="flex justify-end gap-2">
                   <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                    Cancel
+                    {t("Cancel")}
                   </Button>
                   <Button type="submit" disabled={isSaving}>
                     {isSaving ? (
@@ -430,7 +431,7 @@ export default function CustomersPage() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-destructive font-medium">Error loading data</p>
+                <p className="text-destructive font-medium">{t("Error loading data")}</p>
                 <p className="text-sm text-muted-foreground">{custError || empError}</p>
               </div>
               <Button variant="outline" onClick={handleRetry}>
@@ -447,7 +448,7 @@ export default function CustomersPage() {
             <div>
               <CardTitle className="flex items-center gap-2">
                 <Users className="h-5 w-5" />
-                Customer Directory
+                {t("Customer Directory")}
                 {(custLoading || empLoading) && <Loader2 className="h-4 w-4 animate-spin" />}
               </CardTitle>
               <CardDescription>{filteredCustomers.length} customers in your database</CardDescription>

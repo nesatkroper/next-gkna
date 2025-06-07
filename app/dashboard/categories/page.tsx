@@ -24,6 +24,7 @@ import { DataCards } from "@/components/ui/data-cards"
 import { Plus, Search, FolderOpen, Loader2, RefreshCw } from "lucide-react"
 import { useCategoryStore } from "@/stores/category-store"
 import { useToast } from "@/components/ui/use-toast"
+import { t } from "i18next"
 
 export default function CategoriesPage() {
   const {
@@ -179,14 +180,14 @@ export default function CategoriesPage() {
         className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
       >
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Categories</h1>
-          <p className="text-muted-foreground">Organize your products with categories</p>
+          <h1 className="text-3xl font-bold tracking-tight">{t("Categories")}</h1>
+          <p className="text-muted-foreground">{t("Organize your products with categories")}</p>
         </div>
 
         <div className="flex gap-2">
           <Button variant="outline" onClick={handleRetry} disabled={isLoading}>
             <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
-            Refresh
+            {t("Refresh")}
           </Button>
 
           <Dialog
@@ -199,7 +200,7 @@ export default function CategoriesPage() {
             <DialogTrigger asChild>
               <Button>
                 <Plus className="mr-2 h-4 w-4" />
-                Add Category
+                {t("Add Category")}
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px]">
@@ -211,7 +212,7 @@ export default function CategoriesPage() {
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="categoryName">Category Name *</Label>
+                  <Label htmlFor="categoryName">{t("Category Name")} *</Label>
                   <Input
                     id="categoryName"
                     name="categoryName"
@@ -227,7 +228,7 @@ export default function CategoriesPage() {
 
                 <div className="flex justify-end gap-2">
                   <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                    Cancel
+                    {t("Cancel")}
                   </Button>
                   <Button type="submit" disabled={isSaving}>
                     {isSaving ? (
@@ -255,7 +256,7 @@ export default function CategoriesPage() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-destructive font-medium">Error loading data</p>
+                <p className="text-destructive font-medium">{t("Error loading data")}</p>
                 <p className="text-sm text-muted-foreground">{error}</p>
               </div>
               <Button variant="outline" onClick={handleRetry}>
@@ -272,7 +273,7 @@ export default function CategoriesPage() {
             <div>
               <CardTitle className="flex items-center gap-2">
                 <FolderOpen className="h-5 w-5" />
-                Categories
+                {t("Categories")}
                 {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
               </CardTitle>
               <CardDescription>{filteredCategories.length} categories available</CardDescription>

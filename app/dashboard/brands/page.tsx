@@ -25,8 +25,10 @@ import { useToast } from "@/components/ui/use-toast"
 import { useBrandStore } from "@/stores/brand-store"
 import { uploadFile } from "@/lib/file-upload"
 import { Brand } from "@/lib/generated/prisma"
+import { useTranslation } from "react-i18next"
 
 export default function BrandsPage() {
+  const { t } = useTranslation('common')
   const {
     items: brands,
     isLoading: brandLoading,
@@ -216,14 +218,14 @@ export default function BrandsPage() {
         className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
       >
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Brands</h1>
-          <p className="text-muted-foreground">Manage your brand catalog</p>
+          <h1 className="text-3xl font-bold tracking-tight">{t('Brands')}</h1>
+          <p className="text-muted-foreground">{t("Manage your brand catalog")}</p>
         </div>
 
         <div className="flex gap-2">
           <Button variant="outline" onClick={handleRetry} disabled={brandLoading}>
             <RefreshCw className={`mr-2 h-4 w-4 ${brandLoading ? "animate-spin" : ""}`} />
-            Refresh
+            {t("Refresh")}
           </Button>
           <Dialog
             open={isDialogOpen}
@@ -238,7 +240,7 @@ export default function BrandsPage() {
             <DialogTrigger asChild>
               <Button>
                 <Plus className="mr-2 h-4 w-4" />
-                Add Brand
+                {t("Add Brand")}
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px]">
@@ -250,7 +252,7 @@ export default function BrandsPage() {
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="brandName">Brand Name *</Label>
+                  <Label htmlFor="brandName">{t("Brand Name")} *</Label>
                   <Input
                     id="brandName"
                     name="brandName"
@@ -260,7 +262,7 @@ export default function BrandsPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="memo">Memo</Label>
+                  <Label htmlFor="memo">{t("Memo")}</Label>
                   <Textarea
                     id="memo"
                     name="memo"
@@ -270,7 +272,7 @@ export default function BrandsPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Brand Image</Label>
+                  <Label>{t("Brand Image")}</Label>
                   <FileUpload
                     onFileSelect={(file) => setSelectedFile(file)}
                     accept="image/*"
@@ -288,7 +290,7 @@ export default function BrandsPage() {
                     onClick={() => setIsDialogOpen(false)}
                     disabled={isSaving}
                   >
-                    Cancel
+                    {t("Cancel")}
                   </Button>
                   <Button type="submit" disabled={isSaving}>
                     {isSaving ? (
@@ -314,7 +316,7 @@ export default function BrandsPage() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-destructive font-medium">Error loading data</p>
+                <p className="text-destructive font-medium">{t("Error loading data")}</p>
                 <p className="text-sm text-muted-foreground">{brandError}</p>
               </div>
               <Button
@@ -335,7 +337,7 @@ export default function BrandsPage() {
             <div>
               <CardTitle className="flex items-center gap-2">
                 <Tag className="h-5 w-5" />
-                Brand Catalog
+                {t("Brand Catalog")}
                 {brandLoading && <Loader2 className="h-4 w-4 animate-spin" />}
               </CardTitle>
               <CardDescription>{filteredBrands.length} active brands</CardDescription>
