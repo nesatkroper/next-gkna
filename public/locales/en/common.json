@@ -1,4 +1,5 @@
 {
-    "welcome": "Welcome",
-    "description": "This is a Next.js application with i18n"
-  }
+  "welcome": "Welcome",
+  "description": "This is a Next.js application with i18n",
+  "dashboard": "dashboard"
+}

@@ -2,23 +2,72 @@
 
 import { usePathname, useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Globe } from 'lucide-react';
+import ReactCountryFlag from 'react-country-flag';
 
 export default function LanguageSwitcher() {
   const { i18n } = useTranslation();
   const router = useRouter();
   const pathname = usePathname();
 
+  const languages = [
+    { code: 'en', name: 'English', countryCode: 'GB' },
+    { code: 'kh', name: 'Cambodia', countryCode: 'KH' },
+
+  ];
+
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
-    // Update the URL without refreshing the page
     router.push(pathname.replace(`/${i18n.language}`, `/${lng}`));
   };
 
   return (
-    <div>
-      <button onClick={() => changeLanguage('en')}>English</button>
-      <button onClick={() => changeLanguage('fr')}>Français</button>
-      <button onClick={() => changeLanguage('es')}>Español</button>
-    </div>
+    <DropdownMenu>
+      <DropdownMenuTrigger className="flex items-center rounded-md p-2 hover:bg-gray-100 focus:outline-none">
+        <Globe className="h-5 w-5" />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        {languages.map((lang) => (
+          <DropdownMenuItem
+            key={lang.code}
+            onClick={() => changeLanguage(lang.code)}
+            className="flex items-center gap-2"
+          >
+            <ReactCountryFlag
+              countryCode={lang.countryCode}
+              svg
+              style={{ width: '1.5em', height: '1.5em' }}
+              title={lang.name}
+            />
+            <span>{lang.name}</span>
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
+
+// 'use client';
+
+// import { usePathname, useRouter } from 'next/navigation';
+// import { useTranslation } from 'react-i18next';
+
+// export default function LanguageSwitcher() {
+//   const { i18n } = useTranslation();
+//   const router = useRouter();
+//   const pathname = usePathname();
+
+//   const changeLanguage = (lng: string) => {
+//     i18n.changeLanguage(lng);
+//     router.push(pathname.replace(`/${i18n.language}`, `/${lng}`));
+//   };
+
+//   return (
+//     <div>
+//       <button onClick={() => changeLanguage('en')}>English</button>
+//       <button onClick={() => changeLanguage('fr')}>Français</button>
+//       <button onClick={() => changeLanguage('es')}>Español</button>
+//     </div>
+//   );
+// }

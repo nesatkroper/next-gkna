@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     })
 
     return NextResponse.json(departments)
-  } catch (error) {
+  } catch (error: any) {
     console.error("Departments fetch error:", error.message)
     return NextResponse.json({ error: "Failed to fetch departments" }, { status: 500 })
   }
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     })
 
     return NextResponse.json(department, { status: 201 })
-  } catch (error) {
+  } catch (error: any) {
     console.error("Department creation error:", error.message)
     return NextResponse.json({ error: "Failed to create department" }, { status: 500 })
   }

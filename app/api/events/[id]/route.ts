@@ -27,26 +27,6 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         startDate: data.startDate ? new Date(data.startDate) : undefined,
         endDate: data.endDate ? new Date(data.endDate) : undefined,
         updatedAt: new Date(),
-        Address: addressData
-          ? {
-            upsert: {
-              create: {
-                street: addressData.street || null,
-                city: addressData.city || null,
-                state: addressData.state || null,
-                zip: addressData.zip || null,
-                country: addressData.country || null,
-              },
-              update: {
-                street: addressData.street || null,
-                city: addressData.city || null,
-                state: addressData.state || null,
-                zip: addressData.zip || null,
-                country: addressData.country || null,
-              },
-            },
-          }
-          : undefined,
       },
       include: { Address: true },
     })

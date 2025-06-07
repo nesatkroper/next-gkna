@@ -9,9 +9,11 @@ import { Progress } from "@/components/ui/progress"
 import { CalendarDays, Package, TrendingUp, AlertTriangle } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useAuthStore } from "@/stores"
+import { useTranslation } from "react-i18next"
 
 export default function DashboardPage() {
   const { me, fetchMe } = useAuthStore()
+  const { t } = useTranslation('common')
 
   useEffect(() => {
     if (!me) {
@@ -24,14 +26,13 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t('dashboard')}</h1>
         <p className="text-muted-foreground">Welcome back! Here's what's happening with your fertilizer business.</p>
       </motion.div>
 
       <DashboardStats />
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {/* Recent Sales */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
           <Card>
             <CardHeader>

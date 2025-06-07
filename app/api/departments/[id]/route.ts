@@ -27,7 +27,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     }
 
     return NextResponse.json(department)
-  } catch (error) {
+  } catch (error: any) {
     console.error("Department fetch error:", error)
     return NextResponse.json({ error: "Failed to fetch department" }, { status: 500 })
   }
@@ -55,7 +55,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     })
 
     return NextResponse.json(department)
-  } catch (error) {
+  } catch (error: any) {
     console.error("Department update error:", error)
     return NextResponse.json({ error: "Failed to update department" }, { status: 500 })
   }
@@ -63,7 +63,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    // Check if department has employees
+
     const employeesCount = await prisma.employee.count({
       where: { departmentId: params.id, status: "active" },
     })
@@ -81,7 +81,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     })
 
     return NextResponse.json({ message: "Department deleted successfully", department })
-  } catch (error) {
+  } catch (error: any) {
     console.error("Department delete error:", error)
     return NextResponse.json({ error: "Failed to delete department" }, { status: 500 })
   }

@@ -25,6 +25,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import LanguageSwitcher from "./lang-switch";
 
 function DigitalClock() {
   const [time, setTime] = React.useState<Date | null>(null)
@@ -125,6 +126,8 @@ export function EnhancedHeader() {
             <DigitalClock />
 
             <Separator orientation="vertical" className="h-4 mx-2" />
+
+            <LanguageSwitcher />
 
             <Button
               variant="ghost"
