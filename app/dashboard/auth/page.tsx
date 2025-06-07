@@ -26,9 +26,12 @@ import { useAuthenticationStore } from "@/stores/authentication-store"
 import { useRoleStore } from "@/stores/role-store"
 import { useEmployeeStore } from "@/stores/employee-store"
 import { Auth } from "@/lib/generated/prisma"
+import { useTranslation } from "react-i18next"
+import { usePermissions } from "@/hooks/use-permissions"
 
 export default function AuthPage() {
   const { t } = useTranslation('common')
+  const { canCreate, canUpdate, canDelete } = usePermissions();
   const {
     items: auths,
     isLoading: authLoading,

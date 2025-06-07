@@ -9,11 +9,11 @@ const protectedRoutes: Record<string, string[]> = {
   "/roles": ["admin", "manager"],
   "/reports": ["admin", "manager"],
   "/dashboard": ["admin", "manager"],
-  "/employees": ["admin", "manager",],
-  "/products": ["admin", "manager", "staff",],
-  "/inventory": ["admin", "manager", "staff"],
-  "/categories": ["admin", "manager", "staff"],
-  "/profile": ["admin", "manager", "staff", "user", 'agent'],
+  "/dashboard/employees": ["admin", "manager",],
+  "/dashboard/products": ["admin", "manager", "staff",],
+  "/dashboard/inventory": ["admin", "manager", "staff"],
+  "/dashboard/categories": ["admin", "manager", "staff"],
+  "/dashboard/profile": ["admin", "manager", "staff", "user", 'agent'],
 }
 
 const publicRoutes = [
@@ -76,6 +76,17 @@ export async function middleware(request: NextRequest) {
       "Content-Security-Policy",
       "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self';"
     )
+
+    response.cookies.set("permissions", JSON.stringify({
+      canCreate: ["admin", "manager", "staff"].includes(decoded.role),
+      canUpdate: ["admin", "manager"].includes(decoded.role),
+      canDelete: ["admin"].includes(decoded.role),
+    }), {
+      httpOnly: false, // Must be false to access via client-side JS
+      sameSite: "lax",
+      path: "/"
+    });
+
 
     return response
   } catch (error) {

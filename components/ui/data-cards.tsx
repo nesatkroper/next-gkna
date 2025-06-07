@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Edit, Trash2, Eye } from "lucide-react"
 import { formatCurrency } from "@/lib/utils"
+import { usePermissions } from "@/hooks/use-permissions"
 
 interface CardField {
   key: string
@@ -52,6 +53,8 @@ export function DataCards({
     5: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5",
     6: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6",
   }
+
+  const { canUpdate } = usePermissions()
 
   const renderField = (field: CardField, value: any, row: any) => {
     if (field.render) {
@@ -192,7 +195,7 @@ export function DataCards({
                         View
                       </Button>
                     )}
-                    {onEdit && (
+                    {onEdit && canUpdate && (
                       <Button variant="outline" size="sm" className="flex-1" onClick={() => onEdit(row)}>
                         <Edit className="h-4 w-4 mr-1" />
                         Edit
