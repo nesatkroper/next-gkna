@@ -22,6 +22,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Search, Calendar, Clock, Edit, Trash2, UserCheck, Users } from "lucide-react"
 import { formatDate } from "@/lib/utils"
+import { useTranslation } from "react-i18next"
 
 interface Attendance {
   attendanceId: string
@@ -51,6 +52,7 @@ interface Employee {
 }
 
 export default function AttendancePage() {
+  const { t } = useTranslation('common')
   const [attendances, setAttendances] = useState<Attendance[]>([])
   const [employees, setEmployees] = useState<Employee[]>([])
   const [loading, setLoading] = useState(true)
@@ -122,7 +124,7 @@ export default function AttendancePage() {
         setIsDialogOpen(false)
         setEditingAttendance(null)
         fetchAttendances()
-        ;(e.target as HTMLFormElement).reset()
+          ; (e.target as HTMLFormElement).reset()
       }
     } catch (error) {
       console.error("Error saving attendance:", error)
@@ -228,10 +230,10 @@ export default function AttendancePage() {
                     defaultValue={
                       editingAttendance?.employee
                         ? employees.find(
-                            (e) =>
-                              `${e.firstName} ${e.lastName}` ===
-                              `${editingAttendance.employee.firstName} ${editingAttendance.employee.lastName}`,
-                          )?.employeeId
+                          (e) =>
+                            `${e.firstName} ${e.lastName}` ===
+                            `${editingAttendance.employee.firstName} ${editingAttendance.employee.lastName}`,
+                        )?.employeeId
                         : ""
                     }
                   >

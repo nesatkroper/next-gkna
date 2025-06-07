@@ -1,5 +1,19 @@
 {
   "welcome": "Welcome",
   "description": "This is a Next.js application with i18n",
-  "dashboard": "dashboard"
+  "dashboard": "dashboard",
+  "Addresses": "Addresses",
+  "Manage location data for your organization": "Manage location data for your organization",
+  "Refresh": "Refresh",
+  "Add Address": "Add Address",
+  "City": "City",
+  "None": "None",
+  "Latitude": "Latitude",
+  "State": "State",
+  "Customer": "Customer",
+  "Employee": "Employee",
+  "Supplier": "Supplier",
+  "Event": "Event",
+  "Cancel": "Cancel",
+  "  Try Again": "  Try Again"
 }

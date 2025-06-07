@@ -29,8 +29,10 @@ import { useCustomerStore } from "@/stores/customer-store"
 import { useEmployeeStore } from "@/stores/employee-store"
 import { useSupplierStore } from "@/stores/supplier-store"
 import { useEventStore } from "@/stores/event-store"
+import { useTranslation } from "react-i18next"
 
 export default function AddressPage() {
+  const { t } = useTranslation('common')
   const {
     items: addresses,
     isLoading: addrLoading,
@@ -299,8 +301,8 @@ export default function AddressPage() {
         className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
       >
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Addresses</h1>
-          <p className="text-muted-foreground">Manage location data for your organization</p>
+          <h1 className="text-3xl font-bold tracking-tight">{t('Addresses')}</h1>
+          <p className="text-muted-foreground">{t('Manage location data for your organization')}</p>
         </div>
 
         <div className="flex gap-2">
@@ -312,7 +314,7 @@ export default function AddressPage() {
             <RefreshCw
               className={`mr-2 h-4 w-4 ${addrLoading || cityLoading || stateLoading || custLoading || empLoading || supLoading || eventLoading ? "animate-spin" : ""}`}
             />
-            Refresh
+            {t('Refresh')}
           </Button>
 
           <Dialog
@@ -325,7 +327,7 @@ export default function AddressPage() {
             <DialogTrigger asChild>
               <Button>
                 <Plus className="mr-2 h-4 w-4" />
-                Add Address
+                {t('Add Address')}
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[600px]">
@@ -338,13 +340,13 @@ export default function AddressPage() {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="cityId">City</Label>
+                    <Label htmlFor="cityId">{t('City')}</Label>
                     <Select name="cityId" defaultValue={editingAddress?.cityId?.toString() ?? ""}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select city" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="null">None</SelectItem>
+                        <SelectItem value="null">{t('None')}</SelectItem>
                         {cities.map((city) => (
                           <SelectItem key={city.cityId} value={city.cityId.toString()}>
                             {city.name}
@@ -354,13 +356,13 @@ export default function AddressPage() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="stateId">State</Label>
+                    <Label htmlFor="stateId">{t("State")}</Label>
                     <Select name="stateId" defaultValue={editingAddress?.stateId ?? ""}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select state" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="null">None</SelectItem>
+                        <SelectItem value="null">{t('None')}</SelectItem>
                         {states.map((state) => (
                           <SelectItem key={state.stateId} value={state.stateId.toString()}>
                             {state.name}
@@ -373,7 +375,7 @@ export default function AddressPage() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="latitude">Latitude</Label>
+                    <Label htmlFor="latitude">{t('Latitude')}</Label>
                     <Input
                       id="latitude"
                       name="latitude"
@@ -383,7 +385,7 @@ export default function AddressPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="longitude">Longitude</Label>
+                    <Label htmlFor="longitude">{t("Longitude")}</Label>
                     <Input
                       id="longitude"
                       name="longitude"
@@ -395,13 +397,13 @@ export default function AddressPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="customerId">Customer</Label>
+                  <Label htmlFor="customerId">{t("Customer")}</Label>
                   <Select name="customerId" defaultValue={editingAddress?.customerId ?? ''}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select customer" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="null">None</SelectItem>
+                      <SelectItem value="null">{t('None')}</SelectItem>
                       {customers.map((customer) => (
                         <SelectItem key={customer.customerId} value={customer.customerId}>
                           {customer.firstName} {customer.lastName}
@@ -426,13 +428,13 @@ export default function AddressPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="employeeId">Employee</Label>
+                  <Label htmlFor="employeeId">{t("Employee")}</Label>
                   <Select name="employeeId" defaultValue={editingAddress?.employeeId ?? ""}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select employee" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="null">None</SelectItem>
+                      <SelectItem value="null">{t('None')}</SelectItem>
                       {employees.map((employee) => (
                         <SelectItem key={employee.employeeId} value={employee.employeeId}>
                           {employee.firstName} {employee.lastName}
@@ -443,13 +445,13 @@ export default function AddressPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="supplierId">Supplier</Label>
+                  <Label htmlFor="supplierId">{t("Supplier")}</Label>
                   <Select name="supplierId" defaultValue={editingAddress?.supplierId ?? ""}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select supplier" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="null">None</SelectItem>
+                      <SelectItem value="null">{t('None')}</SelectItem>
                       {suppliers.map((supplier) => (
                         <SelectItem key={supplier.supplierId} value={supplier.supplierId}>
                           {supplier.supplierName}
@@ -460,13 +462,13 @@ export default function AddressPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="eventId">Event</Label>
+                  <Label htmlFor="eventId">{t("Event")}</Label>
                   <Select name="eventId" defaultValue={editingAddress?.eventId ?? ""}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select event" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">None</SelectItem>
+                      <SelectItem value="">{t('None')</SelectItem>
                       {events.map((event) => (
                         <SelectItem key={event.eventId} value={event.eventId}>
                           {event.eventName}
@@ -478,7 +480,7 @@ export default function AddressPage() {
 
                 <div className="flex justify-end gap-2">
                   <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                    Cancel
+                    {t("Cancel")}
                   </Button>
                   <Button type="submit" disabled={isSaving}>
                     {isSaving ? (
@@ -511,7 +513,7 @@ export default function AddressPage() {
                 </p>
               </div>
               <Button variant="outline" onClick={handleRetry}>
-                Try Again
+                {t("  Try Again")}
               </Button>
             </div>
           </CardContent>

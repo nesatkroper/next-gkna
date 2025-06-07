@@ -28,6 +28,7 @@ import { useEmployeeStore } from "@/stores/employee-store"
 import { Auth } from "@/lib/generated/prisma"
 
 export default function AuthPage() {
+  const { t } = useTranslation('common')
   const {
     items: auths,
     isLoading: authLoading,
