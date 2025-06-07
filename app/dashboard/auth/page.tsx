@@ -298,8 +298,8 @@ export default function AuthPage() {
         className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
       >
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Auth Management</h1>
-          <p className="text-muted-foreground">Manage user authentication and roles</p>
+          <h1 className="text-3xl font-bold tracking-tight">{t("Auth Managemen")}t</h1>
+          <p className="text-muted-foreground">{t("Manage user authentication and roles")}</p>
         </div>
 
         <div className="flex gap-2">
@@ -311,7 +311,7 @@ export default function AuthPage() {
             <RefreshCw
               className={`mr-2 h-4 w-4 ${authLoading || roleLoading || empLoading ? "animate-spin" : ""}`}
             />
-            Refresh
+            {t("Refresh")}
           </Button>
           <Dialog
             open={isDialogOpen}
@@ -323,7 +323,7 @@ export default function AuthPage() {
             <DialogTrigger asChild>
               <Button disabled={roles.length === 0 || authLoading || roleLoading}>
                 <Plus className="mr-2 h-4 w-4" />
-                Add Auth
+                {t("Add Auth")}
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px]">
@@ -335,7 +335,7 @@ export default function AuthPage() {
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email *</Label>
+                  <Label htmlFor="email">{t("Email")} *</Label>
                   <Input
                     id="email"
                     name="email"
@@ -357,7 +357,7 @@ export default function AuthPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="roleId">Role *</Label>
+                  <Label htmlFor="roleId">{t("Role")} *</Label>
                   <Select
                     name="roleId"
                     required
@@ -377,7 +377,7 @@ export default function AuthPage() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="employeeId">Employee</Label>
+                  <Label htmlFor="employeeId">{t("Employee")}</Label>
                   <Select
                     name="employeeId"
                     defaultValue={editingAuth?.employeeId ?? "none"}
@@ -387,7 +387,7 @@ export default function AuthPage() {
                       <SelectValue placeholder={employees.length === 0 ? "No employees available" : "Select employee"} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="none">No Employee</SelectItem>
+                      <SelectItem value="none">{t("No Employe")}e</SelectItem>
                       {employees.map((e) => (
                         <SelectItem key={e.employeeId} value={e.employeeId}>
                           {e.employeeCode}
@@ -403,7 +403,7 @@ export default function AuthPage() {
                     onClick={() => setIsDialogOpen(false)}
                     disabled={isSaving}
                   >
-                    Cancel
+                    {t("Cancel")}
                   </Button>
                   <Button type="submit" disabled={isSaving}>
                     {isSaving ? (
@@ -429,7 +429,7 @@ export default function AuthPage() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-destructive font-medium">Error loading data</p>
+                <p className="text-destructive font-medium">{t("Error loading date")}a</p>
                 <p className="text-sm text-muted-foreground">
                   {authError || roleError || empError}
                 </p>
@@ -439,7 +439,7 @@ export default function AuthPage() {
                 onClick={handleRetry}
                 disabled={authLoading || roleLoading || empLoading}
               >
-                Try Again
+                {t("Try Again")}
               </Button>
             </div>
           </CardContent>
