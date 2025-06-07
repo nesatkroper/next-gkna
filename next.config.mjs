@@ -15,7 +15,6 @@ const nextConfig = {
       },
     ]
   },
-
   images: {
     domains: ['localhost', 'huotsopheaksakana.site'],
     unoptimized: false,

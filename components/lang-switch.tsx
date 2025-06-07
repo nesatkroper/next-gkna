@@ -13,7 +13,7 @@ export default function LanguageSwitcher() {
 
   const languages = [
     { code: 'en', name: 'English', countryCode: 'GB' },
-    { code: 'kh', name: 'Cambodia', countryCode: 'KH' },
+    { code: 'kh', name: 'ខ្មែរ', countryCode: 'KH' },
 
   ];
 
@@ -23,28 +23,30 @@ export default function LanguageSwitcher() {
   };
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger className="flex items-center rounded-md p-2 hover:bg-gray-100 focus:outline-none">
-        <Globe className="h-5 w-5" />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent>
-        {languages.map((lang) => (
-          <DropdownMenuItem
-            key={lang.code}
-            onClick={() => changeLanguage(lang.code)}
-            className="flex items-center gap-2"
-          >
-            <ReactCountryFlag
-              countryCode={lang.countryCode}
-              svg
-              style={{ width: '1.5em', height: '1.5em' }}
-              title={lang.name}
-            />
-            <span>{lang.name}</span>
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <div className={i18n.language === 'kh' ? 'font-khmer' : ''}>
+      <DropdownMenu>
+        <DropdownMenuTrigger className="flex items-center rounded-md p-2 hover:bg-gray-100 focus:outline-none">
+          <Globe className="h-5 w-5" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          {languages.map((lang) => (
+            <DropdownMenuItem
+              key={lang.code}
+              onClick={() => changeLanguage(lang.code)}
+              className="flex items-center gap-2"
+            >
+              <ReactCountryFlag
+                countryCode={lang.countryCode}
+                svg
+                style={{ width: '1.5em', height: '1.5em' }}
+                title={lang.name}
+              />
+              <span>{lang.name}</span>
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   );
 }
 

@@ -1,5 +1,19 @@
 {
-  "welcome": "តេសត",
-  "description": "តេសត is a Next.js application with i18n",
-  "dashboard": "តេសតហងហ្ហ្ង"
+  "welcome": "ស្វាគមន៍",
+  "description": "នេះគឺជាកម្មវិធី Next.js ជាមួយ i18n",
+  "dashboard": "ផ្ទាំងគ្រប់គ្រង",
+  "Addresses": "អាសយដ្ឋាន",
+  "Manage location data for your organization": "គ្រប់គ្រងទិន្នន័យទីតាំងសម្រាប់អង្គការរបស់អ្នក",
+  "Refresh": "ធ្វើឱ្យស្រស់",
+  "Add Address": "បន្ថែមអាសយដ្ឋាន",
+  "City": "ទីក្រុង",
+  "None": "គ្មាន",
+  "Latitude": "រយៈទទឹង",
+  "State": "រដ្ឋ",
+  "Customer": "អតិថិជន",
+  "Employee": "បុគ្គលិក",
+  "Supplier": "អ្នកផ្គត់ផ្គង់",
+  "Event": "ព្រឹត្តិការណ៍",
+  "Cancel": "បោះបង់",
+  "Try Again": "ព្យាយាមម្តងទៀត"
 }

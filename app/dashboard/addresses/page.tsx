@@ -412,19 +412,6 @@ export default function AddressPage() {
 
                     </SelectContent>
                   </Select>
-                  {/* <Select name="customerId" defaultValue={editingAddress?.customerId ?? ""}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select customer" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">None</SelectItem>
-                      {customers.map((customer) => (
-                        <SelectItem key={customer.customerId} value={customer.customerId}>
-                          {customer.firstName} {customer.lastName}
-                        </SelectItem>
-                      )) ?? null}
-                    </SelectContent>
-                  </Select> */}
                 </div>
 
                 <div className="space-y-2">
@@ -468,7 +455,7 @@ export default function AddressPage() {
                       <SelectValue placeholder="Select event" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">{t('None')</SelectItem>
+                      <SelectItem value="">{t('None')}</SelectItem>
                       {events.map((event) => (
                         <SelectItem key={event.eventId} value={event.eventId}>
                           {event.eventName}
