@@ -354,7 +354,7 @@ export default function AttendancePage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{absentCount}</div>
-              <p className="text-xs text-muted-foreground">{t"Employees absent"}</p>
+              <p className="text-xs text-muted-foreground">{t("Employees absent")}</p>
             </CardContent>
           </Card>
         </motion.div>
@@ -404,7 +404,7 @@ export default function AttendancePage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>{t("Employee")</TableHead>
+                  <TableHead>{t("Employee")}</TableHead>
                   <TableHead>{t("Department")}</TableHead>
                   <TableHead>{t("Check In")}</TableHead>
                   <TableHead>{t("Check Out")}t</TableHead>

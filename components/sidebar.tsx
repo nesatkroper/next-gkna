@@ -36,18 +36,16 @@ import { useCountStore } from "@/stores/count-store"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
-  const { items, fetch  } = useCountStore()
+  const { items, fetch } = useCountStore()
 
   React.useEffect(() => {
     fetch()
   }, [])
 
-  // Define the type for your result object
   type TableCounts = {
     [key: string]: string;
   };
 
-  // Then use it in your reduce function
   const result = items.reduce<TableCounts>((acc, item) => {
     acc[item.table_name] = item.count;
     return acc;
@@ -66,7 +64,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         { name: "Products", href: "/dashboard/products", badge: result.Product },
         { name: "Categories", href: "/dashboard/categories", badge: result.Category },
         { name: "Brand", href: "/dashboard/brands", badge: result.Brand },
-        { name: "Stock Management", href: "/dashboard/inventory", badge: 12 },
+        { name: "Stock", href: "/dashboard/inventory", badge: 12 },
       ],
     },
     {
@@ -75,8 +73,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       children: [
         { name: "Authentication", href: "/dashboard/auth", badge: result.Auth },
         { name: "Role", href: "/dashboard/roles", badge: result.Role },
-        // { name: "Suppliers", href: "/dashboard/suppliers", badge: 15 },
-        // { name: "Authentication", href: "/dashboard/auth", badge: 15 },
       ],
     },
     {
@@ -98,6 +94,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         { name: "Positions", href: "/dashboard/positions", badge: result.Position },
         { name: "Addresses", href: "/dashboard/addresses", badge: result.Address },
         { name: "Event", href: "/dashboard/events", badge: result.Event },
+        { name: "Attendance", href: "/dashboard/attendance", badge: result.Attendance },
       ],
     },
     {
@@ -105,7 +102,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       icon: ShoppingCart,
       children: [
         { name: "Sales", href: "/dashboard/sales", badge: result.Sale },
-        { name: "Attendance", href: "/dashboard/attendance", badge: result.Attendance },
         { name: "Payments", href: "/dashboard/payments", badge: result.Payment },
       ],
     },
@@ -222,285 +218,3 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     </Sidebar>
   )
 }
-
-// "use client"
-
-// import * as React from "react"
-// import Link from "next/link"
-// import { usePathname } from "next/navigation"
-// import {
-//   LayoutDashboard,
-//   Package,
-//   Users,
-//   ShoppingCart,
-//   BarChart3,
-//   Settings,
-//   Building2,
-//   ChevronRight,
-//   Cpu,
-// } from "lucide-react"
-// import { Badge } from "@/components/ui/badge"
-// import {
-//   Sidebar,
-//   SidebarContent,
-//   SidebarFooter,
-//   SidebarGroup,
-//   SidebarGroupContent,
-//   SidebarGroupLabel,
-//   SidebarHeader,
-//   SidebarMenu,
-//   SidebarMenuButton,
-//   SidebarMenuItem,
-//   SidebarMenuSub,
-//   SidebarMenuSubButton,
-//   SidebarMenuSubItem,
-//   SidebarRail,
-// } from "@/components/ui/sidebar"
-// import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-// import { useSystemStore } from "@/stores/system-store"
-// import { useProductStore } from "@/stores/product-store"
-// import { useCategoryStore } from "@/stores/category-store"
-// import { useCustomerStore } from "@/stores/customer-store"
-// import { useEmployeeStore } from "@/stores/employee-store"
-// import { useDepartmentStore } from "@/stores/department-store"
-// import { usePositionStore } from "@/stores/position-store"
-
-// export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-//   const pathname = usePathname()
-
-//   const {
-//     items: systems,
-//     isLoading: isLoadingSystems,
-//     fetch: fetchSystems,
-//   } = useSystemStore()
-//   const {
-//     items: products,
-//     isLoading: isLoadingProducts,
-//     fetch: fetchProducts,
-//   } = useProductStore()
-//   const {
-//     items: categories,
-//     isLoading: isLoadingCategories,
-//     fetch: fetchCategories,
-//   } = useCategoryStore()
-//   const {
-//     items: customers,
-//     isLoading: isLoadingCustomers,
-//     fetch: fetchCustomers,
-//   } = useCustomerStore()
-//   const {
-//     items: employees,
-//     isLoading: isLoadingEmployees,
-//     fetch: fetchEmployees,
-//   } = useEmployeeStore()
-//   const {
-//     items: departments,
-//     isLoading: isLoadingDepartments,
-//     fetch: fetchDepartments,
-//   } = useDepartmentStore()
-//   const {
-//     items: positions,
-//     isLoading: isLoadingPositions,
-//     fetch: fetchPositions,
-//   } = usePositionStore()
-
-//   React.useEffect(() => {
-//     if (systems.length === 0 && !isLoadingSystems) fetchSystems()
-//     if (products.length === 0 && !isLoadingProducts) fetchProducts()
-//     if (categories.length === 0 && !isLoadingCategories) fetchCategories()
-//     if (customers.length === 0 && !isLoadingCustomers) fetchCustomers()
-//     if (employees.length === 0 && !isLoadingEmployees) fetchEmployees()
-//     if (departments.length === 0 && !isLoadingDepartments) fetchDepartments()
-//     if (positions.length === 0 && !isLoadingPositions) fetchPositions()
-//   }, [
-//     systems,
-//     isLoadingSystems,
-//     fetchSystems,
-//     products,
-//     isLoadingProducts,
-//     fetchProducts,
-//     categories,
-//     isLoadingCategories,
-//     fetchCategories,
-//     customers,
-//     isLoadingCustomers,
-//     fetchCustomers,
-//     employees,
-//     isLoadingEmployees,
-//     fetchEmployees,
-//     departments,
-//     isLoadingDepartments,
-//     fetchDepartments,
-//     positions,
-//     isLoadingPositions,
-//     fetchPositions,
-//   ])
-
-//   const navigation = [
-//     {
-//       name: "Dashboard",
-//       href: "/dashboard",
-//       icon: LayoutDashboard,
-//     },
-//     {
-//       name: "Inventory",
-//       icon: Package,
-//       children: [
-//         { name: "Products", href: "/dashboard/products", badge: products.length },
-//         { name: "Categories", href: "/dashboard/categories", badge: categories.length },
-//         { name: "Stock Management", href: "/dashboard/inventory", badge: 12 },
-//       ],
-//     },
-//     {
-//       name: "People",
-//       icon: Users,
-//       children: [
-//         { name: "Customers", href: "/dashboard/customers", badge: customers.length },
-//         { name: "Employees", href: "/dashboard/employees", badge: employees.length },
-//         { name: "Suppliers", href: "/dashboard/suppliers", badge: 15 },
-//         { name: "Authentication", href: "/dashboard/auth", badge: 15 },
-//       ],
-//     },
-//     {
-//       name: "Organization",
-//       icon: Building2,
-//       children: [
-//         { name: "Departments", href: "/dashboard/departments", badge: departments.length },
-//         { name: "Positions", href: "/dashboard/positions", badge: positions.length },
-//         { name: "Addresses", href: "/dashboard/addresses", badge: positions.length },
-//       ],
-//     },
-//     {
-//       name: "Operations",
-//       icon: ShoppingCart,
-//       children: [
-//         { name: "Sales", href: "/dashboard/sales", badge: 45 },
-//         { name: "Attendance", href: "/dashboard/attendance", badge: "new" },
-//         { name: "Payments", href: "/dashboard/payments", badge: 8 },
-//       ],
-//     },
-//     {
-//       name: "System Management",
-//       icon: Cpu,
-//       children: [
-//         { name: "Systems", href: "/dashboard/systems", badge: systems.length },
-//         { name: "Roles", href: "/dashboard/roles", badge: 10 },
-//       ],
-//     },
-//     {
-//       name: "Reports",
-//       href: "/dashboard/reports",
-//       icon: BarChart3,
-//     },
-//     {
-//       name: "Settings",
-//       href: "/dashboard/settings",
-//       icon: Settings,
-//     },
-//   ]
-
-//   return (
-//     <Sidebar collapsible="icon" {...props}>
-//       <SidebarHeader>
-//         <SidebarMenu>
-//           <SidebarMenuItem>
-//             <SidebarMenuButton size="lg" asChild>
-//               <Link href="/dashboard">
-//                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-//                   <span className="font-bold text-sm">FS</span>
-//                 </div>
-//                 <div className="grid flex-1 text-left text-sm leading-tight">
-//                   <span className="truncate font-semibold">Fertilizer System</span>
-//                   <span className="truncate text-xs text-muted-foreground">v1.1.0</span>
-//                 </div>
-//               </Link>
-//             </SidebarMenuButton>
-//           </SidebarMenuItem>
-//         </SidebarMenu>
-//       </SidebarHeader>
-
-//       <SidebarContent className="bg-background">
-//         <SidebarGroup>
-//           <SidebarGroupLabel>Navigation</SidebarGroupLabel>
-//           <SidebarGroupContent>
-//             <SidebarMenu>
-//               {navigation.map((item) => {
-//                 if (item.children) {
-//                   return (
-//                     <Collapsible
-//                       key={item.name}
-//                       asChild
-//                       defaultOpen={
-//                         item.name === "Inventory" ||
-//                         item.name === "People" ||
-//                         item.name === "System Management"
-//                       }
-//                       className="group/collapsible"
-//                     >
-//                       <SidebarMenuItem>
-//                         <CollapsibleTrigger asChild>
-//                           <SidebarMenuButton tooltip={item.name}>
-//                             {item.icon && <item.icon />}
-//                             <span>{item.name}</span>
-//                             <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-//                           </SidebarMenuButton>
-//                         </CollapsibleTrigger>
-//                         <CollapsibleContent>
-//                           <SidebarMenuSub>
-//                             {item.children.map((subItem) => (
-//                               <SidebarMenuSubItem key={subItem.name}>
-//                                 <SidebarMenuSubButton asChild isActive={pathname === subItem.href}>
-//                                   <Link href={subItem.href}>
-//                                     <span>{subItem.name}</span>
-//                                     {subItem.badge && (
-//                                       <Badge
-//                                         variant={subItem.badge === "new" ? "default" : "secondary"}
-//                                         className="ml-auto text-xs h-5 px-1.5"
-//                                       >
-//                                         {subItem.badge}
-//                                       </Badge>
-//                                     )}
-//                                   </Link>
-//                                 </SidebarMenuSubButton>
-//                               </SidebarMenuSubItem>
-//                             ))}
-//                           </SidebarMenuSub>
-//                         </CollapsibleContent>
-//                       </SidebarMenuItem>
-//                     </Collapsible>
-//                   )
-//                 }
-
-//                 return (
-//                   <SidebarMenuItem key={item.name}>
-//                     <SidebarMenuButton asChild isActive={pathname === item.href} tooltip={item.name}>
-//                       <Link href={item.href}>
-//                         {item.icon && <item.icon />}
-//                         <span>{item.name}</span>
-//                       </Link>
-//                     </SidebarMenuButton>
-//                   </SidebarMenuItem>
-//                 )
-//               })}
-//             </SidebarMenu>
-//           </SidebarGroupContent>
-//         </SidebarGroup>
-//       </SidebarContent>
-
-//       <SidebarFooter>
-//         <SidebarMenu>
-//           <SidebarMenuItem>
-//             <SidebarMenuButton>
-//               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-//                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-//                 <span>System Online</span>
-//               </div>
-//             </SidebarMenuButton>
-//           </SidebarMenuItem>
-//         </SidebarMenu>
-//       </SidebarFooter>
-
-//       <SidebarRail />
-//     </Sidebar>
-//   )
-// }

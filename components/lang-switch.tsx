@@ -3,7 +3,7 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Globe } from 'lucide-react';
+import { Languages } from 'lucide-react';
 import ReactCountryFlag from 'react-country-flag';
 
 export default function LanguageSwitcher() {
@@ -14,6 +14,7 @@ export default function LanguageSwitcher() {
   const languages = [
     { code: 'en', name: 'English', countryCode: 'GB' },
     { code: 'kh', name: 'ខ្មែរ', countryCode: 'KH' },
+    { code: 'cn', name: '中文', countryCode: 'CN' },
 
   ];
 
@@ -26,7 +27,7 @@ export default function LanguageSwitcher() {
     <div className={i18n.language === 'kh' ? 'font-khmer' : ''}>
       <DropdownMenu>
         <DropdownMenuTrigger className="flex items-center rounded-md p-2 hover:bg-gray-100 focus:outline-none">
-          <Globe className="h-5 w-5" />
+          <Languages className="h-4 w-5" />
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           {languages.map((lang) => (
