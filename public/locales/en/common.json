@@ -1,6 +1,4 @@
 {
-  "welcome": "Welcome",
-  "description": "This is a Next.js application with i18n",
   "Dashboard": "Dashboard",
   "Addresses": "Addresses",
   "Manage location data for your organization": "Manage location data for your organization",

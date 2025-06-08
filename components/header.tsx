@@ -155,7 +155,7 @@ export function EnhancedHeader() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={me.Employee ? `uploads/${me.Employee.Employeeinfo.picture}` : "/images/profile.webp"} alt="User" />
+                    <AvatarImage src={me.Employee ? `uploads/${me?.Employee.Employeeinfo.picture}` : "/images/profile.webp"} alt="User" />
                     <AvatarFallback className="bg-primary text-primary-foreground text-xs">AD</AvatarFallback>
                   </Avatar>
                 </Button>

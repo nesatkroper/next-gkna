@@ -12,21 +12,21 @@ import { useAuthStore } from "@/stores"
 import { useTranslation } from "react-i18next"
 
 export default function DashboardPage() {
-  const { me, fetchMe } = useAuthStore()
+  const { me, fetch } = useAuthStore()
   const { t } = useTranslation('common')
 
   useEffect(() => {
     if (!me) {
-      fetchMe()
+      fetch()
     }
-  }, [fetchMe, me])
+  }, [fetch, me])
 
   console.log(me)
 
   return (
     <div className="space-y-6">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="text-3xl font-bold tracking-tight">{t('dashboard')}</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t('Dashboard')}</h1>
         <p className="text-muted-foreground">Welcome back! Here's what's happening with your fertilizer business.</p>
       </motion.div>
 
