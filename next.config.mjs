@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  staticPageGenerationTimeout: 300,
+  staticPageGenerationTimeout: 60,
   images: {
     domains: ['localhost', 'huotsopheaksakana.site'],
     unoptimized: false,
