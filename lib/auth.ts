@@ -1,10 +1,10 @@
+export const runtime = 'nodejs';
 // auth.ts
 import { SignJWT, jwtVerify, type JWTPayload } from "jose";
 import bcrypt from "bcryptjs";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
-export const runtime = 'nodejs';
 export interface UserPayload extends JWTPayload {
   authId: string;
   role: string;

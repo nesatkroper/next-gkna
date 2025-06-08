@@ -1,4 +1,5 @@
 "use client"
+export const dynamic = 'force-dynamic';
 
 import type React from "react"
 import { useState, useEffect } from "react"
@@ -27,7 +28,6 @@ import { uploadFile } from "@/lib/file-upload"
 import { Branch } from "@/lib/generated/prisma"
 import { t } from "i18next"
 
-export const dynamic = 'force-dynamic';
 export default function BranchesPage() {
   const {
     items: branches,
