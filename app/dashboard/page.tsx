@@ -11,6 +11,8 @@ import { useEffect, useState } from "react"
 import { useAuthStore } from "@/stores"
 import { useTranslation } from "react-i18next"
 
+// export const revalidate = 60;
+export const dynamic = 'force-dynamic';
 export default function DashboardPage() {
   const { me, fetch } = useAuthStore()
   const { t } = useTranslation('common')
