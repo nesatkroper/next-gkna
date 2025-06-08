@@ -60,7 +60,6 @@ export default function CategoriesPage() {
       category.categoryCode?.toLowerCase().includes(searchTerm.toLowerCase()),
   )
 
-  // Table columns configuration
   const tableColumns = [
     {
       key: "categoryName",
@@ -86,7 +85,6 @@ export default function CategoriesPage() {
     },
   ]
 
-  // Card fields configuration
   const cardFields = [
     {
       key: "categoryName",

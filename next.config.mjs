@@ -18,10 +18,6 @@ const nextConfig = {
     JWT_SECRET: process.env.JWT_SECRET,
   },
 
-  experimental: {
-    turbo: false,
-  },
-
   webpack: (config) => {
     config.cache = false;
 
