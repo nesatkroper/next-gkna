@@ -22,18 +22,56 @@ CREATE TYPE "SystemType" AS ENUM ('default', 'pos', 'reserve');
 -- CreateTable
 CREATE TABLE "Address" (
     "addressId" UUID NOT NULL DEFAULT gen_random_uuid(),
-    "cityId" INTEGER,
-    "stateId" INTEGER,
+    "provinceId" INTEGER NOT NULL,
+    "districtId" INTEGER NOT NULL,
+    "communeId" INTEGER NOT NULL,
+    "villageId" INTEGER NOT NULL,
     "latitude" DOUBLE PRECISION,
     "longitude" DOUBLE PRECISION,
     "customerId" UUID,
     "employeeId" UUID,
+    "supplierId" UUID,
     "eventId" UUID,
+    "status" "Status" NOT NULL DEFAULT 'active',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "status" "Status" NOT NULL DEFAULT 'active',
 
     CONSTRAINT "Address_pkey" PRIMARY KEY ("addressId")
+);
+
+-- CreateTable
+CREATE TABLE "Village" (
+    "villageId" SERIAL NOT NULL,
+    "name" TEXT NOT NULL,
+    "communeId" INTEGER NOT NULL,
+
+    CONSTRAINT "Village_pkey" PRIMARY KEY ("villageId")
+);
+
+-- CreateTable
+CREATE TABLE "Commune" (
+    "communeId" SERIAL NOT NULL,
+    "name" TEXT NOT NULL,
+    "districtId" INTEGER NOT NULL,
+
+    CONSTRAINT "Commune_pkey" PRIMARY KEY ("communeId")
+);
+
+-- CreateTable
+CREATE TABLE "District" (
+    "districtId" SERIAL NOT NULL,
+    "name" TEXT NOT NULL,
+    "provinceId" INTEGER NOT NULL,
+
+    CONSTRAINT "District_pkey" PRIMARY KEY ("districtId")
+);
+
+-- CreateTable
+CREATE TABLE "Provine" (
+    "provinceId" SERIAL NOT NULL,
+    "name" TEXT NOT NULL,
+
+    CONSTRAINT "Provine_pkey" PRIMARY KEY ("provinceId")
 );
 
 -- CreateTable
@@ -85,6 +123,35 @@ CREATE TABLE "AuthLog" (
 );
 
 -- CreateTable
+CREATE TABLE "Brand" (
+    "brandId" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "brandName" TEXT NOT NULL,
+    "picture" TEXT,
+    "brandCode" TEXT,
+    "memo" TEXT,
+    "status" "Status" NOT NULL DEFAULT 'active',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Brand_pkey" PRIMARY KEY ("brandId")
+);
+
+-- CreateTable
+CREATE TABLE "Branch" (
+    "branchId" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "branchName" TEXT NOT NULL,
+    "branchCode" TEXT,
+    "picture" TEXT,
+    "tel" TEXT,
+    "memo" TEXT,
+    "status" "Status" NOT NULL DEFAULT 'active',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Branch_pkey" PRIMARY KEY ("branchId")
+);
+
+-- CreateTable
 CREATE TABLE "Cart" (
     "cartId" UUID NOT NULL DEFAULT gen_random_uuid(),
     "authId" UUID,
@@ -121,15 +188,6 @@ CREATE TABLE "Category" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Category_pkey" PRIMARY KEY ("categoryId")
-);
-
--- CreateTable
-CREATE TABLE "City" (
-    "cityId" SERIAL NOT NULL,
-    "stateId" INTEGER NOT NULL,
-    "name" TEXT NOT NULL,
-
-    CONSTRAINT "City_pkey" PRIMARY KEY ("cityId")
 );
 
 -- CreateTable
@@ -183,6 +241,7 @@ CREATE TABLE "Employee" (
     "dob" TIMESTAMP(3),
     "phone" TEXT,
     "positionId" UUID NOT NULL,
+    "branchId" UUID,
     "departmentId" UUID NOT NULL,
     "salary" DECIMAL(10,2) NOT NULL,
     "hiredDate" TIMESTAMP(3),
@@ -204,6 +263,24 @@ CREATE TABLE "Employeeinfo" (
     "govExpire" TIMESTAMP(3),
     "govId" TEXT,
     "govPicture" TEXT
+);
+
+-- CreateTable
+CREATE TABLE "Entry" (
+    "entryId" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "quantity" INTEGER NOT NULL DEFAULT 0,
+    "memo" TEXT,
+    "entryPrice" DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+    "entryDate" TIMESTAMP(3),
+    "productId" UUID NOT NULL,
+    "supplierId" UUID NOT NULL,
+    "branchId" UUID NOT NULL,
+    "invoice" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "status" "Status" NOT NULL DEFAULT 'active',
+
+    CONSTRAINT "Entry_pkey" PRIMARY KEY ("entryId")
 );
 
 -- CreateTable
@@ -333,9 +410,11 @@ CREATE TABLE "Product" (
     "productName" TEXT NOT NULL,
     "productCode" TEXT,
     "categoryId" UUID NOT NULL,
+    "brandId" UUID,
     "picture" TEXT,
     "unit" TEXT,
-    "capacity" TEXT,
+    "capacity" DECIMAL(10,2) DEFAULT 0.00,
+    "quantity" INTEGER NOT NULL DEFAULT 0,
     "sellPrice" DECIMAL(10,2) NOT NULL DEFAULT 0.00,
     "costPrice" DECIMAL(10,2) NOT NULL DEFAULT 0.00,
     "discountRate" INTEGER NOT NULL DEFAULT 0,
@@ -365,6 +444,7 @@ CREATE TABLE "Sale" (
     "saleId" UUID NOT NULL DEFAULT gen_random_uuid(),
     "employeeId" UUID NOT NULL,
     "customerId" UUID NOT NULL,
+    "branchId" UUID NOT NULL,
     "saleDate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "amount" DECIMAL(12,2) NOT NULL,
     "status" "Status" NOT NULL DEFAULT 'active',
@@ -392,51 +472,12 @@ CREATE TABLE "Saledetail" (
 );
 
 -- CreateTable
-CREATE TABLE "State" (
-    "stateId" SERIAL NOT NULL,
-    "name" TEXT NOT NULL,
-
-    CONSTRAINT "State_pkey" PRIMARY KEY ("stateId")
-);
-
--- CreateTable
-CREATE TABLE "Stock" (
-    "stockId" UUID NOT NULL DEFAULT gen_random_uuid(),
-    "productId" UUID NOT NULL,
-    "memo" TEXT,
-    "status" "Status" NOT NULL DEFAULT 'active',
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-    "quantity" INTEGER NOT NULL DEFAULT 0,
-
-    CONSTRAINT "Stock_pkey" PRIMARY KEY ("stockId")
-);
-
--- CreateTable
-CREATE TABLE "Stockentry" (
-    "entryId" UUID NOT NULL DEFAULT gen_random_uuid(),
-    "quantity" INTEGER NOT NULL DEFAULT 0,
-    "memo" TEXT,
-    "status" "Status" NOT NULL DEFAULT 'active',
-    "entryPrice" DECIMAL(12,2) NOT NULL DEFAULT 0.00,
-    "entryDate" TIMESTAMP(3),
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-    "productId" UUID NOT NULL,
-    "supplierId" UUID NOT NULL,
-    "invoice" TEXT,
-
-    CONSTRAINT "Stockentry_pkey" PRIMARY KEY ("entryId")
-);
-
--- CreateTable
 CREATE TABLE "Supplier" (
     "supplierId" UUID NOT NULL DEFAULT gen_random_uuid(),
     "supplierName" TEXT NOT NULL,
     "companyName" TEXT,
     "phone" TEXT,
     "email" TEXT,
-    "address" TEXT,
     "status" "Status" NOT NULL DEFAULT 'active',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -484,10 +525,13 @@ CREATE UNIQUE INDEX "Address_customerId_key" ON "Address"("customerId");
 CREATE UNIQUE INDEX "Address_employeeId_key" ON "Address"("employeeId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Address_supplierId_key" ON "Address"("supplierId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Address_eventId_key" ON "Address"("eventId");
 
 -- CreateIndex
-CREATE INDEX "Address_cityId_customerId_employeeId_eventId_stateId_idx" ON "Address"("cityId", "customerId", "employeeId", "eventId", "stateId");
+CREATE INDEX "Address_customerId_employeeId_eventId_idx" ON "Address"("customerId", "employeeId", "eventId");
 
 -- CreateIndex
 CREATE INDEX "Attendance_employeeId_eventId_idx" ON "Attendance"("employeeId", "eventId");
@@ -512,12 +556,6 @@ CREATE UNIQUE INDEX "Cart_authId_productId_key" ON "Cart"("authId", "productId")
 
 -- CreateIndex
 CREATE INDEX "Cartnote_cartId_idx" ON "Cartnote"("cartId");
-
--- CreateIndex
-CREATE INDEX "City_stateId_idx" ON "City"("stateId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "City_name_stateId_key" ON "City"("name", "stateId");
 
 -- CreateIndex
 CREATE INDEX "Customer_employeeId_idx" ON "Customer"("employeeId");
@@ -548,6 +586,9 @@ CREATE UNIQUE INDEX "Employeeinfo_email_key" ON "Employeeinfo"("email");
 
 -- CreateIndex
 CREATE INDEX "Employeeinfo_employeeId_idx" ON "Employeeinfo"("employeeId");
+
+-- CreateIndex
+CREATE INDEX "Entry_productId_supplierId_branchId_status_entryDate_idx" ON "Entry"("productId", "supplierId", "branchId", "status", "entryDate");
 
 -- CreateIndex
 CREATE INDEX "Event_status_startDate_idx" ON "Event"("status", "startDate");
@@ -589,22 +630,10 @@ CREATE UNIQUE INDEX "Role_name_key" ON "Role"("name");
 CREATE INDEX "Role_name_idx" ON "Role"("name");
 
 -- CreateIndex
-CREATE INDEX "Sale_customerId_employeeId_saleDate_status_idx" ON "Sale"("customerId", "employeeId", "saleDate", "status");
+CREATE INDEX "Sale_customerId_employeeId_saleDate_status_branchId_idx" ON "Sale"("customerId", "employeeId", "saleDate", "status", "branchId");
 
 -- CreateIndex
 CREATE INDEX "Saledetail_productId_saledetailId_saleId_quantity_amount_idx" ON "Saledetail"("productId", "saledetailId", "saleId", "quantity", "amount");
-
--- CreateIndex
-CREATE UNIQUE INDEX "State_name_key" ON "State"("name");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Stock_productId_key" ON "Stock"("productId");
-
--- CreateIndex
-CREATE INDEX "Stock_createdAt_productId_status_quantity_idx" ON "Stock"("createdAt", "productId", "status", "quantity");
-
--- CreateIndex
-CREATE INDEX "Stockentry_productId_supplierId_status_entryDate_idx" ON "Stockentry"("productId", "supplierId", "status", "entryDate");
 
 -- CreateIndex
 CREATE INDEX "Supplier_status_idx" ON "Supplier"("status");
@@ -631,7 +660,16 @@ CREATE INDEX "Token_expiresAt_idx" ON "Token"("expiresAt");
 CREATE INDEX "Token_token_idx" ON "Token"("token");
 
 -- AddForeignKey
-ALTER TABLE "Address" ADD CONSTRAINT "Address_cityId_fkey" FOREIGN KEY ("cityId") REFERENCES "City"("cityId") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Address" ADD CONSTRAINT "Address_villageId_fkey" FOREIGN KEY ("villageId") REFERENCES "Village"("villageId") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Address" ADD CONSTRAINT "Address_communeId_fkey" FOREIGN KEY ("communeId") REFERENCES "Commune"("communeId") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Address" ADD CONSTRAINT "Address_districtId_fkey" FOREIGN KEY ("districtId") REFERENCES "District"("districtId") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Address" ADD CONSTRAINT "Address_provinceId_fkey" FOREIGN KEY ("provinceId") REFERENCES "Provine"("provinceId") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Address" ADD CONSTRAINT "Address_customerId_fkey" FOREIGN KEY ("customerId") REFERENCES "Customer"("customerId") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -643,7 +681,16 @@ ALTER TABLE "Address" ADD CONSTRAINT "Address_employeeId_fkey" FOREIGN KEY ("emp
 ALTER TABLE "Address" ADD CONSTRAINT "Address_eventId_fkey" FOREIGN KEY ("eventId") REFERENCES "Event"("eventId") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Address" ADD CONSTRAINT "Address_stateId_fkey" FOREIGN KEY ("stateId") REFERENCES "State"("stateId") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Address" ADD CONSTRAINT "Address_supplierId_fkey" FOREIGN KEY ("supplierId") REFERENCES "Supplier"("supplierId") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Village" ADD CONSTRAINT "Village_communeId_fkey" FOREIGN KEY ("communeId") REFERENCES "Commune"("communeId") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Commune" ADD CONSTRAINT "Commune_districtId_fkey" FOREIGN KEY ("districtId") REFERENCES "District"("districtId") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "District" ADD CONSTRAINT "District_provinceId_fkey" FOREIGN KEY ("provinceId") REFERENCES "Provine"("provinceId") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Attendance" ADD CONSTRAINT "Attendance_employeeId_fkey" FOREIGN KEY ("employeeId") REFERENCES "Employee"("employeeId") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -670,9 +717,6 @@ ALTER TABLE "Cart" ADD CONSTRAINT "Cart_productId_fkey" FOREIGN KEY ("productId"
 ALTER TABLE "Cartnote" ADD CONSTRAINT "Cartnote_cartId_fkey" FOREIGN KEY ("cartId") REFERENCES "Cart"("cartId") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "City" ADD CONSTRAINT "City_stateId_fkey" FOREIGN KEY ("stateId") REFERENCES "State"("stateId") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "Customer" ADD CONSTRAINT "Customer_employeeId_fkey" FOREIGN KEY ("employeeId") REFERENCES "Employee"("employeeId") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -685,7 +729,19 @@ ALTER TABLE "Employee" ADD CONSTRAINT "Employee_departmentId_fkey" FOREIGN KEY (
 ALTER TABLE "Employee" ADD CONSTRAINT "Employee_positionId_fkey" FOREIGN KEY ("positionId") REFERENCES "Position"("positionId") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "Employee" ADD CONSTRAINT "Employee_branchId_fkey" FOREIGN KEY ("branchId") REFERENCES "Branch"("branchId") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "Employeeinfo" ADD CONSTRAINT "Employeeinfo_employeeId_fkey" FOREIGN KEY ("employeeId") REFERENCES "Employee"("employeeId") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Entry" ADD CONSTRAINT "Entry_branchId_fkey" FOREIGN KEY ("branchId") REFERENCES "Branch"("branchId") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Entry" ADD CONSTRAINT "Entry_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product"("productId") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Entry" ADD CONSTRAINT "Entry_supplierId_fkey" FOREIGN KEY ("supplierId") REFERENCES "Supplier"("supplierId") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Imageaddress" ADD CONSTRAINT "Imageaddress_addressId_fkey" FOREIGN KEY ("addressId") REFERENCES "Address"("addressId") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -712,25 +768,22 @@ ALTER TABLE "Position" ADD CONSTRAINT "Position_departmentId_fkey" FOREIGN KEY (
 ALTER TABLE "Product" ADD CONSTRAINT "Product_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("categoryId") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "Product" ADD CONSTRAINT "Product_brandId_fkey" FOREIGN KEY ("brandId") REFERENCES "Brand"("brandId") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "Sale" ADD CONSTRAINT "Sale_customerId_fkey" FOREIGN KEY ("customerId") REFERENCES "Customer"("customerId") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Sale" ADD CONSTRAINT "Sale_employeeId_fkey" FOREIGN KEY ("employeeId") REFERENCES "Employee"("employeeId") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "Sale" ADD CONSTRAINT "Sale_branchId_fkey" FOREIGN KEY ("branchId") REFERENCES "Branch"("branchId") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "Saledetail" ADD CONSTRAINT "Saledetail_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product"("productId") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Saledetail" ADD CONSTRAINT "Saledetail_saleId_fkey" FOREIGN KEY ("saleId") REFERENCES "Sale"("saleId") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Stock" ADD CONSTRAINT "Stock_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product"("productId") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Stockentry" ADD CONSTRAINT "Stockentry_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product"("productId") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Stockentry" ADD CONSTRAINT "Stockentry_supplierId_fkey" FOREIGN KEY ("supplierId") REFERENCES "Supplier"("supplierId") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Token" ADD CONSTRAINT "Token_authId_fkey" FOREIGN KEY ("authId") REFERENCES "Auth"("authId") ON DELETE SET NULL ON UPDATE CASCADE;

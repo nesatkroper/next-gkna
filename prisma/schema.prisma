@@ -10,26 +10,67 @@ datasource db {
 
 model Address {
   addressId    String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  cityId       Int?
-  stateId      Int?
+  provinceId   Int
+  districtId   Int
+  communeId    Int
+  villageId    Int
   latitude     Float?
   longitude    Float?
   customerId   String?        @unique @db.Uuid
   employeeId   String?        @unique @db.Uuid
   supplierId   String?        @unique @db.Uuid
   eventId      String?        @unique @db.Uuid
+  status       Status         @default(active)
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
-  status       Status         @default(active)
-  City         City?          @relation(fields: [cityId], references: [cityId])
+  Village      Village        @relation(fields: [villageId], references: [villageId])
+  Commune      Commune        @relation(fields: [communeId], references: [communeId])
+  District     District       @relation(fields: [districtId], references: [districtId])
+  Province     Provine        @relation(fields: [provinceId], references: [provinceId])
   Customer     Customer?      @relation(fields: [customerId], references: [customerId])
   Employee     Employee?      @relation(fields: [employeeId], references: [employeeId])
   Event        Event?         @relation(fields: [eventId], references: [eventId])
-  State        State?         @relation(fields: [stateId], references: [stateId])
   supplier     Supplier?      @relation(fields: [supplierId], references: [supplierId])
   Imageaddress Imageaddress[]
 
-  @@index([cityId, customerId, employeeId, eventId, stateId])
+  @@index([ customerId, employeeId, eventId])
+}
+
+model Village {
+  villageId Int @id @default(autoincrement())
+  name String
+  communeId Int
+
+  Commune       Commune  @relation(fields: [communeId], references: [communeId])
+  Address       Address[]
+}
+
+model Commune {
+  communeId Int  @id @default(autoincrement())
+  name String
+  districtId Int
+
+  District     District @relation(fields: [districtId], references: [districtId])
+  Village      Village[]
+  Address      Address[]
+}
+
+model District {
+  districtId Int @id @default(autoincrement())
+  name String
+  provinceId  Int
+
+  Province      Provine @relation(fields: [provinceId], references: [provinceId])
+  Commune       Commune[]
+  Address       Address[]
+}
+
+model Provine {
+  provinceId Int @id @default(autoincrement())
+  name String
+
+  District      District[]
+  Address       Address[]
 }
 
 model Attendance {
@@ -111,6 +152,7 @@ model Branch {
   updatedAt  DateTime @updatedAt
 
   Sale       Sale[]
+  Entry      Entry[]
   Employee   Employee[]
 }
 
@@ -152,17 +194,6 @@ model Category {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   Product      Product[]
-}
-
-model City {
-  cityId  Int       @id @default(autoincrement())
-  stateId Int
-  name    String
-  Address Address[]
-  State   State     @relation(fields: [stateId], references: [stateId])
-
-  @@index([stateId])
-  @@unique([name, stateId])
 }
 
 model Customer {
@@ -256,6 +287,26 @@ model Employeeinfo {
   Employee   Employee  @relation(fields: [employeeId], references: [employeeId])
 
   @@index([employeeId])
+}
+
+model Entry {
+  entryId    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  quantity   Int       @default(0)
+  memo       String?
+  entryPrice Decimal   @default(0.00) @db.Decimal(12, 2)
+  entryDate  DateTime?
+  productId  String    @db.Uuid
+  supplierId String    @db.Uuid
+  branchId   String    @db.Uuid
+  invoice    String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  status     Status    @default(active)
+  Branch     Branch    @relation(fields: [branchId], references: [branchId])
+  Product    Product   @relation(fields: [productId], references: [productId])
+  Supplier   Supplier  @relation(fields: [supplierId], references: [supplierId])
+
+  @@index([productId, supplierId,branchId, status, entryDate])
 }
 
 model Event {
@@ -453,31 +504,6 @@ model Saledetail {
   Sale         Sale     @relation(fields: [saleId], references: [saleId])
 
   @@index([productId,saledetailId, saleId,quantity,amount])
-}
-
-model State {
-  stateId Int       @id @default(autoincrement())
-  name    String    @unique
-  Address Address[]
-  City    City[]
-}
-
-model Entry {
-  entryId    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  quantity   Int       @default(0)
-  memo       String?
-  status     Status    @default(active)
-  entryPrice Decimal   @default(0.00) @db.Decimal(12, 2)
-  entryDate  DateTime?
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  productId  String    @db.Uuid
-  supplierId String    @db.Uuid
-  invoice    String?
-  Product    Product   @relation(fields: [productId], references: [productId])
-  Supplier   Supplier  @relation(fields: [supplierId], references: [supplierId])
-
-  @@index([productId, supplierId, status, entryDate])
 }
 
 model Supplier {

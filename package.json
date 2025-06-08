@@ -8,10 +8,9 @@
     "build": "npx prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
-    "mig": "prisma migrate dev --name add-branchid2sale",
+    "mig": "prisma migrate dev --name init",
     "gen": "prisma generate && npm run dev",
-    "db": "npm run mig && npm run gen && npm run dev",
-    "seed": "NODE_OPTIONS='--loader ts-node/esm' ts-node seed.ts"
+    "db": "npm run mig && npm run gen && npm run dev"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

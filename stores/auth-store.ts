@@ -1,16 +1,25 @@
 import { clearAuthData, getAuthData, storeAuthData } from "@/lib/auth-utils";
-import { Auth } from "@/lib/generated/prisma"
+import { Auth, Employee, Employeeinfo, Role } from "@/lib/generated/prisma"
 import { create } from "zustand"
 import { devtools } from "zustand/middleware"
 
 interface AuthState {
-  me: Auth | null;
+  me: {
+    Employee?: Employee & {
+      EmployeeInfo?: Employeeinfo;
+    };
+    Role: Role;
+    email: string;
+  } | null;
   isLoadingMe: boolean;
   meError: string | null;
+  hasFetched: boolean;
 }
 
+
+
 interface AuthActions {
-  fetchMe: () => Promise<void>;
+  fetch: () => Promise<void>;
   clearMeError: () => void;
   clearAuth: () => void;
 }
@@ -23,10 +32,11 @@ export const useAuthStore = create<AuthStore>()(
       me: getAuthData(),
       isLoadingMe: false,
       meError: null,
+      hasFetched: false,
 
-      fetchMe: async () => {
-        const { isLoadingMe } = get();
-        if (isLoadingMe) return;
+      fetch: async () => {
+        const { isLoadingMe, me, hasFetched } = get();
+        if (isLoadingMe || me || hasFetched) return;
 
         set({ isLoadingMe: true, meError: null });
 
@@ -37,14 +47,13 @@ export const useAuthStore = create<AuthStore>()(
           const data = await response.json();
           const userData = data.user || data;
 
-          set({ me: userData, isLoadingMe: false });
+          set({ me: userData, isLoadingMe: false, hasFetched: true });
           storeAuthData(userData);
         } catch (error: unknown) {
           const errorMessage = error instanceof Error ? error.message : 'Failed to fetch auth';
-          set({ meError: errorMessage, isLoadingMe: false });
+          set({ meError: errorMessage, isLoadingMe: false, hasFetched: true });
         }
       },
-
       clearMeError: () => {
         set({ meError: null });
       },

@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { Button } from "@/components/ui/button"
-import { usePathname } from 'next/navigation';
+import { usePathname } from 'next/navigation'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { Bell, LogOut, Moon, Sun, User, Settings, Clock } from "lucide-react"
+import { LogOut, Moon, Sun, User, Settings, Clock } from "lucide-react"
 import { useTheme } from "next-themes"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
@@ -25,7 +25,9 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import LanguageSwitcher from "./lang-switch";
+import LanguageSwitcher from "./lang-switch"
+import { useTranslation } from "react-i18next"
+import { useAuthStore } from "@/stores"
 
 function DigitalClock() {
   const [time, setTime] = React.useState<Date | null>(null)
@@ -91,21 +93,29 @@ function DigitalClock() {
 }
 
 export function EnhancedHeader() {
+  const { t } = useTranslation('common')
   const { setTheme, theme } = useTheme()
   const [notifications] = React.useState(3)
   const pathname = usePathname()
-  const lastSegment = pathname.split('/').pop();
+  const lastSegment = pathname.split('/').pop()
+  const { me, fetch } = useAuthStore()
+
+  React.useEffect(() => {
+    if (!me) fetch()
+  }, [me])
+
+  console.log(me)
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 max-w-screen-2xl items-center">
+      <div className="px-4 flex h-14 items-center justify-between">
         <div className="mr-4 hidden md:flex">
-          <SidebarTrigger className="-ml-2" />
+          <SidebarTrigger className="me-4" />
           <Separator orientation="vertical" className="mr-2 h-4" />
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem className="hidden md:block">
-                <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
+                <BreadcrumbLink href="/dashboard">{t('Dashboard')}</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem>
@@ -140,24 +150,12 @@ export function EnhancedHeader() {
               <span className="sr-only">Toggle theme</span>
             </Button>
 
-            <Button variant="ghost" size="icon" className="h-8 w-8 relative">
-              <Bell className="h-4 w-4" />
-              {notifications > 0 && (
-                <Badge
-                  variant="destructive"
-                  className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center p-0 text-[10px] font-medium"
-                >
-                  {notifications > 99 ? "99+" : notifications}
-                </Badge>
-              )}
-              <span className="sr-only">Notifications</span>
-            </Button>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src="/placeholder.svg?height=32&width=32" alt="User" />
+                    <AvatarImage src={me.Employee ? `uploads/${me.Employee.Employeeinfo.picture}` : "/images/profile.webp"} alt="User" />
                     <AvatarFallback className="bg-primary text-primary-foreground text-xs">AD</AvatarFallback>
                   </Avatar>
                 </Button>
@@ -165,11 +163,11 @@ export function EnhancedHeader() {
               <DropdownMenuContent className="w-56" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">Admin User</p>
-                    <p className="text-xs leading-none text-muted-foreground">admin@fertilizer.com</p>
+                    <p className="text-sm font-medium leading-none">{me.Employee ? `${me.Employee.firstName} ${me.Employee.lastName}` : 'Admin User'}</p>
+                    <p className="text-xs leading-none text-muted-foreground">{me.email || 'admin@fertilizer.com'} </p>
                     <div className="flex items-center gap-2 mt-2">
-                      <Badge variant="secondary" className="text-xs px-1.5 py-0.5">
-                        Administrator
+                      <Badge variant="secondary" className="text-xs px-1.5 py-0.5 capitalize">
+                        {me.Role.name || 'Administrator'}
                       </Badge>
                       <div className="flex items-center gap-1">
                         <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
