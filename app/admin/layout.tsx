@@ -1,13 +1,10 @@
-import type React from "react"
-import { EnhancedHeader } from "@/components/header"
+// app/admin/layout.tsx
+import type { ReactNode } from "react"
 import { AppSidebar } from "@/components/sidebar"
+import { EnhancedHeader } from "@/components/header"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
     <div className="flex h-screen bg-background">
       <SidebarProvider>

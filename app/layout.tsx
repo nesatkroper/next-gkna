@@ -6,6 +6,11 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
 import { languages } from '@/app/i18n/settings';
 import "./globals.css"
+import { Header } from "@radix-ui/react-accordion";
+import { Footer } from "react-day-picker";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/sidebar";
+import { EnhancedHeader } from "@/components/header";
 
 export async function generateStaticParams() {
   return languages.map((lng) => ({ lng }));
@@ -73,7 +78,17 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <I18nProvider>
-            {children}
+            <div className="flex h-screen bg-background">
+              <SidebarProvider>
+                <AppSidebar />
+                <SidebarInset>
+                  <div className="flex flex-1 flex-col overflow-hidden">
+                    <EnhancedHeader />
+                    <main className="flex-1 overflow-auto p-4 lg:p-6">{children}</main>
+                  </div>
+                </SidebarInset>
+              </SidebarProvider>
+            </div>
             <Toaster />
           </I18nProvider>
         </ThemeProvider>
