@@ -42,6 +42,7 @@ export const useBrandStore = create<BrandStore>((set) => ({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
+        cache: 'no-store'
       })
       if (!response.ok) {
         const errorData = await response.json()
