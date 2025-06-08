@@ -26,6 +26,7 @@ import { useCategoryStore } from "@/stores/category-store"
 import { useToast } from "@/components/ui/use-toast"
 import { t } from "i18next"
 
+export const dynamic = 'force-dynamic';
 export default function CategoriesPage() {
   const {
     items: categories,

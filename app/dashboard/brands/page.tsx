@@ -27,6 +27,7 @@ import { uploadFile } from "@/lib/file-upload"
 import { Brand } from "@/lib/generated/prisma"
 import { useTranslation } from "react-i18next"
 
+export const dynamic = 'force-dynamic';
 export default function BrandsPage() {
   const { t } = useTranslation('common')
   const {

@@ -29,6 +29,7 @@ import { useEmployeeStore } from "@/stores/employee-store"
 import { useDepartmentStore } from "@/stores/department-store"
 import { usePositionStore } from "@/stores/position-store"
 
+export const dynamic = 'force-dynamic';
 export default function EmployeesPage() {
   const {
     items: employees,

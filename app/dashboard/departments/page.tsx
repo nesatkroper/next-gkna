@@ -23,6 +23,7 @@ import { Plus, Search, Building, Loader2, RefreshCw } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 import { useDepartmentStore } from "@/stores/department-store" // Assuming this exists
 
+export const dynamic = 'force-dynamic';
 export default function DepartmentsPage() {
   const {
     items: departments,
@@ -153,7 +154,7 @@ export default function DepartmentsPage() {
         })
         setIsDialogOpen(false)
         setEditingDepartment(null)
-        ;(e.target as HTMLFormElement).reset()
+          ; (e.target as HTMLFormElement).reset()
       } else {
         throw new Error("Department operation failed")
       }
@@ -234,15 +235,15 @@ export default function DepartmentsPage() {
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
 
-                  <div className="space-y-2">
-                    <Label htmlFor="departmentName">Department Name *</Label>
-                    <Input
-                      id="departmentName"
-                      name="departmentName"
-                      required
-                      defaultValue={editingDepartment?.departmentName || ""}
-                    />
-                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="departmentName">Department Name *</Label>
+                  <Input
+                    id="departmentName"
+                    name="departmentName"
+                    required
+                    defaultValue={editingDepartment?.departmentName || ""}
+                  />
+                </div>
 
 
                 <div className="space-y-2">

@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
 import { Building, Bell, Shield, Database, Mail, Smartphone, Globe, Save } from "lucide-react"
 
+export const dynamic = 'force-dynamic';
 export default function SettingsPage() {
   const [settings, setSettings] = useState({
     company: {

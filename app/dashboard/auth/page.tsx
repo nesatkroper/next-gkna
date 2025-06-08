@@ -29,6 +29,7 @@ import { Auth } from "@/lib/generated/prisma"
 import { useTranslation } from "react-i18next"
 import { usePermissions } from "@/hooks/use-permissions"
 
+export const dynamic = 'force-dynamic';
 export default function AuthPage() {
   const { t } = useTranslation('common')
   const { canCreate, canUpdate, canDelete } = usePermissions();

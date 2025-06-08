@@ -26,6 +26,7 @@ import { useToast } from "@/components/ui/use-toast"
 import { usePositionStore } from "@/stores/position-store"
 import { useDepartmentStore } from "@/stores/department-store"
 
+export const dynamic = 'force-dynamic';
 export default function PositionsPage() {
   const {
     items: positions,

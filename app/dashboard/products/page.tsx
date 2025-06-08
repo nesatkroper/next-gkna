@@ -29,7 +29,7 @@ import { useCategoryStore, useProductStore } from "@/stores"
 import { uploadFile } from "@/lib/file-upload"
 import { usePermissions } from "@/hooks/use-permissions"
 
-
+export const dynamic = 'force-dynamic';
 export default function ProductsPage() {
   const {
     items: products,

@@ -41,6 +41,7 @@ interface Event {
   } | null
 }
 
+export const dynamic = 'force-dynamic';
 export default function EventsPage() {
   const {
     items: events,
@@ -58,8 +59,8 @@ export default function EventsPage() {
   const [view, setView] = useState<"table" | "card">("table")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingEvent, setEditingEvent] = useState<Event | null>(null)
-  const [startDate, setStartDate ]= useState<Date | undefined>()
-  const [endDate, setEndDate]=useState<Date | undefined>()
+  const [startDate, setStartDate] = useState<Date | undefined>()
+  const [endDate, setEndDate] = useState<Date | undefined>()
 
 
   useEffect(() => {

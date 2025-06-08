@@ -66,7 +66,7 @@ interface InventoryReport {
     supplier: { supplierName: string }
   }>
 }
-
+export const dynamic = 'force-dynamic';
 export default function ReportsPage() {
   const {
     salesReport,

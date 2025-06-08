@@ -31,6 +31,7 @@ import { useSupplierStore } from "@/stores/supplier-store"
 import { useEventStore } from "@/stores/event-store"
 import { useTranslation } from "react-i18next"
 
+export const dynamic = 'force-dynamic';
 export default function AddressPage() {
   const { t } = useTranslation('common')
   const {

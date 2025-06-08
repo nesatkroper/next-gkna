@@ -28,6 +28,7 @@ import { useCustomerStore } from "@/stores/customer-store"
 import { useEmployeeStore } from "@/stores/employee-store"
 import { t } from "i18next"
 
+export const dynamic = 'force-dynamic';
 export default function CustomersPage() {
   const {
     items: customers,

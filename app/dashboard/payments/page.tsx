@@ -52,6 +52,7 @@ interface Sale {
   }
 }
 
+export const dynamic = 'force-dynamic';
 export default function PaymentsPage() {
   const [payments, setPayments] = useState<Payment[]>([])
   const [sales, setSales] = useState<Sale[]>([])
@@ -120,7 +121,7 @@ export default function PaymentsPage() {
       if (response.ok) {
         setIsDialogOpen(false)
         fetchPayments()
-        ;(e.target as HTMLFormElement).reset()
+          ; (e.target as HTMLFormElement).reset()
       }
     } catch (error) {
       console.error("Error adding payment:", error)

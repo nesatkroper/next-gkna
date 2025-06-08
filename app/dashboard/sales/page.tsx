@@ -26,6 +26,7 @@ import { useAuthStore, useCustomerStore, useProductStore, useSaleStore } from "@
 import { useBranchStore } from "@/stores/branch-store"
 import { toast } from "sonner"
 
+export const dynamic = 'force-dynamic';
 export default function SalesPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [isDialogOpen, setIsDialogOpen] = useState(false)

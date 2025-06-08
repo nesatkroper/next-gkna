@@ -24,6 +24,7 @@ import { Plus, Search, Truck, Loader2, RefreshCw, Phone, Mail, Building } from "
 import { useToast } from "@/components/ui/use-toast"
 import { useSupplierStore } from "@/stores/supplier-store"
 
+export const dynamic = 'force-dynamic';
 export default function SuppliersPage() {
   const {
     items: suppliers,

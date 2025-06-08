@@ -34,6 +34,7 @@ interface Role {
   updatedAt: string
 }
 
+export const dynamic = 'force-dynamic';
 export default function RolePage() {
   const {
     items: roles,

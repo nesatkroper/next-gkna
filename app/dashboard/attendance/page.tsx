@@ -51,6 +51,7 @@ interface Employee {
   employeeCode: string
 }
 
+export const dynamic = 'force-dynamic';
 export default function AttendancePage() {
   const { t } = useTranslation('common')
   const [attendances, setAttendances] = useState<Attendance[]>([])
