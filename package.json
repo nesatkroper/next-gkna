@@ -4,12 +4,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "npx prisma generate && next build",
+    "clean": "rimraf .next && rimraf node_modules/.cache && rimraf .turbo",
+    "prepare:env": "npx prisma generate",
+    "build": "npm i && npm run prepare:env && next build",
+    "dev": "next dev",
     "start": "next start",
     "lint": "next lint",
     "mig": "prisma migrate dev --name init",
-    "gen": "prisma generate && npm run dev",
+    "gen": "prisma generate",
     "db": "npm run mig && npm run gen && npm run dev"
   },
   "dependencies": {
