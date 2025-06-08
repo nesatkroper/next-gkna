@@ -92,7 +92,21 @@ export default function SalesPage() {
   const handleAddSale = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validate all products are selected
+    if (saleItems.some(item => !item.productId)) {
+      toast.error("Please select products for all items");
+      return;
+    }
+
+    const insufficientQuantity = saleItems.some(item => {
+      const product = Product.find(p => p.productId === item.productId);
+      return product && item.quantity > product.quantity;
+    });
+
+    if (insufficientQuantity) {
+      toast.error("One or more products have insufficient quantity");
+      return;
+    }
+
     if (saleItems.some(item => !item.productId)) {
       toast.error("Please select products for all items");
       return;
@@ -122,10 +136,9 @@ export default function SalesPage() {
 
       if (!response.ok) throw new Error('Failed to create sale');
 
-      // Reset form on success
       setSaleItems([{ productId: "", quantity: 1, price: 0 }]);
       setIsDialogOpen(false);
-      salFetch(); // Refresh sales list
+      salFetch();
     } catch (error) {
       console.error('Error:', error);
       toast.error('Failed to create sale');
@@ -135,7 +148,6 @@ export default function SalesPage() {
     }
   };
 
-  // Calculate stats
   const totalSales = Sale.reduce((sum, sale) => sum + sale.amount, 0)
   const todaySales = Sale.filter((sale) => {
     const today = new Date().toDateString()
@@ -200,7 +212,7 @@ export default function SalesPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="branchId">Branch ({ })</Label>
+                  <Label htmlFor="branchId">Branch ({me?.Employee?.Branch?.branchName})</Label>
                   <Select name="branchId" required>
                     <SelectTrigger>
                       <SelectValue placeholder="Leave to choose current branch" />
@@ -241,8 +253,14 @@ export default function SalesPage() {
                         onValueChange={(value) => {
                           const selectedProduct = Product.find(p => p.productId === value);
                           if (selectedProduct) {
+                            if (selectedProduct.quantity <= 0) {
+                              toast.error("This product is out of stock");
+                              return;
+                            }
                             updateSaleItem(index, "productId", value);
                             updateSaleItem(index, "price", selectedProduct.sellPrice);
+                            // Also update product name for display
+                            updateSaleItem(index, "productName", selectedProduct.productName);
                           }
                         }}
                         required
@@ -255,14 +273,13 @@ export default function SalesPage() {
                           </SelectValue>
                         </SelectTrigger>
                         <SelectContent>
-                          {Product.map((product) => (
+                          {Product.filter(product => product.quantity > 0).map((product) => (
                             <SelectItem
                               key={product.productId}
                               value={product.productId}
                             >
-                              {product.productName} - {formatCurrency(product.sellPrice)}
+                              {product.productName} - {formatCurrency(product.sellPrice)} (Qty: {product.quantity})
                             </SelectItem>
-
                           ))}
                         </SelectContent>
                       </Select>
@@ -272,7 +289,15 @@ export default function SalesPage() {
                         type="number"
                         min="1"
                         value={item.quantity}
-                        onChange={(e) => updateSaleItem(index, "quantity", Number.parseInt(e.target.value))}
+                        onChange={(e) => {
+                          const newQuantity = Number.parseInt(e.target.value);
+                          const selectedProduct = Product.find(p => p.productId === item.productId);
+                          if (selectedProduct && newQuantity > selectedProduct.quantity) {
+                            toast.error(`Only ${selectedProduct.quantity} available`);
+                            return;
+                          }
+                          updateSaleItem(index, "quantity", newQuantity);
+                        }}
                         placeholder="Qty"
                       />
                     </div>

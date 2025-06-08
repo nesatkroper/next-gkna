@@ -24,6 +24,7 @@ export async function GET(request: NextRequest) {
           include: {
             Department: true,
             Position: true,
+            Branch: true,
             Employeeinfo: true,
           },
         },

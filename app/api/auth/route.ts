@@ -9,7 +9,11 @@ export async function GET() {
     const auths = await prisma.auth.findMany({
       include: {
         Role: true,
-        Employee: true,
+        Employee: {
+          include: {
+            Branch: true
+          }
+        },
       },
       orderBy: {
         createdAt: "desc",
