@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
+export const runtime = 'nodejs';
 export interface UserPayload extends JWTPayload {
   authId: string;
   role: string;
@@ -25,7 +26,7 @@ export async function generateToken(payload: UserPayload): Promise<string> {
 export async function verifyToken(token: string): Promise<UserPayload | null> {
   try {
     const { payload } = await jwtVerify<JWTPayload>(token, getSecretKey());
-    
+
     // Type guard to ensure the payload has the required properties
     if (
       typeof payload === 'object' &&

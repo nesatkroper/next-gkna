@@ -11,13 +11,11 @@ interface SecurityEvent {
 
 export async function logSecurityEvent(event: SecurityEvent): Promise<void> {
   try {
-    // Log to console for development
     console.log("Security Event:", {
       timestamp: new Date().toISOString(),
       ...event,
     })
 
-    // Store in AuthLog table with security event format
     if (event.userId) {
       await prisma.authLog.create({
         data: {
@@ -33,13 +31,6 @@ export async function logSecurityEvent(event: SecurityEvent): Promise<void> {
         },
       })
     }
-
-    // In production, you might want to:
-    // 1. Send to external security monitoring service (e.g., Datadog, Splunk)
-    // 2. Send alerts for critical events via email/Slack
-    // 3. Store in a dedicated security events table
-
-    // Example: Send critical alerts
     if (isCriticalEvent(event.type)) {
       await sendSecurityAlert(event)
     }

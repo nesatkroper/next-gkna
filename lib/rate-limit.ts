@@ -17,7 +17,6 @@ export function rateLimit(config: RateLimitConfig) {
       const data = cache.get(token)
 
       if (!data || now > data.resetTime) {
-        // Reset or initialize
         cache.set(token, {
           count: 1,
           resetTime: now + config.interval,
@@ -34,7 +33,7 @@ export function rateLimit(config: RateLimitConfig) {
   }
 }
 
-// Clean up expired entries periodically
+
 setInterval(() => {
   const now = Date.now()
   for (const [key, data] of cache.entries()) {

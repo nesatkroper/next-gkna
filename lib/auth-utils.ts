@@ -1,6 +1,8 @@
 import Cookies from 'js-cookie'
 import CryptoJS from 'crypto-js'
 
+export const runtime = 'nodejs';
+
 const SECRET_KEY = process.env.NEXT_PUBLIC_COOKIE_SECRET || 'your-secret-key-here'
 export function storeAuthData(data: any, expiresInDays: number = 7) {
   try {

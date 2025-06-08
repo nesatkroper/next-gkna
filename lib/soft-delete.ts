@@ -1,7 +1,7 @@
-// Utility functions for soft delete operations
+
 export const softDeleteWhere = {
   active: { status: "active" as const },
-  all: {}, // For admin views to see all records
+  all: {},
 }
 
 export const softDelete = {
