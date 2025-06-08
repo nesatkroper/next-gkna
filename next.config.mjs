@@ -3,6 +3,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   staticPageGenerationTimeout: 120,
+  webpack: (config) => {
+    config.cache = false;
+    return config;
+  },
   async headers() {
     return [
       {
