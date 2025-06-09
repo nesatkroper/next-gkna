@@ -165,20 +165,38 @@ export default function AuthPage() {
   }
 
   const validatePassword = (password: string) => {
-    return password.length >= 8
+    return password.length >= 6
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    console.log("Is submit")
-    const formData = new FormData(e.currentTarget)
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
     const authData: Partial<Auth> = {
       email: formData.get("email") as string,
       password: formData.get("password") as string,
       roleId: formData.get("roleId") as string,
       employeeId: formData.get("employeeId") === "none" ? null : (formData.get("employeeId") as string),
+    };
+
+    // Validate roleId exists
+    if (!roles.find((r) => r.roleId === authData.roleId)) {
+      toast({
+        title: "Error",
+        description: "Selected role does not exist",
+        variant: "destructive",
+      });
+      return;
     }
-    console.log("authData:", authData)
+
+    // Validate employeeId if provided
+    if (authData.employeeId && !employees.find((e) => e.employeeId === authData.employeeId)) {
+      toast({
+        title: "Error",
+        description: "Selected employee does not exist",
+        variant: "destructive",
+      });
+      return;
+    }
 
     console.log("Validating email:", authData.email)
     if (!validateEmail(authData.email)) {

@@ -28,20 +28,25 @@ export const useAuthenticationStore = create<AuthenticationStore>((set) => ({
   },
   create: async (data) => {
     try {
+      console.log("Sending POST to /api/auth with data:", data);
       const response = await fetch("/api/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
-      })
+      });
+      console.log("Response status:", response.status);
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || "Failed to create auth record")
+        const errorData = await response.json();
+        console.error("API error:", errorData);
+        throw new Error(errorData.message || "Failed to create auth record");
       }
-      const newAuth = await response.json()
-      set((state) => ({ items: [...state.items, newAuth] }))
-      return true
+      const newAuth = await response.json();
+      console.log("Created auth:", newAuth);
+      set((state) => ({ items: [...state.items, newAuth] }));
+      return true;
     } catch (error: any) {
-      throw error
+      console.error("Create error:", error);
+      throw error;
     }
   },
   update: async (id, data) => {
