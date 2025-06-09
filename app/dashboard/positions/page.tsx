@@ -64,12 +64,12 @@ export default function PositionsPage() {
     const matchesSearch =
       position.positionName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       position.positionCode?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      position.department.departmentName.toLowerCase().includes(searchTerm.toLowerCase())
+      position.Department.departmentName.toLowerCase().includes(searchTerm.toLowerCase())
 
     const matchesDepartment =
       filterDepartment === "all" ||
       departments.find((d) => d.departmentId === filterDepartment)?.departmentName ===
-      position.department.departmentName
+      position.Department.departmentName
 
     return matchesSearch && matchesDepartment
   })
@@ -87,13 +87,13 @@ export default function PositionsPage() {
     {
       key: "department.departmentName",
       label: "Department",
-      render: (value: any, row: any) => row.department?.departmentName || "Unknown",
+      render: (value: any, row: any) => row.Department?.departmentName || "Unknown",
     },
     {
       key: "_count.employees",
       label: "Employees",
       type: "badge" as const,
-      render: (value: any, row: any) => row._count?.employees || 0,
+      render: (value: any, row: any) => row._count?.Employees || 0,
     },
     {
       key: "memo",
@@ -124,13 +124,13 @@ export default function PositionsPage() {
     {
       key: "department.departmentName",
       label: "Department",
-      render: (value: any, row: any) => row.department?.departmentName || "Unknown",
+      render: (value: any, row: any) => row.Department?.departmentName || "Unknown",
     },
     {
       key: "_count.employees",
       label: "Employees",
       type: "badge" as const,
-      render: (value: any, row: any) => row._count?.employees || 0,
+      render: (value: any, row: any) => row._count?.Employees || 0,
     },
     {
       key: "memo",
@@ -176,7 +176,7 @@ export default function PositionsPage() {
       } else {
         throw new Error("Position operation failed")
       }
-    } catch (error) {
+    } catch (error: any) {
       setIsSaving(false)
       toast({
         title: "Error",

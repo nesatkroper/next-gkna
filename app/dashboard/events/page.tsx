@@ -81,7 +81,7 @@ export default function EventsPage() {
 
   const tableColumns = [
     {
-      key: "name: eventName",
+      key: "eventName",
       label: "Event",
     },
     {

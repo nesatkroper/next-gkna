@@ -37,12 +37,7 @@ export async function GET(request: NextRequest) {
           Department: true,
           Position: true,
           Employeeinfo: true,
-          Address: {
-            include: {
-              City: true,
-              State: true,
-            },
-          },
+          Address: true,
           _count: {
             select: {
               Sale: true,

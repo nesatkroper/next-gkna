@@ -34,7 +34,7 @@ export default function SalesPage() {
   const [saleItems, setSaleItems] = useState([{ productId: "", quantity: 1, price: 0, productName: "" }])
   const [saleDate, setSaleDate] = useState<Date>(new Date())
   const inv = generateInvoiceCode();
-  const { me, fetchMe } = useAuthStore()
+  const { me, fetch } = useAuthStore()
 
   const {
     items: Customer,
@@ -62,8 +62,8 @@ export default function SalesPage() {
     cusFetch()
     proFetch()
     brcFetch()
-    fetchMe()
-  }, [cusFetch, proFetch, salFetch, brcFetch, fetchMe])
+    fetch()
+  }, [cusFetch, proFetch, salFetch, brcFetch, fetch])
 
   const filteredSales = Sale.filter(
     (sale) =>
@@ -129,11 +129,8 @@ export default function SalesPage() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('/api/sales', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(saleData)
-      });
+      salFetch()
+
 
       if (!response.ok) throw new Error('Failed to create sale');
 

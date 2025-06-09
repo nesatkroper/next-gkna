@@ -28,12 +28,7 @@ export async function GET(request: NextRequest) {
       prisma.customer.findMany({
         where,
         include: {
-          Address: {
-            include: {
-              City: true,
-              State: true,
-            },
-          },
+          Address: true,
           Customerinfo: true,
           Employee: {
             select: {
@@ -47,6 +42,7 @@ export async function GET(request: NextRequest) {
             },
           },
         },
+
         skip,
         take: limit,
         orderBy: { createdAt: "desc" },
@@ -104,8 +100,6 @@ export async function POST(request: NextRequest) {
         await tx.address.create({
           data: {
             customerId: newCustomer.customerId,
-            cityId: data.cityId,
-            stateId: data.stateId,
             latitude: data.latitude,
             longitude: data.longitude,
             createdAt: new Date(),

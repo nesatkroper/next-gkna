@@ -79,15 +79,8 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <I18nProvider>
             <div className="flex h-screen bg-background">
-              <SidebarProvider>
-                <AppSidebar />
-                <SidebarInset>
-                  <div className="flex flex-1 flex-col overflow-hidden">
-                    <EnhancedHeader />
-                    <main className="flex-1 overflow-auto p-4 lg:p-6">{children}</main>
-                  </div>
-                </SidebarInset>
-              </SidebarProvider>
+              <div className="flex flex-1 flex-col overflow-hidden">{children}
+              </div>
             </div>
             <Toaster />
           </I18nProvider>
