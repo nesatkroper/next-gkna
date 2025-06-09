@@ -154,6 +154,7 @@ model Branch {
   Sale       Sale[]
   Entry      Entry[]
   Employee   Employee[]
+  Stock      Stock[]
 }
 
 model Cart {
@@ -439,7 +440,6 @@ model Product {
   picture      String?
   unit         String?
   capacity     Decimal?     @db.Decimal(10, 2)  @default(0.00)
-  quantity     Int          @default(0)
   sellPrice    Decimal      @default(0.00) @db.Decimal(10, 2)
   costPrice    Decimal      @default(0.00) @db.Decimal(10, 2)
   discountRate Int          @default(0)
@@ -452,6 +452,7 @@ model Product {
   Brand        Brand?        @relation(fields: [brandId], references: [brandId])
   Saledetail   Saledetail[]
   Stockentry   Entry[]
+  Stock        Stock[]
 
   @@index([categoryId, sellPrice, costPrice, discountRate])
 }
@@ -488,6 +489,20 @@ model Sale {
   Saledetail Saledetail[]
 
   @@index([customerId, employeeId, saleDate, status, branchId])
+}
+
+model Stock {
+  stockId      String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  productId    String   @db.Uuid
+  branchId     String   @db.Uuid
+  quantity     Int      @default(0)
+  unit         String
+  memo         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  Product      Product  @relation(fields: [productId], references: [productId])
+  Branch       Branch   @relation(fields: [branchId], references: [branchId])
 }
 
 model Saledetail {

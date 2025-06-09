@@ -1,12 +1,14 @@
-"use client"
-export const dynamic = 'force-dynamic';
 
-import type React from "react"
-import { useState, useEffect } from "react"
-import { motion } from "framer-motion"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
+
+// app/brands/page.tsx
+"use client";
+export const dynamic = "force-dynamic";
+
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -14,202 +16,134 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { ViewToggle } from "@/components/ui/view-toggle"
-import { DataTable } from "@/components/ui/data-table"
-import { DataCards } from "@/components/ui/data-cards"
-import { FileUpload } from "@/components/ui/file-upload"
-import { Plus, Search, Tag, Loader2, RefreshCw } from "lucide-react"
-import { useToast } from "@/components/ui/use-toast"
-import { useBrandStore } from "@/stores/brand-store"
-import { uploadFile } from "@/lib/file-upload"
-import { Brand } from "@/lib/generated/prisma"
-import { useTranslation } from "react-i18next"
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { ViewToggle } from "@/components/ui/view-toggle";
+import { DataTable } from "@/components/ui/data-table";
+import { DataCards } from "@/components/ui/data-cards";
+import { FileUpload } from "@/components/ui/file-upload";
+import { Plus, Search, Tag, Loader2, RefreshCw } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
+import { useBrandStore } from "@/stores/brand-store";
+import { useTranslation } from "react-i18next";
+import { useRouter } from "next/navigation";
 
 export default function BrandsPage() {
-  const { t } = useTranslation('common')
-  const {
-    items: brands,
-    isLoading: brandLoading,
-    error: brandError,
-    fetch: fetchBrands,
-    create: createBrand,
-    update: updateBrand,
-    delete: deleteBrand,
-  } = useBrandStore()
-
-  const { toast } = useToast()
-  const [isSaving, setIsSaving] = useState(false)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [view, setView] = useState<"table" | "card">("table")
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [editingBrand, setEditingBrand] = useState<Brand | null>(null)
+  const { t } = useTranslation("common");
+  const { items: brands, isLoading: brandLoading, error: brandError, fetch: fetchBrands, delete: deleteBrand } = useBrandStore();
+  const { toast } = useToast();
+  const router = useRouter();
+  const [isSaving, setIsSaving] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [view, setView] = useState<"table" | "card">("table");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [editingBrand, setEditingBrand] = useState<Brand | null>(null);
 
   useEffect(() => {
-    fetchBrands()
-  }, [fetchBrands])
+    fetchBrands();
+  }, [fetchBrands]);
 
-  const activeBrands = brands.filter((brand) => brand.status === "active")
+  const activeBrands = brands.filter((brand) => brand.status === "active");
 
   const filteredBrands = activeBrands.filter(
     (brand) =>
       brand.brandName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      brand.brandCode?.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
+      brand.brandCode?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const tableColumns = [
-    {
-      key: "brandName",
-      label: "Brand",
-      type: "image" as const,
-    },
-    {
-      key: "brandCode",
-      label: "Code",
-      render: (_value: any, row: Brand) => row.brandCode ?? "-",
-    },
-    {
-      key: "memo",
-      label: "Memo",
-      render: (_value: any, row: Brand) => row.memo ?? "-",
-    },
-    {
-      key: "createdAt",
-      label: "Created",
-      type: "date" as const,
-    },
-    {
-      key: "status",
-      label: "Status",
-      type: "badge" as const,
-    },
-  ]
+    { key: "brandName", label: "Brand", type: "image" as const },
+    { key: "brandCode", label: "Code", render: (_value: any, row: Brand) => row.brandCode ?? "-" },
+    { key: "memo", label: "Memo", render: (_value: any, row: Brand) => row.memo ?? "-" },
+    { key: "createdAt", label: "Created", type: "date" as const },
+    { key: "status", label: "Status", type: "badge" as const },
+  ];
 
   const cardFields = [
-    {
-      key: "picture",
-      type: "image" as const,
-    },
-    {
-      key: "brandName",
-      primary: true,
-    },
-    {
-      key: "brandCode",
-      secondary: true,
-      render: (_value: any, row: Brand) => row.brandCode ?? "-",
-    },
-    {
-      key: "memo",
-      label: "Memo",
-      render: (_value: any, row: Brand) => row.memo ?? "-",
-    },
-    {
-      key: "status",
-      label: "Status",
-      type: "badge" as const,
-    },
-    {
-      key: "createdAt",
-      label: "Created",
-      type: "date" as const,
-    },
-  ]
+    { key: "picture", type: "image" as const },
+    { key: "brandName", primary: true },
+    { key: "brandCode", secondary: true, render: (_value: any, row: Brand) => row.brandCode ?? "-" },
+    { key: "memo", label: "Memo", render: (_value: any, row: Brand) => row.memo ?? "-" },
+    { key: "status", label: "Status", type: "badge" as const },
+    { key: "createdAt", label: "Created", type: "date" as const },
+  ];
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setIsSaving(true)
+  async function handleSubmit(formData: FormData) {
+    setIsSaving(true);
 
     try {
-      const formData = new FormData(e.currentTarget)
-      let pictureUrl = editingBrand?.picture || null
-
-      if (selectedFile) {
-        try {
-          pictureUrl = await uploadFile(selectedFile, { aspectRatio: "original" })
-        } catch (uploadError: any) {
-          toast({
-            title: "Error",
-            description: `Failed to upload image: ${uploadError.message}`,
-            variant: "destructive",
-          })
-          setIsSaving(false)
-          return
-        }
-      }
-
       const brandData: Partial<Brand> = {
         brandName: formData.get("brandName") as string,
+        brandCode: formData.get("brandCode") as string || null,
         memo: formData.get("memo") as string || null,
-        picture: pictureUrl,
-      }
+        picture: editingBrand?.picture || null,
+      };
 
       if (!brandData.brandName) {
-        throw new Error("Brand name is required")
+        throw new Error("Brand name is required");
       }
 
+      const { create, update } = useBrandStore.getState();
       const success = editingBrand
-        ? await updateBrand(editingBrand.brandId, brandData)
-        : await createBrand(brandData)
+        ? await update(editingBrand.brandId, brandData, selectedFile)
+        : await create(brandData, selectedFile);
 
       if (success) {
         toast({
           title: "Success",
           description: `Brand ${editingBrand ? "updated" : "created"} successfully`,
-        })
-        setIsDialogOpen(false)
-        setSelectedFile(null)
-        setEditingBrand(null)
-          ; (e.target as HTMLFormElement).reset()
+        });
+        setIsDialogOpen(false);
+        setSelectedFile(null);
+        setEditingBrand(null);
+        router.refresh();
       } else {
-        throw new Error("Brand operation failed")
+        throw new Error("Brand operation failed");
       }
     } catch (error: any) {
-      console.error("Brand submit error:", error)
       toast({
         title: "Error",
         description: error.message || `Failed to ${editingBrand ? "update" : "create"} brand`,
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsSaving(false)
+      setIsSaving(false);
     }
   }
 
   const handleEdit = (brand: Brand) => {
-    setEditingBrand(brand)
-    setSelectedFile(null)
-    setIsDialogOpen(true)
-  }
+    setEditingBrand(brand);
+    setSelectedFile(null);
+    setIsDialogOpen(true);
+  };
 
   const handleDelete = async (brandId: string) => {
-    if (!confirm("Are you sure you want to delete this brand?")) return
+    if (!confirm("Are you sure you want to delete this brand?")) return;
 
     try {
-      const success = await deleteBrand(brandId)
+      const success = await deleteBrand(brandId);
       if (success) {
         toast({
           title: "Success",
           description: "Brand deleted successfully",
-        })
+        });
       } else {
-        throw new Error("Failed to delete brand")
+        throw new Error("Failed to delete brand");
       }
     } catch (error: any) {
       toast({
         title: "Error",
         description: error.message || "Failed to delete brand",
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   const handleRetry = () => {
-    fetchBrands()
-  }
+    fetchBrands();
+  };
 
   return (
     <div className="space-y-6">
@@ -219,7 +153,7 @@ export default function BrandsPage() {
         className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
       >
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">{t('Brands')}</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t("Brands")}</h1>
           <p className="text-muted-foreground">{t("Manage your brand catalog")}</p>
         </div>
 
@@ -231,10 +165,10 @@ export default function BrandsPage() {
           <Dialog
             open={isDialogOpen}
             onOpenChange={(open) => {
-              setIsDialogOpen(open)
+              setIsDialogOpen(open);
               if (!open) {
-                setSelectedFile(null)
-                setEditingBrand(null)
+                setSelectedFile(null);
+                setEditingBrand(null);
               }
             }}
           >
@@ -251,7 +185,7 @@ export default function BrandsPage() {
                   {editingBrand ? "Update brand details" : "Create a new brand in your catalog"}
                 </DialogDescription>
               </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form action={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="brandName">{t("Brand Name")} *</Label>
                   <Input
@@ -259,6 +193,15 @@ export default function BrandsPage() {
                     name="brandName"
                     required
                     defaultValue={editingBrand?.brandName ?? ""}
+                    disabled={isSaving}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="brandCode">{t("Brand Code")}</Label>
+                  <Input
+                    id="brandCode"
+                    name="brandCode"
+                    defaultValue={editingBrand?.brandCode ?? ""}
                     disabled={isSaving}
                   />
                 </div>
@@ -320,11 +263,7 @@ export default function BrandsPage() {
                 <p className="text-destructive font-medium">{t("Error loading data")}</p>
                 <p className="text-sm text-muted-foreground">{brandError}</p>
               </div>
-              <Button
-                variant="outline"
-                onClick={handleRetry}
-                disabled={brandLoading}
-              >
+              <Button variant="outline" onClick={handleRetry} disabled={brandLoading}>
                 Try Again
               </Button>
             </div>
@@ -387,5 +326,17 @@ export default function BrandsPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
+
+interface Brand {
+  brandId: string;
+  brandName: string;
+  brandCode?: string | null;
+  picture?: string | null;
+  memo?: string | null;
+  status: "active" | "inactive";
+  createdAt: string;
+  updatedAt: string;
+}
+

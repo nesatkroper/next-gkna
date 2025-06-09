@@ -10,7 +10,7 @@
     "dev": "next dev",
     "start": "next start",
     "lint": "next lint",
-    "mig": "prisma migrate dev --name init",
+    "mig": "prisma migrate dev --name add-stock",
     "gen": "prisma generate",
     "db": "npm run mig && npm run gen && npm run dev"
   },

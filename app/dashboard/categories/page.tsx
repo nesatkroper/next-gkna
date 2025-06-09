@@ -1,13 +1,11 @@
+// app/categories/page.tsx
+"use client";
 
-"use client"
-
-import type React from "react"
-
-import { useState, useEffect } from "react"
-import { motion } from "framer-motion"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -15,161 +13,116 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { ViewToggle } from "@/components/ui/view-toggle"
-import { DataTable } from "@/components/ui/data-table"
-import { DataCards } from "@/components/ui/data-cards"
-import { Plus, Search, FolderOpen, Loader2, RefreshCw } from "lucide-react"
-import { useCategoryStore } from "@/stores/category-store"
-import { useToast } from "@/components/ui/use-toast"
-import { t } from "i18next"
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { ViewToggle } from "@/components/ui/view-toggle";
+import { DataTable } from "@/components/ui/data-table";
+import { DataCards } from "@/components/ui/data-cards";
+import { Plus, Search, FolderOpen, Loader2, RefreshCw } from "lucide-react";
+import { useCategoryStore } from "@/stores/category-store";
+import { useToast } from "@/components/ui/use-toast";
+import { t } from "i18next";
+import { createCategory, updateCategory } from "@/actions/categories"; // Import Server Actions
+import { useRouter } from "next/navigation";
 
-export const dynamic = 'force-dynamic';
 export default function CategoriesPage() {
-  const {
-    items: categories,
-    isLoading,
-    error,
-    fetch,
-    create,
-    update,
-    delete: deleteCategory,
-  } = useCategoryStore()
-
-
-  const { toast } = useToast()
-  const [isSaving, setIsSaving] = useState(false)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [view, setView] = useState<"table" | "card">("table")
-  const [editingCategory, setEditingCategory] = useState<any>(null)
-
-
+  const { items: categories, isLoading, error, fetch, delete: deleteCategory } = useCategoryStore();
+  const { toast } = useToast();
+  const router = useRouter();
+  const [isSaving, setIsSaving] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [view, setView] = useState<"table" | "card">("table");
+  const [editingCategory, setEditingCategory] = useState<any>(null);
 
   useEffect(() => {
-    fetch()
-  }, [fetch])
+    fetch();
+  }, [fetch]);
 
-  const activeCategories = categories.filter((cat) => cat.status === "active")
+  const activeCategories = categories.filter((cat) => cat.status === "active");
 
   const filteredCategories = activeCategories.filter(
     (category) =>
       category.categoryName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      category.categoryCode?.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
+      category.categoryCode?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const tableColumns = [
-    {
-      key: "categoryName",
-      label: "Category Name",
-    },
-    {
-      key: "categoryCode",
-      label: "Category Code",
-    },
-    {
-      key: "desc",
-      label: "Description",
-    },
-    {
-      key: "status",
-      label: "Status",
-      type: "badge" as const,
-    },
-    {
-      key: "createdAt",
-      label: "Created",
-      type: "date" as const,
-    },
-  ]
+    { key: "categoryName", label: "Category Name" },
+    { key: "categoryCode", label: "Category Code" },
+    { key: "memo", label: "Description" }, // Changed from 'desc' to 'memo' to match schema
+    { key: "status", label: "Status", type: "badge" as const },
+    { key: "createdAt", label: "Created", type: "date" as const },
+  ];
 
   const cardFields = [
-    {
-      key: "categoryName",
-      primary: true,
-    },
-    {
-      key: "categoryCode",
-      secondary: true,
-    },
-    {
-      key: "desc",
-      label: "Description",
-    },
-    {
-      key: "status",
-      label: "Status",
-      type: "badge" as const,
-    },
-    {
-      key: "createdAt",
-      label: "Created",
-      type: "date" as const,
-    },
-  ]
+    { key: "categoryName", primary: true },
+    { key: "categoryCode", secondary: true },
+    { key: "memo", label: "Description" },
+    { key: "status", label: "Status", type: "badge" as const },
+    { key: "createdAt", label: "Created", type: "date" as const },
+  ];
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+  // Handle form submission using Server Action
+  async function handleSubmit(formData: FormData) {
+    setIsSaving(true);
 
-    const formData = new FormData(e.currentTarget)
     const categoryData = {
       categoryName: formData.get("categoryName") as string,
       categoryCode: formData.get("categoryCode") as string,
-      desc: formData.get("desc") as string,
-    }
+      memo: formData.get("memo") as string,
+    };
 
-    setIsSaving(true)
-    const success = editingCategory
-      ? await update(editingCategory.categoryId, categoryData)
-      : await create(categoryData)
-    setIsSaving(false)
+    const result = editingCategory
+      ? await updateCategory(editingCategory.categoryId, categoryData)
+      : await createCategory(categoryData);
 
+    setIsSaving(false);
 
-    if (success) {
+    if (result.success) {
       toast({
         title: "Success",
         description: `Category ${editingCategory ? "updated" : "created"} successfully`,
-      })
-      setIsDialogOpen(false)
-      setEditingCategory(null)
-        ; (e.target as HTMLFormElement).reset()
+      });
+      setIsDialogOpen(false);
+      setEditingCategory(null);
+      router.refresh(); // Refresh the page to reflect changes
     } else {
       toast({
         title: "Error",
         description: `Failed to ${editingCategory ? "update" : "create"} category`,
         variant: "destructive",
-      })
+      });
     }
   }
 
   const handleEdit = (category: any) => {
-    setEditingCategory(category)
-    setIsDialogOpen(true)
-  }
+    setEditingCategory(category);
+    setIsDialogOpen(true);
+  };
 
   const handleDelete = async (categoryId: string) => {
-    if (!confirm("Are you sure you want to delete this category?")) return
+    if (!confirm("Are you sure you want to delete this category?")) return;
 
-    const success = await deleteCategory(categoryId)
+    const success = await deleteCategory(categoryId);
     if (success) {
       toast({
         title: "Success",
         description: "Category deleted successfully",
-      })
+      });
     } else {
       toast({
         title: "Error",
         description: "Failed to delete category",
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   const handleRetry = () => {
-    fetch()
-  }
+    fetch();
+  };
 
   return (
     <div className="space-y-6">
@@ -192,8 +145,8 @@ export default function CategoriesPage() {
           <Dialog
             open={isDialogOpen}
             onOpenChange={(open) => {
-              setIsDialogOpen(open)
-              if (!open) setEditingCategory(null)
+              setIsDialogOpen(open);
+              if (!open) setEditingCategory(null);
             }}
           >
             <DialogTrigger asChild>
@@ -209,7 +162,7 @@ export default function CategoriesPage() {
                   {editingCategory ? "Update category information" : "Create a new category for your products"}
                 </DialogDescription>
               </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form action={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="categoryName">{t("Category Name")} *</Label>
                   <Input
@@ -221,8 +174,22 @@ export default function CategoriesPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="desc">Description</Label>
-                  <Textarea id="desc" name="desc" rows={3} defaultValue={editingCategory?.desc || ""} />
+                  <Label htmlFor="categoryCode">{t("Category Code")}</Label>
+                  <Input
+                    id="categoryCode"
+                    name="categoryCode"
+                    defaultValue={editingCategory?.categoryCode || ""}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="memo">{t("Description")}</Label>
+                  <Textarea
+                    id="memo"
+                    name="memo"
+                    rows={3}
+                    defaultValue={editingCategory?.memo || ""}
+                  />
                 </div>
 
                 <div className="flex justify-end gap-2">
@@ -241,7 +208,6 @@ export default function CategoriesPage() {
                       "Create Category"
                     )}
                   </Button>
-
                 </div>
               </form>
             </DialogContent>
@@ -249,7 +215,6 @@ export default function CategoriesPage() {
         </div>
       </motion.div>
 
-      {/* Error Display */}
       {error && (
         <Card className="border-destructive">
           <CardContent className="pt-6">
@@ -318,6 +283,6 @@ export default function CategoriesPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
 
