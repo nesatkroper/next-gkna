@@ -1,5 +1,4 @@
 export const runtime = 'nodejs';
-// auth.ts
 import { SignJWT, jwtVerify, type JWTPayload } from "jose";
 import bcrypt from "bcryptjs";
 
