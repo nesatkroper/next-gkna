@@ -38,11 +38,11 @@ export function EnhancedHeader() {
   const { me, fetch } = useAuthStore()
   const [mounted, setMounted] = React.useState(false);
 
+
   React.useEffect(() => {
     setMounted(true);
   }, []);
 
-  if (!mounted) return null; // prevents mismatch
 
 
   React.useEffect(() => {
@@ -111,6 +111,7 @@ export function EnhancedHeader() {
                 <span className="sr-only">Toggle theme</span>
               </Button>
             )}
+
 
 
             <DropdownMenu>
