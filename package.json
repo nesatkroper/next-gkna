@@ -7,7 +7,7 @@
     "clean": "rimraf .next && rimraf node_modules/.cache && rimraf .turbo",
     "prepare:env": "npx prisma generate",
     "build": "NODE_OPTIONS='--max-old-space-size=4096' next build",
-    "dev": "next dev",
+    "dev": "next dev --turbopack",
     "start": "next start",
     "lint": "next lint",
     "mig": "prisma migrate dev --name add-stock",
