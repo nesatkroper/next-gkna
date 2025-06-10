@@ -292,14 +292,14 @@ model Employeeinfo {
 
 model Entry {
   entryId    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  quantity   Int       @default(0)
-  memo       String?
-  entryPrice Decimal   @default(0.00) @db.Decimal(12, 2)
-  entryDate  DateTime?
   productId  String    @db.Uuid
   supplierId String    @db.Uuid
   branchId   String    @db.Uuid
   invoice    String?
+  quantity   Int       @default(0)
+  memo       String?
+  entryPrice Decimal   @default(0.00) @db.Decimal(12, 2)
+  entryDate  DateTime?
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
   status     Status    @default(active)

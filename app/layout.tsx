@@ -5,10 +5,8 @@ import { Inter, Noto_Serif_Khmer } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
 import { languages } from '@/app/i18n/settings';
+import NextTopLoader from 'nextjs-toploader';
 import "./globals.css";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/sidebar";
-import { EnhancedHeader } from "@/components/header";
 
 export async function generateStaticParams() {
   return languages.map((lng) => ({ lng }));
@@ -74,6 +72,15 @@ export default function RootLayout({
   return (
     <html lang={lng} className={notoKhmer.className} suppressHydrationWarning>
       <body className={inter.className}>
+        <NextTopLoader color="#4f46e5"
+          initialPosition={0.08}
+          crawlSpeed={200}
+          height={3}
+          crawl={true}
+          showSpinner={false}
+          easing="ease"
+          speed={200}
+        />
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <I18nProvider>
             <div className="flex h-screen bg-background">
