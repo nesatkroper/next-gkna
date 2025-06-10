@@ -1,4 +1,3 @@
-// app/inventory/page.tsx
 "use client";
 export const dynamic = "force-dynamic";
 
@@ -28,12 +27,57 @@ import { useRouter } from "next/navigation";
 import { formatDate } from "@/lib/utils";
 import { useStockStore, useProductStore, useSupplierStore } from "@/stores";
 import { usePermissions } from "@/hooks/use-permissions";
+import { useBranchStore } from "@/stores/branch-store";
+
+interface Entry {
+  entryId: string;
+  productId: string;
+  supplierId: string;
+  branchId: string;
+  quantity: number;
+  entryPrice: number;
+  entryDate?: string | null;
+  invoice?: string | null;
+  memo?: string | null;
+  status: "active" | "inactive";
+  createdAt: string;
+  updatedAt: string;
+  Product?: {
+    productId: string;
+    productName: string;
+    productCode?: string | null;
+    unit?: string | null;
+    capacity?: number | null;
+    category?: { categoryName: string };
+  } | null;
+  Supplier?: {
+    supplierId: string;
+    supplierName: string;
+    companyName?: string | null;
+  } | null;
+  Branch?: {
+    branchId: string;
+    branchName: string;
+    branchCode?: string | null;
+  } | null;
+  branchInput?: {
+    create?: {
+      branchName: string;
+      branchCode?: string;
+      // other branch fields
+    };
+    connect?: {
+      branchId: string;
+    };
+  };
+}
 
 export default function InventoryPage() {
   const { t } = useTranslation("ui");
   const { items: stockEntries, isLoading, error, fetch, create, update, delete: deleteEntry } = useStockStore();
   const { items: products, isLoading: prodLoading, fetch: proFetch } = useProductStore();
   const { items: suppliers, isLoading: supLoading, fetch: supFetch } = useSupplierStore();
+  const { items: branches, fetch: braFetch } = useBranchStore();
   const { canCreate, canUpdate, canDelete } = usePermissions();
   const { toast } = useToast();
   const router = useRouter();
@@ -49,7 +93,8 @@ export default function InventoryPage() {
     fetch({ search: searchTerm, lowStock: showLowStock });
     proFetch();
     supFetch();
-  }, [fetch, proFetch, supFetch, searchTerm, showLowStock]);
+    braFetch();
+  }, [fetch, proFetch, supFetch, braFetch, searchTerm, showLowStock]);
 
   const filteredStocks = stockEntries.filter(
     (stock) =>
@@ -60,6 +105,7 @@ export default function InventoryPage() {
   );
 
   async function handleAddStock(formData: FormData) {
+    console.log(formData)
     if (!canCreate) {
       toast({
         title: t("Permission Denied"),
@@ -75,18 +121,23 @@ export default function InventoryPage() {
       const stockData: Partial<Entry> = {
         productId: formData.get("productId") as string,
         supplierId: formData.get("supplierId") as string,
+        branchId: formData.get("branchId") as string,
         quantity: parseInt(formData.get("quantity") as string),
-        entryPrice: formData.get("entryPrice") as string,
+        entryPrice: parseFloat(formData.get("entryPrice") as string),
         entryDate: entryDate?.toISOString(),
         invoice: formData.get("invoice") as string || null,
         memo: formData.get("memo") as string || null,
         status: (formData.get("status") as "active" | "inactive") || "active",
+
       };
+
+
 
       if (!stockData.productId) throw new Error(t("Product is required"));
       if (!stockData.supplierId) throw new Error(t("Supplier is required"));
+      if (!stockData.branchId) throw new Error(t("Branch is required"));
       if (stockData.quantity <= 0) throw new Error(t("Quantity must be positive"));
-      if (parseFloat(stockData.entryPrice) < 0) throw new Error(t("Entry price must be non-negative"));
+      if (stockData.entryPrice < 0) throw new Error(t("Entry price must be non-negative"));
 
       const success = await create(stockData);
       if (success) {
@@ -129,8 +180,9 @@ export default function InventoryPage() {
       const stockData: Partial<Entry> = {
         productId: formData.get("productId") as string,
         supplierId: formData.get("supplierId") as string,
+        branchId: formData.get("branchId") as string,
         quantity: parseInt(formData.get("quantity") as string),
-        entryPrice: formData.get("entryPrice") as string,
+        entryPrice: parseFloat(formData.get("entryPrice") as string),
         entryDate: entryDate?.toISOString(),
         invoice: formData.get("invoice") as string || null,
         memo: formData.get("memo") as string || null,
@@ -139,8 +191,9 @@ export default function InventoryPage() {
 
       if (!stockData.productId) throw new Error(t("Product is required"));
       if (!stockData.supplierId) throw new Error(t("Supplier is required"));
+      if (!stockData.branchId) throw new Error(t("Branch is required"));
       if (stockData.quantity <= 0) throw new Error(t("Quantity must be positive"));
-      if (parseFloat(stockData.entryPrice) < 0) throw new Error(t("Entry price must be non-negative"));
+      if (stockData.entryPrice < 0) throw new Error(t("Entry price must be non-negative"));
 
       const success = await update(selectedEntry.entryId, stockData);
       if (success) {
@@ -225,7 +278,7 @@ export default function InventoryPage() {
         {canCreate && (
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
-              <Button disabled={prodLoading || supLoading}>
+              <Button disabled={prodLoading || supLoading || isSubmitting}>
                 <Plus className="mr-2 h-4 w-4" />
                 {t("Add Stock Entry")}
               </Button>
@@ -252,20 +305,37 @@ export default function InventoryPage() {
                   </Select>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="supplierId">{t("Supplier")} *</Label>
-                  <Select name="supplierId" required disabled={isSubmitting}>
-                    <SelectTrigger>
-                      <SelectValue placeholder={t("Select supplier")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {suppliers.map((supplier) => (
-                        <SelectItem key={supplier.supplierId} value={supplier.supplierId}>
-                          {supplier.supplierName} {supplier.companyName && `(${supplier.companyName})`}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="branchId">{t("Branch")} *</Label>
+                    <Select name="branchId" required disabled={isSubmitting}>
+                      <SelectTrigger>
+                        <SelectValue placeholder={t("Select branch")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {branches.map((b) => (
+                          <SelectItem key={b.branchId} value={b.branchId}>
+                            {b.branchName} {b.branchCode && `(${b.branchCode})`}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="supplierId">{t("Supplier")} *</Label>
+                    <Select name="supplierId" required disabled={isSubmitting}>
+                      <SelectTrigger>
+                        <SelectValue placeholder={t("Select supplier")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {suppliers.map((supplier) => (
+                          <SelectItem key={supplier.supplierId} value={supplier.supplierId}>
+                            {supplier.supplierName} {supplier.companyName && `(${supplier.companyName})`}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -327,7 +397,7 @@ export default function InventoryPage() {
                     {isSubmitting ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        {t("Processing...")}
+                        {t("Creating...")}
                       </>
                     ) : (
                       t("Add Entry")
@@ -354,6 +424,7 @@ export default function InventoryPage() {
                   fetch({ search: searchTerm, lowStock: showLowStock });
                   proFetch();
                   supFetch();
+                  braFetch();
                 }}
                 disabled={isLoading || prodLoading || supLoading}
               >
@@ -459,6 +530,7 @@ export default function InventoryPage() {
                 <TableRow>
                   <TableHead>{t("Product")}</TableHead>
                   <TableHead>{t("Supplier")}</TableHead>
+                  <TableHead>{t("Branch")}</TableHead>
                   <TableHead>{t("Category")}</TableHead>
                   <TableHead>{t("Unit/Capacity")}</TableHead>
                   <TableHead>{t("Quantity")}</TableHead>
@@ -486,7 +558,8 @@ export default function InventoryPage() {
                         </div>
                       </TableCell>
                       <TableCell>{stock.Supplier?.supplierName || "N/A"}</TableCell>
-                      <TableCell>{stock.Product?.Category?.categoryName || "N/A"}</TableCell>
+                      <TableCell>{stock.Branch?.branchName || "N/A"}</TableCell>
+                      <TableCell>{stock.Product?.category?.categoryName || "N/A"}</TableCell>
                       <TableCell>
                         {stock.Product?.unit && stock.Product?.capacity != null
                           ? `${stock.Product.capacity} ${stock.Product.unit}`
@@ -570,25 +643,47 @@ export default function InventoryPage() {
                 </Select>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="supplierId">{t("Supplier")} *</Label>
-                <Select
-                  name="supplierId"
-                  defaultValue={selectedEntry.supplierId}
-                  required
-                  disabled={isSubmitting}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t("Select supplier")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {suppliers.map((supplier) => (
-                      <SelectItem key={supplier.supplierId} value={supplier.supplierId}>
-                        {supplier.supplierName} {supplier.companyName && `(${supplier.companyName})`}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="branchId">{t("Branch")} *</Label>
+                  <Select
+                    name="branchId"
+                    defaultValue={selectedEntry.branchId}
+                    required
+                    disabled={isSubmitting}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("Select branch")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {branches.map((b) => (
+                        <SelectItem key={b.branchId} value={b.branchId}>
+                          {b.branchName} {b.branchCode && `(${b.branchCode})`}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="supplierId">{t("Supplier")} *</Label>
+                  <Select
+                    name="supplierId"
+                    defaultValue={selectedEntry.supplierId}
+                    required
+                    disabled={isSubmitting}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("Select supplier")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {suppliers.map((supplier) => (
+                        <SelectItem key={supplier.supplierId} value={supplier.supplierId}>
+                          {supplier.supplierName} {supplier.companyName && `(${supplier.companyName})`}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -695,39 +790,6 @@ export default function InventoryPage() {
     </div>
   );
 }
-
-interface Entry {
-  entryId: string;
-  productId: string;
-  supplierId: string;
-  branchId: string;
-  quantity: number;
-  entryPrice: number;
-  entryDate?: string | null;
-  invoice?: string | null;
-  memo?: string | null;
-  status: "active" | "inactive";
-  createdAt: string;
-  updatedAt: string;
-  Product?: {
-    productId: string;
-    productName: string;
-    productCode?: string | null;
-    unit?: string | null;
-    capacity?: number | null;
-    Category?: { categoryName: string };
-  };
-  Supplier?: {
-    supplierId: string;
-    supplierName: string;
-    companyName?: string | null;
-  };
-  Branch?: {
-    branchId: string;
-    branchName: string;
-  };
-}
-
 
 
 
