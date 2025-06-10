@@ -6,7 +6,7 @@
   "scripts": {
     "clean": "rimraf .next && rimraf node_modules/.cache && rimraf .turbo",
     "prepare:env": "npx prisma generate",
-    "build": "npm i && npm run prepare:env && next build",
+    "build": "NODE_OPTIONS='--max-old-space-size=4096' next build",
     "dev": "next dev",
     "start": "next start",
     "lint": "next lint",

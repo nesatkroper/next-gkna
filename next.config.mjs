@@ -1,52 +1,77 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  images: {
-    domains: ['localhost', 'huotsopheaksakana.site'],
-    unoptimized: false,
+  experimental: {
+    webpackMemoryOptimizations: true,
+    webpackBuildWorker: true,
   },
-
-  eslint: {
+eslint: {
     ignoreDuringBuilds: true,
   },
-
   typescript: {
     ignoreBuildErrors: true,
   },
-
-  env: {
-    JWT_SECRET: process.env.JWT_SECRET,
+webpack: (config, { dev }) => {
+    if (config.cache && !dev) {
+      config.cache = Object.freeze({
+        type: 'memory',
+      })
+    }
+    return config
   },
+}
 
-  webpack: (config) => {
-    config.cache = false;
+export default nextConfig
 
-    config.module.rules.push({
-      test: /\.(js|ts|jsx|tsx)$/,
-      exclude: [
-        /node_modules/,
-        /C:\\Users\\.*\\Application Data/,
-      ],
-    });
 
-    return config;
-  },
+// /** @type {import('next').NextConfig} */
+// const nextConfig = {
+//   images: {
+//     domains: ['localhost', 'huotsopheaksakana.site'],
+//     unoptimized: false,
+//   },
 
-  async headers() {
-    return [
-      {
-        source: "/(.*)",
-        headers: [
-          {
-            key: "Content-Security-Policy",
-            value: "default-src 'self'; img-src 'self' data: blob: https:;",
-          },
-        ],
-      },
-    ];
-  },
-};
+//   eslint: {
+//     ignoreDuringBuilds: true,
+//   },
 
-export default nextConfig;
+//   typescript: {
+//     ignoreBuildErrors: true,
+//   },
+
+//   env: {
+//     JWT_SECRET: process.env.JWT_SECRET,
+//   },
+
+//   webpack: (config) => {
+//     config.cache = false;
+
+//     config.module.rules.push({
+//       test: /\.(js|ts|jsx|tsx)$/,
+//       exclude: [
+//         /node_modules/,
+//         /C:\\Users\\.*\\Application Data/,
+//       ],
+//     });
+
+//     return config;
+//   },
+
+//   async headers() {
+//     return [
+//       {
+//         source: "/(.*)",
+//         headers: [
+//           {
+//             key: "Content-Security-Policy",
+//             value: "default-src 'self'; img-src 'self' data: blob: https:;",
+//           },
+//         ],
+//       },
+//     ];
+//   },
+// };
+
+// export default nextConfig;
 
 
 
